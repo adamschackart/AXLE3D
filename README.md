@@ -1,6 +1,6 @@
 # HackmanGames
 
-This is my own collection of general-purpose reusable game libraries. More info and screenshots to come!
+This is my own collection of general-purpose reusable game libraries for Python and/or C++. More info and screenshots to come!
 
 AECORE
 ------
