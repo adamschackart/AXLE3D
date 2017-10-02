@@ -12,7 +12,7 @@ A Python wrapper for aecore.
 
 PYXL
 ----
-A simple SNES-style 2D game engine, featuring a unique Smalltalk-esque object system and a really neat game controller interface.
+A simple SNES-style 2D game engine, featuring a unique Smalltalk-esque object system, a hybrid software/hardware renderer, and a really neat game controller interface featuring built-in support for cheat codes and advanced deadzone handling.
 
 MASH3D
 ------
