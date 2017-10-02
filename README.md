@@ -17,3 +17,7 @@ A simple SNES-style 2D game engine, featuring a unique Smalltalk-esque object sy
 MASH3D
 ------
 A fairly basic 3D engine, compatible with PYXL and utilizing the same general structure.
+
+DELTA-V
+-------
+An example game utilizing Mash3D, originally developed by Alex Holkner for PyWeek. Eventually, Pyglet will be replaced by PYXL as the windowing and 2D font rendering solution.
