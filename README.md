@@ -1,6 +1,14 @@
-# HackmanGames
+# The AJ Hackman Game Library Collection
 
 This is my own collection of general-purpose reusable game libraries for Python and/or C++. More info and screenshots to come!
+
+SETUP
+-----
+python setup.py build
+python -m deltav
+
+Python 3, Mac OSX, package installation, and compiling Cython modules as C++ are currently unsupported.
+These libraries were designed to be dropped into the folder containing the game code, as there is a large degree of customization available during the build process.
 
 AECORE
 ------
