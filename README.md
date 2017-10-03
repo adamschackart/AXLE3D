@@ -4,8 +4,19 @@ This is my own collection of general-purpose reusable game libraries for Python 
 
 SETUP
 -----
-python setup.py build
-python -m deltav
+Just type
+
+    python setup.py build
+
+and then
+
+    python -m deltav
+    
+to run the test game.
+
+    python -O setup.py build
+    
+creates an optimized release build.
 
 Python 3, Mac OSX, package installation, and compiling Cython modules as C++ are currently unsupported.
 These libraries were designed to be dropped into the folder containing the game code, as there is a large degree of customization available during the build process.
