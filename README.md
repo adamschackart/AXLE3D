@@ -2,6 +2,8 @@
 
 This is my own collection of general-purpose reusable game libraries for Python and/or C++. More info and screenshots to come!
 
+Please note that development has been frozen until 2018 while I search for employment and a place to set up my internal Mercurial server. Pull requests and issues will be ignored until this time.
+
 SETUP
 -----
 Just type
