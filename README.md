@@ -43,4 +43,7 @@ A fairly basic 3D engine, compatible with PYXL and utilizing the same general st
 
 DELTA-V
 -------
+
+![Alt text](https://i.imgur.com/zijDoGg.png "Delta-V pause menu")
+
 An example first-person shooter game utilizing Mash3D, originally developed by Alex Holkner for PyWeek. Eventually, Pyglet will be replaced by PYXL as the windowing, input, and 2D font rendering solution.
