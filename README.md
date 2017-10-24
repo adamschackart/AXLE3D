@@ -23,7 +23,7 @@ creates an optimized release build.
 Python 3, Mac OSX, package installation, and compiling Cython modules as C++ are currently unsupported.
 These libraries were designed to be dropped into the folder containing the game code, as there is a large degree of customization available during the build process.
 
-Windows users must have Cython and cx_Freeze installed via pip, and Linux users must have SDL, DevIL, and OpenGL dev packages installed as well.
+Windows users must have Pyglet, Cython and cx_Freeze installed via pip, and Linux users must have SDL, DevIL, and OpenGL dev packages installed as well.
 
 AECORE
 ------
