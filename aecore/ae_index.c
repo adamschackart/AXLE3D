@@ -711,7 +711,7 @@ void idx_type_convert_ex(void* indices, // doesn't reallocate index array
     ae_assert(idx_fits_type(indices, n, src, dst),
 
         "%u-element index buffer of type %s at %p won't fit in %s", (u32)n,
-        indices, ae_index_type_name[src], ae_index_type_name[dst]);
+        ae_index_type_name[src], indices, ae_index_type_name[dst]);
 
     // avoiding a possible bug if we loop backwards in the implementation
     if (n == 0) { AE_PROFILE_LEAVE(); return; }

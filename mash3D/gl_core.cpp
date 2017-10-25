@@ -1984,7 +1984,7 @@ gl_texture_t* gl_texture_create(int width, int height, int comp)
         ae_image_format_t ae_format = AE_IMAGE_FORMAT_MONO;
         GLenum gl_format = 0;
 
-        /* TODO: allow float textures
+        /* TODO: allow support for floating-point textures in this path
          */
         ae_image_type_t ae_type = AE_IMAGE_TYPE_U8;
         GLenum gl_type = GL_UNSIGNED_BYTE;
@@ -2010,14 +2010,10 @@ gl_texture_t* gl_texture_create(int width, int height, int comp)
             default: ae_assert(0, "%i", comp); break;
         }
 
+        // allocate image & fill it in with some noticeable default color
         ae_image_t blank =
         {
-            NULL,
-            width,
-            height,
-            ae_format,
-            ae_type,
-            NULL,
+            NULL, (size_t)width, (size_t)height, ae_format, ae_type, NULL,
         };
 
         ae_image_alloc(&blank);

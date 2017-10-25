@@ -124,9 +124,13 @@ class Extension(Cython.Distutils.Extension):
             # silence various -Wall warnings we don't care about here. perhaps at some
             # point we should try passing -Wextra or even -pedantic and see what happens.
             self.extra_compile_args.append('-Wno-comment')
+            self.extra_compile_args.append('-Wno-date-time')
+            self.extra_compile_args.append('-Wno-expansion-to-defined')
+            self.extra_compile_args.append('-Wno-strict-prototypes')
 
             self.extra_compile_args.append('-Wno-unused-function')
             self.extra_compile_args.append('-Wno-unused-label')
+            self.extra_compile_args.append('-Wno-unused-local-typedefs')
             self.extra_compile_args.append('-Wno-unused-variable')
 
         # for whatever reason, distutils' unixccompiler doesn't have a different set of

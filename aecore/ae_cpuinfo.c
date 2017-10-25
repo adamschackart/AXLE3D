@@ -447,7 +447,9 @@ const char* ae_platform_name(void)
 
 const char* ae_platform_name(void)
 {
-    static char unix_platform[256];
+    // NOTE: goofy GCC warnings assume huge strings, so we had to bump this
+    static char unix_platform[512];
+
     if (!unix_platform[0])
     {
         struct utsname info;
@@ -462,6 +464,7 @@ const char* ae_platform_name(void)
             strcpy(unix_platform, "Unknown Unix Platform");
         }
     }
+
     return unix_platform;
 }
 
