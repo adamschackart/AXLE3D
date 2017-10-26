@@ -2,7 +2,7 @@ from mash3D import Coord3D, Texture, gl
 from aegame import Vec3
 from pyglet import font
 
-import game
+from . import game
 
 class CutScene(game.ThreeD):
     znear = 0.5

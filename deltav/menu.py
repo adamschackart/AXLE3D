@@ -4,7 +4,7 @@ from mash3D import *
 from pyglet import clock
 from pyglet import font
 
-import game
+from . import game
 
 class Menu(game.ThreeD):
     options = []

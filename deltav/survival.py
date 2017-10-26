@@ -1,6 +1,6 @@
 from aegame import Vec3
-import level
 import random
+from . import level
 
 SAMPLE_PERIOD = 0.5
 MAX_SAMPLES = 5

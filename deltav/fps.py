@@ -11,9 +11,9 @@ from pyglet.window import key
 from mash3D import Texture, Coord3D, Light, gl
 from aegame import *
 
-import menu
-import obj
-import game
+from . import menu
+from . import obj
+from . import game
 
 class Character(object):
     MOVEMENT_NAMES = [

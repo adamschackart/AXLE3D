@@ -128,10 +128,13 @@ class Extension(Cython.Distutils.Extension):
             self.extra_compile_args.append('-Wno-expansion-to-defined')
             self.extra_compile_args.append('-Wno-strict-prototypes')
 
+            self.extra_compile_args.append('-Wno-unused-command-line-argument')
             self.extra_compile_args.append('-Wno-unused-function')
             self.extra_compile_args.append('-Wno-unused-label')
             self.extra_compile_args.append('-Wno-unused-local-typedefs')
             self.extra_compile_args.append('-Wno-unused-variable')
+
+            self.extra_link_args.append('-Wno-unused-command-line-argument')
 
         # for whatever reason, distutils' unixccompiler doesn't have a different set of
         # debug arguments like in win32. XXX TODO -g is still passed in release builds.
@@ -221,14 +224,26 @@ class build_exe(cx_Freeze.build_exe):
 
 class clean(distutils.command.clean.clean):
     def run(self):
-        # just toss the entire build directory, as cx_freeze doesn't clean up exes
+        # just toss the entire build directory, as cx_freeze doesn't clean up exes.
         if os.path.exists('build'): shutil.rmtree('build')
+
+        # clean up files cython leaves behind - this applies to python 2 builds only.
+        # XXX TODO: the way these paths are handled is kinda hackish... clean it up!
 
         for name in [ os.path.splitext( extension.sources[0] )[0] for extension in \
                     self.distribution.ext_modules if '.py' in extension.sources[0]]:
             for ext in ['.c', '.cpp', '.so', '.pyd', '.pdb']:
                 if os.path.exists(name + '_d' + ext): os.remove(name + '_d' + ext)
                 if os.path.exists(name + ext): os.remove(name + ext)
+
+        # clean up files cython leaves behind - this applies to python 3 builds only.
+        # XXX TODO: the way these paths are handled is kinda hackish... clean it up!
+
+        for path in [extension.name.split('.')[0] for extension in \
+                                    self.distribution.ext_modules]:
+            for name in os.listdir(path):
+                for ext in ['.so', '.pyd']:
+                    if name.endswith(ext): os.remove(os.path.join(path, name))
 
         # clean up after build_shared. if you need libs that are deleted by this,
         # then you must copy them from some platform-specific path before build.

@@ -1,10 +1,10 @@
 from mash3D import Texture, Coord3D
 from aegame import profile, Vec4
 
-import fps
-import level
-import survival
-import game
+from . import fps
+from . import level
+from . import survival
+from . import game
 
 class MainMenu(game.ThreeD):
     exclusive_mouse = False

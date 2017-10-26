@@ -1,9 +1,9 @@
 from pyglet.gl import *
 
-import cutscene
-import fps
-import obj
-import game
+from . import cutscene
+from . import fps
+from . import obj
+from . import game
 
 from aegame import profile, Vec3
 from mash3D import gl
