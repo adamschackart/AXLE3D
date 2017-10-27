@@ -523,7 +523,6 @@ cdef class BranchCoverage:
     """
     Tracks information about conditionals evaluated in C code and prints it.
     """
-
     @staticmethod # get the status of the branch coverage system at runtime.
     def is_enabled(): return ae_branch_report_enabled()
 
@@ -591,6 +590,7 @@ branch_coverage = BranchCoverage()
 
 cdef class SwitchCoverage:
     """
+    Tracks & prints information about switch statements on enums in C code.
     """
     @staticmethod # get the status of the switch coverage system at runtime.
     def is_enabled(): return ae_switch_report_enabled()

@@ -4,6 +4,7 @@
 # ------------------------------------------------------------------------------
 # NOTE: this is the "extra math" module, for miscellaneous math functionality!
 # ------------------------------------------------------------------------------
+import sys # version info
 
 cdef extern from "ae_easing.h":
     float ease_linear_in_flt    (float t, float b, float c, float d)
@@ -139,11 +140,18 @@ cdef extern from "ae_easing.h":
     double ease_dbl(ae_ease_mode_t mode, double t, double b, double c, double d)
 
 cdef class EaseMethods:
-    def __call__(self, bytes mode, double t, double b, double c, double d):
+    def __call__(self, str mode, double t, double b, double c, double d):
         """
-        Call an easing function by short string name, ie. `exponential_inout`.
+        Call an easing function by its short string name, ie. `exponential_inout`.
         """
-        return ease_dbl(ae_ease_mode_from_short_name(<char*>mode), t, b, c, d)
+        cdef bytes b_mode
+
+        if sys.version_info.major > 2:
+            b_mode = <bytes>mode.encode('utf-8')
+        else:
+            b_mode = <bytes>mode
+
+        return ease_dbl(ae_ease_mode_from_short_name(<char*>b_mode), t, b, c, d)
 
     @staticmethod
     def linear_in(double t, double b, double c, double d):

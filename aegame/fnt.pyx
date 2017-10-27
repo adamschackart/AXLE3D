@@ -6,6 +6,8 @@ from img cimport IntRect, Image, ae_image_t
 from mem cimport u32
 from vec cimport Vec4
 
+import sys # version info
+
 cdef extern from "ae_minifont.h":
     # ==========================================================================
     # ~ [ 8x8 fonts ]
@@ -128,11 +130,24 @@ cdef class MiniFont8x8:
         return atlas
 
     def putc(self, int character, int x, int y, Vec4 color, Image dst):
+        """
+        Render a single 8x8 character to an image - char is the character ordinal.
+        """
         ae_minifont8x8_putc(character, x, y, self.font, color.v, &dst.image)
         return self
 
-    def puts(self, bytes string, int x, int y, Vec4 color, Image dst):
-        ae_minifont8x8_puts(<char*>string, x, y, self.font, color.v, &dst.image)
+    def puts(self, str string, int x, int y, Vec4 color, Image dst):
+        """
+        Render a string to an image at a given location - font text is not resized.
+        """
+        cdef bytes b_string
+
+        if sys.version_info.major > 2:
+            b_string = <bytes>string.encode('utf-8')
+        else:
+            b_string = <bytes>string
+
+        ae_minifont8x8_puts(<char*>b_string, x, y, self.font, color.v, &dst.image)
         return self
 
     def flip_glyph_x(self, int c):
