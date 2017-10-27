@@ -2932,10 +2932,18 @@ cdef class Buffer:
 
     property vertex_format_name:
         def __get__(self):
-            return gl_buffer_get_str(self.buffer, GL_BUFFER_PROPERTY_VERTEX_FORMAT)
+            cdef bytes s = gl_buffer_get_str(self.buffer, GL_BUFFER_PROPERTY_VERTEX_FORMAT)
+            return s.decode() if sys.version_info.major > 2 else s # convert bytes to utf-8
 
-        def __set__(self, bytes value):
-            gl_buffer_set_str(self.buffer, GL_BUFFER_PROPERTY_VERTEX_FORMAT, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            gl_buffer_set_str(self.buffer, GL_BUFFER_PROPERTY_VERTEX_FORMAT, <char*>string)
 
     property index_type:
         def __get__(self):
@@ -2946,10 +2954,18 @@ cdef class Buffer:
 
     property index_type_name:
         def __get__(self):
-            return gl_buffer_get_str(self.buffer, GL_BUFFER_PROPERTY_INDEX_TYPE)
+            cdef bytes s = gl_buffer_get_str(self.buffer, GL_BUFFER_PROPERTY_INDEX_TYPE)
+            return s.decode() if sys.version_info.major > 2 else s # convert bytes to utf
 
-        def __set__(self, bytes value):
-            gl_buffer_set_str(self.buffer, GL_BUFFER_PROPERTY_INDEX_TYPE, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            gl_buffer_set_str(self.buffer, GL_BUFFER_PROPERTY_INDEX_TYPE, <char*>string)
 
     property vertex_count:
         def __get__(self):
@@ -2997,24 +3013,48 @@ cdef class Buffer:
 
     property status:
         def __get__(self):
-            return gl_buffer_get_str(self.buffer, GL_BUFFER_PROPERTY_STATUS)
+            cdef bytes s = gl_buffer_get_str(self.buffer, GL_BUFFER_PROPERTY_STATUS)
+            return s.decode() if sys.version_info.major > 2 else s # bytes to utf-8
 
-        def __set__(self, bytes value):
-            gl_buffer_set_str(self.buffer, GL_BUFFER_PROPERTY_STATUS, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            gl_buffer_set_str(self.buffer, GL_BUFFER_PROPERTY_STATUS, <char*>string)
 
     property path:
         def __get__(self):
-            return gl_buffer_get_str(self.buffer, GL_BUFFER_PROPERTY_PATH)
+            cdef bytes s = gl_buffer_get_str(self.buffer, GL_BUFFER_PROPERTY_PATH)
+            return s.decode() if sys.version_info.major > 2 else s # bytes to utf-8
 
-        def __set__(self, bytes value):
-            gl_buffer_set_str(self.buffer, GL_BUFFER_PROPERTY_PATH, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            gl_buffer_set_str(self.buffer, GL_BUFFER_PROPERTY_PATH, <char*>string)
 
     property name:
         def __get__(self):
-            return gl_buffer_get_str(self.buffer, GL_BUFFER_PROPERTY_NAME)
+            cdef bytes s = gl_buffer_get_str(self.buffer, GL_BUFFER_PROPERTY_NAME)
+            return s.decode() if sys.version_info.major > 2 else s # bytes to utf-8
 
-        def __set__(self, bytes value):
-            gl_buffer_set_str(self.buffer, GL_BUFFER_PROPERTY_NAME, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            gl_buffer_set_str(self.buffer, GL_BUFFER_PROPERTY_NAME, <char*>string)
 
     property open:
         def __get__(self):
@@ -3187,9 +3227,19 @@ cdef class Buffer:
 
         return self
 
-    def create_lsystem(self, bytes program, int slices, int max_depth, **kwargs):
+    def create_lsystem(self, str program, int slices, int max_depth, **kwargs):
+        """
+        Execute a recursive turtle graphics program to make trees or vegetation.
+        """
+        cdef bytes bstring
+
+        if sys.version_info.major > 2:
+            bstring = <bytes>program.encode('utf-8')
+        else:
+            bstring = <bytes>program
+
         if not self.open:
-            self.buffer = gl_buffer_create_lsystem(program, slices, max_depth)
+            self.buffer = gl_buffer_create_lsystem(bstring, slices, max_depth)
 
             # set attributes
             for key, val in kwargs.items(): setattr(self, key, val)
