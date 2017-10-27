@@ -2108,10 +2108,18 @@ cdef class Object:
         cdef gl_object_type_t object_type = gl_object_type(self.ptr) # enum
         cdef bytes name = gl_object_type_short_name[< size_t >object_type]
 
+        cdef str nstr # TODO: move all string code after unknown detection
+
         if object_type == GL_OBJECT_TYPE_UNKNOWN:
             return self
 
-        return globals()[name.replace('_', ' ').title().replace(' ', '')] \
+        # XXX: is there a way to detect version num without calling python?
+        if sys.version_info.major > 2:
+            nstr = name.decode()
+        else:
+            nstr = <str>name
+
+        return globals()[nstr.replace('_', ' ').title().replace(' ', '')] \
                                             (reference = <size_t>self.ptr)
 
 def ObjectFrom(object obj, bint collect=False):
@@ -3541,10 +3549,18 @@ cdef class ParticleEmitter:
 
     property velgen_mode:
         def __get__(self):
-            return gl_particle_emitter_get_str(self.emitter, GL_PARTICLE_EMITTER_PROPERTY_VELGEN_MODE)
+            cdef bytes s = gl_particle_emitter_get_str(self.emitter, GL_PARTICLE_EMITTER_PROPERTY_VELGEN_MODE)
+            return s.decode() if sys.version_info.major > 2 else s # convert velgen mode to utf-8 in python 3
 
-        def __set__(self, bytes value):
-            gl_particle_emitter_set_str(self.emitter, GL_PARTICLE_EMITTER_PROPERTY_VELGEN_MODE, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            gl_particle_emitter_set_str(self.emitter, GL_PARTICLE_EMITTER_PROPERTY_VELGEN_MODE, <char*>string)
 
     property velgen_scale:
         def __get__(self):
@@ -3590,17 +3606,33 @@ cdef class ParticleEmitter:
 
     property status:
         def __get__(self):
-            return gl_particle_emitter_get_str(self.emitter, GL_PARTICLE_EMITTER_PROPERTY_STATUS) # repr
+            cdef bytes s = gl_particle_emitter_get_str(self.emitter, GL_PARTICLE_EMITTER_PROPERTY_STATUS)
+            return s.decode() if sys.version_info.major > 2 else s # convert to utf-8 string in python 3
 
-        def __set__(self, bytes value):
-            gl_particle_emitter_set_str(self.emitter, GL_PARTICLE_EMITTER_PROPERTY_STATUS, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            gl_particle_emitter_set_str(self.emitter, GL_PARTICLE_EMITTER_PROPERTY_STATUS, <char*>string)
 
     property name:
         def __get__(self):
-            return gl_particle_emitter_get_str(self.emitter, GL_PARTICLE_EMITTER_PROPERTY_NAME) # repr
+            cdef bytes s = gl_particle_emitter_get_str(self.emitter, GL_PARTICLE_EMITTER_PROPERTY_NAME)
+            return s.decode() if sys.version_info.major > 2 else s # convert to utf-8 string in python 3
 
-        def __set__(self, bytes value):
-            gl_particle_emitter_set_str(self.emitter, GL_PARTICLE_EMITTER_PROPERTY_NAME, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            gl_particle_emitter_set_str(self.emitter, GL_PARTICLE_EMITTER_PROPERTY_NAME, <char*>string)
 
     property open:
         def __get__(self):
