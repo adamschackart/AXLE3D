@@ -335,11 +335,21 @@ cdef class Logger:
 # ~ [ filesystem / paths ]
 # ==============================================================================
 
-def conf_path(bytes org, bytes app):
+def conf_path(str org, str app):
     """
     Get the only writeable application path, used for config files and savegames.
     """
-    cdef const char* path = ae_conf_path(<const char*>org, <const char*>app)
+    cdef bytes b_org, b_app
+    cdef const char * path
+
+    if sys.version_info.major > 2:
+        # convert unicode python 3 strings into ascii strings for our c library
+        b_org = org.encode('utf-8')
+        b_app = app.encode('utf-8')
+
+        path = ae_conf_path(<const char*>b_org, <const char*>b_app)
+    else:
+        path = ae_conf_path(<const char*>org, <const char*>app)
 
     if not path[0]:
         name = os.path.join(org, app) # python fallback if the C path is stubbed
@@ -364,9 +374,9 @@ def conf_path(bytes org, bytes app):
         if not os.path.exists(name):
             os.makedirs(name)
 
-        return name
+        return name.decode() if sys.version_info.major > 2 else name
     else:
-        return path
+        return path.decode() if sys.version_info.major > 2 else path
 
 def _python_base_path():
     frozen = getattr(sys, 'frozen', None) # am i packaged in an exe?
@@ -391,13 +401,20 @@ def _python_base_path():
             else:
                 return os.path.dirname(sys.executable) # cx_Freeze
 
-ae_base_path_override(_python_base_path())
+# set the application path after initialization to the path containing __main__
+if sys.version_info.major > 2:
+    ae_base_path_override(<bytes>_python_base_path().encode('utf-8'))
+else:
+    ae_base_path_override(<bytes>_python_base_path())
 
 def base_path():
     """
     Get the read-only path where the main application resides (__main__ path).
     """
-    return ae_base_path()
+    if sys.version_info.major > 2:
+        return ae_base_path().decode() # auto-conversion to a unicode string
+    else:
+        return ae_base_path() # auto-conversion to an oldschool ascii string
 
 # ==============================================================================
 # ~ [ timing & profiling ]
