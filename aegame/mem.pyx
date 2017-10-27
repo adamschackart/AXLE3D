@@ -5,6 +5,8 @@
 from vec cimport Vector, Vec2, Vec3, Vec4, vec_copy, vec2copy, vec3copy, vec4copy
 from libc.string cimport memcpy, memset
 
+import sys # version info
+
 cdef extern from "ae_memory.h":
     # ===== [ fixed-size scalar types ] ========================================
 
@@ -370,22 +372,45 @@ cdef class Array:
     def crc32(self, u32 seed=0):
         return ae_crc32_block(seed, self.array.data, self.array.size)
 
-    def append_file(self, bytes filename, bint fatal=True):
-        if not ae_file_read_array(&self.array, <char*>filename, 0) and fatal:
+    def append_file(self, str filename, bint fatal=True):
+        """
+        Write the contents of a file to the end of this array (in binary mode).
+        """
+        cdef bytes b_filename # convert potentially unicode filename to ascii
+
+        if sys.version_info.major > 2:
+            b_filename = <bytes>filename.encode('utf-8')
+        else:
+            b_filename = <bytes>filename
+
+        if not ae_file_read_array(&self.array, <char*>b_filename, 0) and fatal:
             raise IOError("failed to read file \"{}\"".format(filename))
 
         return self
 
-    def write_file(self, bytes filename, bint fatal=True):
-        if not ae_file_write(<char*>filename, self.array.data,
-                                self.array.size, 0) and fatal:
+    def write_file(self, str filename, bint fatal=True):
+        """
+        Write this array to a raw binary file (no newline conversion, etc). If
+        the file already existed, its contents will be overwritten (truncated).
+        """
+        cdef bytes b_filename # convert potentially unicode filename to ascii
+
+        if sys.version_info.major > 2:
+            b_filename = <bytes>filename.encode('utf-8')
+        else:
+            b_filename = <bytes>filename
+
+        if not ae_file_write(< char* >b_filename, self.array.data,
+                                    self.array.size, 0) and fatal:
             raise IOError("failed to write file \"{}\"".format(filename))
 
         return self
 
     def get_subview(self, size_t offset, size_t length, object array_t=Array):
-        """The in-place, unsafe version of get_region. Returns an array pointing
-        directly into a region of self, which must be freed with del_subview."""
+        """
+        The in-place, unsafe version of get_region. Returns an array pointing
+        directly into a region of self, which must be freed with del_subview.
+        """
         cdef Array subview = array_t(*self.ctor_args)
 
         assert offset + length <= self.array.size, '{} subview (offset'\
@@ -397,12 +422,15 @@ cdef class Array:
         return subview
 
     def del_subview(self):
-        """Safely deletes a buffer returned by get_subview without freeing."""
+        """
+        Safely deletes a buffer returned by get_subview without freeing memory.
+        """
         memset(&self.array, 0, sizeof(ae_array_t)); return self
 
     def chunk(self, size_t chunk_size, object chunk_t=Array):
-        """Create a new copy broken up into a list of equally sized regions."""
-
+        """
+        Make a new copy of self broken up into a list of equally sized regions.
+        """
         assert (chunk_size and self.array.size % chunk_size == 0, # check size
                 "{} is an invalid chunk size for {}".format(chunk_size, self))
 
@@ -411,7 +439,9 @@ cdef class Array:
 
     @classmethod
     def merge(cls, list arrays):
-        """Join a list of arrays into one. The functional opposite of chunk."""
+        """
+        Join a list of arrays into one array. The functional opposite of chunk.
+        """
         cdef Array a, self = cls(*arrays[0].ctor_args)
 
         assert len(set(_.ctor_args for _ in arrays)) == 1, "heterogenous array " \
@@ -426,7 +456,9 @@ cdef class Array:
         return self
 
     def shuffle(self, size_t elem_size):
-        """Randomly move all n-byte elements around in a homogenous array."""
+        """
+        Randomly shuffle all n-byte elements around inside a homogenous array.
+        """
         assert ( elem_size <= self.array.size ) if self else True, \
             "{} size is not divisible by {}".format(self, elem_size)
 
@@ -437,7 +469,9 @@ cdef class Array:
         return self
 
     def reverse(self, size_t elem_size):
-        """Reverse contents. Be careful not to call this instead of reserve!"""
+        """
+        Reverse array contents. Be careful not to call this instead of reserve!
+        """
         assert ( elem_size <= self.array.size ) if self else True, \
             "{} size is not divisible by {}".format(self, elem_size)
 
@@ -676,8 +710,10 @@ cdef class Array:
         return (<s64*>self.array.data)[index]
 
     def get_region(self, size_t offset, size_t length, object array_t=Array):
-        """Allocate and copy a subsection of this array's contents. If you need
-        to manipulate a specific section in-place, call get_subview instead."""
+        """
+        Allocate and copy a subsection of this array's contents. If you need
+        to manipulate a specific section in-place, call get_subview instead.
+        """
         cdef Array region = array_t(*self.ctor_args)
 
         assert offset + length <= self.array.size, '{} region (offset'\
@@ -689,7 +725,9 @@ cdef class Array:
         return region
 
     def get_bytes(self, size_t offset, size_t length):
-        """Copy a subsection of this array into a new python bytes object."""
+        """
+        Copy a sized subsection of this array into a new python bytes object.
+        """
         cdef bytes b = b'\0' * length
 
         assert offset + length <= self.array.size, '{} bytes (offset' \
@@ -761,8 +799,9 @@ cdef class Array:
         (<s64*>self.array.data)[index] = v; return self
 
     def set_region(self, size_t offset, Array region):
-        """Copy an array into a subsection of this array at a given byte offset."""
-
+        """
+        Copy another array into a subsection of this array at a given byte offset.
+        """
         assert offset + region.array.size <= self.array.size, '{} region (offset'\
             ' {} length {}) out of bounds'.format(self, offset, region.array.size)
 
@@ -775,8 +814,9 @@ cdef class Array:
         return self
 
     def set_bytes(self, size_t offset, bytes source):
-        """Copy the contents of a python bytes object into a region of self."""
-
+        """
+        Copy a python bytes object into a region of self at a given byte offset.
+        """
         assert offset + len(source) <= self.array.size, '{} bytes (offset' \
             ' {} length {}) out of bounds'.format(self, offset, len(source))
 
