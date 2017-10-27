@@ -9,6 +9,8 @@ cdef extern from "ae_logger.h":
     void ae_log_clear_stdout() # clear terminal and reset cursor
     void ae_log_str(const char* category, const char* fmt, ...)
 
+    void ae_log_flush() # synchronize log contents with log file
+
     void ae_log_enable_str(const char* category, int enabled)
     void ae_log_enable_all(int enabled)
 
@@ -307,6 +309,10 @@ cdef class Logger:
 
     # clear the terminal display (equivalent to win32 "cls" or unix "clear").
     def clear_stdout(self): ae_log_clear_stdout()
+
+    # if writing the log to a file to device, synchronize the log's contents.
+    # XXX: this method is mysteriously called at exit in python 3 only. why?
+    def flush(self): ae_log_flush()
 
     def enable(self, str cat, bint enabled):
         cdef bytes cat_b

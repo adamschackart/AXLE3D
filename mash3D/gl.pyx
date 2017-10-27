@@ -1486,6 +1486,8 @@ def Viewport(int x, int y, int width, int height):
 # ==============================================================================
 # ~ [ GL state logging ]
 # ==============================================================================
+# TODO: convert _ex state logging methods to handle unicode strings for python 3
+# ------------------------------------------------------------------------------
 
 cdef class Logger:
     """

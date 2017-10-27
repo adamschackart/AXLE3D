@@ -13,6 +13,7 @@
 --- TODO: declare library functions as pointers through a GL_FUNCTIONS_N macro
 --- TODO: state tracking; don't rebind the same material or texture redundantly
 --- TODO: values aren't clamped when setting properties for lights or materials
+--- TODO: lights and particle emitters should probably have path str properties
 --------------------------------------------------------------------------------
 
 --- TODO: put all internal object structures into a union and block-allocate it.
