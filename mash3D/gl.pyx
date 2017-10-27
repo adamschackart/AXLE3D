@@ -2240,24 +2240,48 @@ cdef class Texture:
 
     property status:
         def __get__(self):
-            return gl_texture_get_str(self.texture, GL_TEXTURE_PROPERTY_STATUS) # repr
+            cdef bytes s = gl_texture_get_str(self.texture, GL_TEXTURE_PROPERTY_STATUS)
+            return s.decode() if sys.version_info.major > 2 else s # convert to unicode
 
-        def __set__(self, bytes value):
-            gl_texture_set_str(self.texture, GL_TEXTURE_PROPERTY_STATUS, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            gl_texture_set_str(self.texture, GL_TEXTURE_PROPERTY_STATUS, <char*>string)
 
     property path:
         def __get__(self):
-            return gl_texture_get_str(self.texture, GL_TEXTURE_PROPERTY_PATH)
+            cdef bytes s = gl_texture_get_str(self.texture, GL_TEXTURE_PROPERTY_PATH)
+            return s.decode() if sys.version_info.major > 2 else s # convert to utf-8
 
-        def __set__(self, bytes value):
-            gl_texture_set_str(self.texture, GL_TEXTURE_PROPERTY_PATH, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            gl_texture_set_str(self.texture, GL_TEXTURE_PROPERTY_PATH, <char*>string)
 
     property name:
         def __get__(self):
-            return gl_texture_get_str(self.texture, GL_TEXTURE_PROPERTY_NAME)
+            cdef bytes s = gl_texture_get_str(self.texture, GL_TEXTURE_PROPERTY_NAME)
+            return s.decode() if sys.version_info.major > 2 else s # convert to utf-8
 
-        def __set__(self, bytes value):
-            gl_texture_set_str(self.texture, GL_TEXTURE_PROPERTY_NAME, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            gl_texture_set_str(self.texture, GL_TEXTURE_PROPERTY_NAME, <char*>string)
 
     property open:
         def __get__(self):
@@ -2529,24 +2553,48 @@ cdef class Material:
 
     property status:
         def __get__(self):
-            return gl_material_get_str(self.material, GL_MATERIAL_PROPERTY_STATUS)
+            cdef bytes s = gl_material_get_str(self.material, GL_MATERIAL_PROPERTY_STATUS)
+            return s.decode() if sys.version_info.major > 2 else s
 
-        def __set__(self, bytes value):
-            gl_material_set_str(self.material, GL_MATERIAL_PROPERTY_STATUS, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            gl_material_set_str(self.material, GL_MATERIAL_PROPERTY_STATUS, <char*>string)
 
     property path:
         def __get__(self):
-            return gl_material_get_str(self.material, GL_MATERIAL_PROPERTY_PATH)
+            cdef bytes s = gl_material_get_str(self.material, GL_MATERIAL_PROPERTY_PATH)
+            return s.decode() if sys.version_info.major > 2 else s # convert to unicode
 
-        def __set__(self, bytes value):
-            gl_material_set_str(self.material, GL_MATERIAL_PROPERTY_PATH, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            gl_material_set_str(self.material, GL_MATERIAL_PROPERTY_PATH, <char*>string)
 
     property name:
         def __get__(self):
-            return gl_material_get_str(self.material, GL_MATERIAL_PROPERTY_NAME)
+            cdef bytes s = gl_material_get_str(self.material, GL_MATERIAL_PROPERTY_NAME)
+            return s.decode() if sys.version_info.major > 2 else s # convert to unicode
 
-        def __set__(self, bytes value):
-            gl_material_set_str(self.material, GL_MATERIAL_PROPERTY_NAME, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            gl_material_set_str(self.material, GL_MATERIAL_PROPERTY_NAME, <char*>string)
 
     property open:
         def __get__(self):
@@ -2731,17 +2779,33 @@ cdef class Light:
 
     property status:
         def __get__(self):
-            return gl_light_get_str(self.light, GL_LIGHT_PROPERTY_STATUS)
+            cdef bytes s = gl_light_get_str(self.light, GL_LIGHT_PROPERTY_STATUS)
+            return s.decode() if sys.version_info.major > 2 else s # char* -> utf
 
-        def __set__(self, bytes value):
-            gl_light_set_str(self.light, GL_LIGHT_PROPERTY_STATUS, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            gl_light_set_str(self.light, GL_LIGHT_PROPERTY_STATUS, <char*>string)
 
     property name:
         def __get__(self):
-            return gl_light_get_str(self.light, GL_LIGHT_PROPERTY_NAME)
+            cdef bytes s = gl_light_get_str(self.light, GL_LIGHT_PROPERTY_NAME)
+            return s.decode() if sys.version_info.major > 2 else s # to unicode
 
-        def __set__(self, bytes value):
-            gl_light_set_str(self.light, GL_LIGHT_PROPERTY_NAME, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            gl_light_set_str(self.light, GL_LIGHT_PROPERTY_NAME, <char*>string)
 
     property open:
         def __get__(self):
