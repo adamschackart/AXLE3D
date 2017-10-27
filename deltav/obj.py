@@ -69,31 +69,41 @@ class OBJ(object):
             if not values: continue
 
             if values[0] == 'v':
-                vertices.append(map(float, values[1:4]))
+                vertices.append([float(x) for x in values[1:4]])
+
             elif values[0] == 'vn':
-                normals.append(map(float, values[1:4]))
+                normals.append([float(x) for x in values[1:4]])
+
             elif values[0] == 'vt':
-                tex_coords.append(map(float, values[1:3]))
+                tex_coords.append([float(x) for x in values[1:3]])
+
             elif values[0] == 'mtllib':
                 self.load_material_library(values[1])
+
             elif values[0] in ('usemtl', 'usemat'):
                 material = self.materials.get(values[1], None)
+
                 if material is None:
                     warnings.warn('Unknown material: %s' % values[1])
+
                 if mesh is not None:
                     group = MaterialGroup(material)
                     mesh.groups.append(group)
+
             elif values[0] == 'o':
                 mesh = Mesh(values[1])
                 self.meshes[mesh.name] = mesh
                 self.mesh_list.append(mesh)
                 group = None
+
             elif values[0] == 'f':
                 if mesh is None:
                     mesh = Mesh('')
                     self.mesh_list.append(mesh)
+
                 if material is None:
                     material = Material()
+
                 if group is None:
                     group = MaterialGroup(self, material)
                     mesh.groups.append(group)
@@ -104,7 +114,7 @@ class OBJ(object):
 
                 for i, v in enumerate(values[1:]):
                     v_index, t_index, n_index = \
-                        (map(int, [j or 0 for j in v.split('/')]) + [0, 0])[:3]
+                        ([int(x) for x in [j or 0 for j in v.split('/')]] + [0, 0])[:3]
 
                     if v_index < 0: v_index += len(vertices) - 1
                     if t_index < 0: t_index += len(tex_coords) - 1
