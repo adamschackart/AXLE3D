@@ -11,6 +11,8 @@ from aegame.idx cimport *
 from aegame.tri cimport *
 from aegame.img cimport *
 
+import sys # version info
+
 cdef extern from "gl_core.h":
     # ==========================================================================
     # ~ [ macros & init ]
@@ -804,7 +806,10 @@ def implementation():
     """
     Identify the underlying platform layer, for 'safer' game-specific hacks.
     """
-    return gl_implementation()
+    if sys.version_info.major > 2:
+        return gl_implementation().decode() # auto-convert to unicode string
+    else:
+        return gl_implementation() # auto-convert to oldschool ascii string
 
 # ==============================================================================
 # ~ [ OpenGL wrapper ]
@@ -2309,17 +2314,25 @@ cdef class Texture:
     def load_from_bytes(self, bytes data, **kwargs):
         return self.load_from_memory(<size_t>(<char*>data), len(data), **kwargs)
 
-    def load(self, bytes filename, **kwargs):
+    def load(self, str filename, **kwargs):
         """
         Load an image file into a texture. Raises IOError if image loading fails.
         """
-        cdef ae_image_error_t error = AE_IMAGE_NO_CODEC # default for stubs
+        cdef ae_image_error_t error = AE_IMAGE_NO_CODEC # the default for stubs
+
+        # convert the filename from a unicode string in python 3 to ascii bytes
+        cdef bytes b_filename
+
+        if sys.version_info.major > 2:
+            b_filename = <bytes>filename.encode('utf-8')
+        else:
+            b_filename = <bytes>filename
 
         if not self.open:
-            self.texture = gl_texture_load_ex(<char*>filename, &error)
+            self.texture = gl_texture_load_ex(<char*>b_filename, &error)
 
             if error != AE_IMAGE_SUCCESS:
-                raise IOError(ae_image_error_message(error, <char*>filename))
+                raise IOError(ae_image_error_message(error, <char*>b_filename))
 
             # convenient way to set some texture attributes inline
             for key, val in kwargs.items(): setattr(self, key, val)
