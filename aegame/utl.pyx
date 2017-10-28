@@ -311,7 +311,7 @@ cdef class Logger:
     def clear_stdout(self): ae_log_clear_stdout()
 
     # if writing the log to a file to device, synchronize the log's contents.
-    # XXX: this method is mysteriously called at exit in python 3 only. why?
+    # this is automatically called at exit in py3k as sys.stdout is flushed.
     def flush(self): ae_log_flush()
 
     def enable(self, str cat, bint enabled):
