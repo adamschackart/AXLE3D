@@ -9,6 +9,8 @@ from libc.string cimport memset
 from vec cimport *
 from mem cimport *
 
+import sys # version info
+
 cdef extern from "ae_math.h":
     # ===== [ rects ] ==========================================================
 
@@ -833,27 +835,81 @@ cdef class Image:
 
     # ===== [ file codecs ] ====================================================
 
-    def info(self, bytes filename, bint fatal=True):
-        cdef ae_image_error_t err = ae_image_info(&self.image, <char*>filename)
+    def info(self, str filename, bint fatal=True):
+        """
+        Fill image with width, height, format, type info without loading pixels.
+        """
+        cdef ae_image_error_t err
+
+        cdef bytes b_filename
+        cdef bytes err_string
+
+        if sys.version_info.major > 2:
+            b_filename = <bytes>filename.encode('utf-8') # convert from unicode
+        else:
+            b_filename = <bytes>filename
+
+        err = ae_image_info(&self.image, <char*>b_filename) # issue actual call
 
         if fatal and err != AE_IMAGE_SUCCESS:
-            raise IOError(ae_image_error_message(err, <char*>filename))
+            err_string = ae_image_error_message(err, <char*>b_filename)
+
+            if sys.version_info.major > 2:
+                raise IOError(err_string.decode()) # convert ascii to utf-8 str
+            else:
+                raise IOError(err_string)
 
         return self
 
-    def load(self, bytes filename, bint fatal=True):
-        cdef ae_image_error_t err = ae_image_load(&self.image, <char*>filename)
+    def load(self, str filename, bint fatal=True):
+        """
+        Load a single image file (PNG, JPEG, BMP, DDS, etc) from the filesystem.
+        """
+        cdef ae_image_error_t err
+
+        cdef bytes b_filename
+        cdef bytes err_string
+
+        if sys.version_info.major > 2:
+            b_filename = <bytes>filename.encode('utf-8') # convert from unicode
+        else:
+            b_filename = <bytes>filename
+
+        err = ae_image_load(&self.image, <char*>b_filename) # issue actual call
 
         if fatal and err != AE_IMAGE_SUCCESS:
-            raise IOError(ae_image_error_message(err, <char*>filename))
+            err_string = ae_image_error_message(err, <char*>b_filename)
+
+            if sys.version_info.major > 2:
+                raise IOError(err_string.decode()) # convert ascii to utf-8 str
+            else:
+                raise IOError(err_string)
 
         return self
 
-    def save(self, bytes filename, bint fatal=True):
-        cdef ae_image_error_t err = ae_image_save(&self.image, <char*>filename)
+    def save(self, str filename, bint fatal=True):
+        """
+        Save an image. If the image file already exists, it will be overwritten.
+        """
+        cdef ae_image_error_t err
+
+        cdef bytes b_filename
+        cdef bytes err_string
+
+        if sys.version_info.major > 2:
+            b_filename = <bytes>filename.encode('utf-8') # convert from unicode
+        else:
+            b_filename = <bytes>filename
+
+        err = ae_image_save(&self.image, <char*>b_filename) # issue actual call
 
         if fatal and err != AE_IMAGE_SUCCESS:
-            raise IOError(ae_image_error_message(err, <char*>filename))
+            err_string = ae_image_error_message(err, <char*>b_filename)
+
+            if sys.version_info.major > 2:
+                raise IOError(err_string.decode()) # convert ascii to utf-8 str
+            else:
+                raise IOError(err_string)
 
         return self
 
