@@ -914,6 +914,9 @@ cdef class Image:
         return self
 
     # ===== [ image archives ] =================================================
+    # --------------------------------------------------------------------------
+    # XXX TODO FIXME: archive encoders aren't py3k-compatible yet (tricky work!)
+    # --------------------------------------------------------------------------
 
     @classmethod
     def load_archive(cls, str filename, bint fatal=True):
@@ -965,6 +968,10 @@ cdef class Image:
 
     @staticmethod
     def save_archive_ex(list filenames, bytes filename, bint fatal=True):
+        """
+        Create an image archive from a list of image filenames and save it. All
+        image files must be of the same file type due to implementation limits.
+        """
         cdef ae_image_error_t err
         cdef bytes name
 
@@ -992,6 +999,10 @@ cdef class Image:
 
     @staticmethod
     def save_archive(list images, bytes filename, bint fatal=True):
+        """
+        Create an image archive from a list of image objects and save it. All
+        images will be archived with the same underlying file codec (PNG etc).
+        """
         cdef ae_image_error_t err
         cdef Image image
 
