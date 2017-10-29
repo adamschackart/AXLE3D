@@ -916,19 +916,36 @@ cdef class Image:
     # ===== [ image archives ] =================================================
 
     @classmethod
-    def load_archive(cls, bytes filename, bint fatal=True):
+    def load_archive(cls, str filename, bint fatal=True):
+        """
+        Load a sequence of images from any implementation-supported archive file.
+        """
         cdef ae_image_t* c_images
         cdef ae_image_t* c_image
-
-        cdef ae_image_error_t err = ae_image_archive_load(
-                            &c_images, < char * >filename)
 
         cdef list images = []
         cdef Image image
 
+        cdef ae_image_error_t err
+
+        cdef bytes b_filename
+        cdef bytes err_string
+
+        if sys.version_info.major > 2:
+            b_filename = <bytes>filename.encode('utf-8') # convert utf-8 to ascii
+        else:
+            b_filename = <bytes>filename # filename is already oldschool byte str
+
+        err = ae_image_archive_load(&c_images, <char*>b_filename)
+
         if err != AE_IMAGE_SUCCESS:
             if fatal:
-                raise IOError(ae_image_error_message(err, <char*>filename))
+                err_string = ae_image_error_message(err, <char*>b_filename)
+
+                if sys.version_info.major > 2:
+                    raise IOError(err_string.decode())
+                else:
+                    raise IOError(err_string)
             else:
                 return images
 
