@@ -523,6 +523,7 @@ def profile_print(  ae_profile_sort_t sort, size_t max_items,
 # ==============================================================================
 # NOTE: this is an interface to a global system, so creating these does nothing.
 # TODO: use ae_branch_report_render to get all branch nodes in a list of tuples.
+# TODO: convert clear and print methods to use `str` for python 3 compatibility.
 # ------------------------------------------------------------------------------
 
 cdef class BranchCoverage:
@@ -592,6 +593,7 @@ branch_coverage = BranchCoverage()
 # ==============================================================================
 # NOTE: this is an interface to a global system, so creating these does nothing.
 # TODO: use ae_switch_report_render to get all switch nodes in a list of tuples.
+# TODO: convert clear and print methods to use `str` for python 3 compatibility.
 # ------------------------------------------------------------------------------
 
 cdef class SwitchCoverage:
