@@ -258,13 +258,16 @@ class clean(distutils.command.clean.clean):
         # delete serialized python bytecode files throughout the entire source tree,
         # and clean up shared library build metadata left behind by visual studio.
         for dirpath, dirnames, filenames in os.walk('.'):
-            if '__pycache__' in dirpath: shutil.rmtree(dirpath)
 
+            # python 2 puts serialized bytecode files inline with package .py files.
             for filename in filenames:
                 if (filename.endswith('.dll.manifest') or
                     filename.endswith('.pyc') or
                     filename.endswith('.pyo') ):
                     os.remove(os.path.join(dirpath, filename))
+
+            # python 3 puts serialized bytecode files into a __pycache__ directory.
+            if '__pycache__' in dirpath: shutil.rmtree(dirpath)
 
         distutils.command.clean.clean.run(self) # delete temporary build directories
 
