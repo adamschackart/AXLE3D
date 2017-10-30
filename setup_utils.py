@@ -245,9 +245,6 @@ class clean(distutils.command.clean.clean):
                 for ext in ['.so', '.pyd']:
                     if name.endswith(ext): os.remove(os.path.join(path, name))
 
-                cache = os.path.join(path, '__pycache__') # remove bytecode caches.
-                if os.path.exists(cache): shutil.rmtree(cache)
-
         # clean up after build_shared. if you need libs that are deleted by this,
         # then you must copy them from some platform-specific path before build.
         if sys.platform == 'win32':
@@ -261,6 +258,8 @@ class clean(distutils.command.clean.clean):
         # delete serialized python bytecode files throughout the entire source tree,
         # and clean up shared library build metadata left behind by visual studio.
         for dirpath, dirnames, filenames in os.walk('.'):
+            if '__pycache__' in dirpath: shutil.rmtree(dirpath)
+
             for filename in filenames:
                 if (filename.endswith('.dll.manifest') or
                     filename.endswith('.pyc') or
