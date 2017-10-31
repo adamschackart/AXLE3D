@@ -756,9 +756,18 @@ cdef class Image:
     # ===== [ memory management ] ==============================================
 
     def alloc(self):
+        """
+        Given an image that has its properties set to some desired size, type,
+        and format, manually allocate its pixel buffer to match those attributes.
+        This is not something that is commonly required, especially in Python.
+        Also note that the pixels inside the new buffer are undefined / garbage.
+        """
         ae_image_alloc(&self.image); return self
 
     def alloc_fit(self, Image other):
+        """
+        Much like alloc, only the properties of `other` are set in `self` first.
+        """
         ae_image_alloc_fit(&self.image, &other.image); return self
 
     def address(self):
@@ -1084,6 +1093,9 @@ cdef class Image:
 
     def unary_clut(self, Array r=None, Array g=None, Array b=None,
                                 Array a=None, IntRect rect=None ):
+        """
+        Apply a color lookup table separately to each channel in an image.
+        """
         cdef u8 * r_lut = NULL
         cdef u8 * g_lut = NULL
         cdef u8 * b_lut = NULL
@@ -1187,12 +1199,21 @@ cdef class Image:
 
     # ===== [ binary operations ] ==============================================
 
-    def copy_into(self, Image dst, int x, int y, bint r=True, bint g=True, bint b=True, bint a=True):
-        ae_image_binary_copy(&dst.image, &self.image, x, y, r, g, b, a); return self
+    def copy_into( self, Image dst, int x, int y, bint r = True,
+                    bint g = True, bint b = True, bint a = True):
+        """
+        Blit dst into self blindly and quickly, ignoring alpha blending.
+        """
+        ae_image_binary_copy(&dst.image, &self.image, x, y, r, g, b, a)
+        return self
 
     def lerp_into(self, Image dst, int x, int y, float t, bint r = True,
                             bint g = True, bint b = True, bint a = True):
-        ae_image_lerp(&dst.image, &self.image, x, y, t, r, g, b, a); return self
+        """
+        Interpolate dst into self inplace, instead of A & B lerp into C.
+        """
+        ae_image_lerp(&dst.image, &self.image, x, y, t, r, g, b, a)
+        return self
 
     # ===== [ blitting ] =======================================================
 
@@ -1229,7 +1250,7 @@ cdef class Image:
                     Vec4 src_scale=None, Vec4 dst_scale=None,
                     bint r=1, bint g=1, bint b=1, bint a=1 ):
         """
-            Draw this image into another image with a blending mode.
+        Draw this image into another image with a given blending mode.
         """
         cdef float* s = NULL if src_scale is None else src_scale.v
         cdef float* d = NULL if dst_scale is None else dst_scale.v
@@ -1242,7 +1263,7 @@ cdef class Image:
     def blit_into( self, Image dst, int x, int y, bint r = True ,
                     bint g = True, bint b = True, bint a = True):
         """
-            Draw this image into another image with normal blending.
+        Draw this image into another image with normal linear blending.
         """
         ae_image_blit(&dst.image, &self.image, x, y, r, g, b, a)
         return self
@@ -1260,7 +1281,7 @@ cdef class Image:
                             bint r=1, bint g=1, bint b=1, bint a=1,
                             IntRect rect=None ):
         """
-            Draw an alpha-blended rect over self with a given alpha blending mode.
+        Draw an alpha-blended rect over self with a given alpha blending mode.
         """
         cdef float* s = NULL if src_scale is None else src_scale.v
         cdef float* d = NULL if dst_scale is None else dst_scale.v
@@ -1272,7 +1293,7 @@ cdef class Image:
     def blit_rect(self, Vec4 color = None, bint r = True, bint g = True,
                     bint b = True, bint a = True, IntRect rect = None ):
         """
-            Draw an alpha-blended rect over self with normal transparent blending.
+        Draw an alpha-blended rect over self with normal transparent blending.
         """
         ae_image_blit_rect(&self.image, NULL if rect is None else rect.rect,
                             NULL if color is None else color.v, r, g, b, a)
