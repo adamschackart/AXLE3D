@@ -688,10 +688,8 @@ cdef class VertexArray(Array):
         self.vertex_format = vertex_format
 
     def __repr__(self):
-        cdef size_t idx = <size_t>self.vertex_format # casting for cython
-
         return "{}({} size, {} cap, {})".format( self.__class__.__name__,
-            self.array.size, self.array._cap, ae_vertex_format_name[idx])
+                    self.array.size, self.array._cap, self.format_name())
 
     def get_subview(self, size_t offset, size_t length, object array_t=VertexArray):
         return Array.get_subview(self, offset, length, array_t)
@@ -708,10 +706,16 @@ cdef class VertexArray(Array):
         return Array.get_region(self, offset, length, array_t)
 
     property ctor_args:
-        def __get__(self): return (self.vertex_format,) # copies
+        def __get__(self): return (self.vertex_format,) # for copying & pickling
 
     def format_name(self):
-        return ae_vertex_format_name[<size_t>self.vertex_format]
+        """
+        Get the name string of this array's vertex format (without the AE prefix).
+        """
+        if sys.version_info.major > 2:
+            return ae_vertex_format_name[<size_t>self.vertex_format][3:].decode()
+        else:
+            return ae_vertex_format_name[<size_t>self.vertex_format][3:]
 
     def format_size(self):
         return ae_vertex_format_size[<size_t>self.vertex_format]

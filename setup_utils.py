@@ -128,6 +128,9 @@ class Extension(Cython.Distutils.Extension):
             self.extra_compile_args.append('-Wno-expansion-to-defined')
             self.extra_compile_args.append('-Wno-strict-prototypes')
 
+            # XXX: i don't want to disable this warning, but it happens in cython-generated code!
+            self.extra_compile_args.append('-Wno-incompatible-pointer-types-discards-qualifiers')
+
             self.extra_compile_args.append('-Wno-unused-command-line-argument')
             self.extra_compile_args.append('-Wno-unused-function')
             self.extra_compile_args.append('-Wno-unused-label')

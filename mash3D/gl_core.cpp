@@ -3676,7 +3676,7 @@ gl_buffer_get_str(gl_buffer_t* buffer, gl_buffer_property_t property)
                                                 [X(buffer)->index_type];
 
                 if (AE_SNPRINTF(gl_buffer_status, "%u \"%s\" vtx, %u \"%s\" idx",
-                                vc, vn, ic, in) < 0)
+                            vc, vn + strlen("AE_"), ic, in + strlen("AE_")) < 0)
                 {
                     AE_WARN("%u bytes is not enough for buffer status!",
                                 (unsigned int)sizeof(gl_buffer_status));

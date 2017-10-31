@@ -765,13 +765,25 @@ cdef class Image:
         return <size_t>self.image.pixels
 
     def format_name(self):
-        return ae_image_format_name[<size_t>self.image.format]
+        """
+        Get the string name of this image's pixel format (`MONO`, `RGBA`, etc).
+        """
+        if sys.version_info.major > 2:
+            return ae_image_format_name[<size_t>self.image.format][3:].decode()
+        else:
+            return ae_image_format_name[<size_t>self.image.format][3:]
 
     def format_components(self):
         return ae_image_format_components[<size_t>self.image.format]
 
     def type_name(self):
-        return ae_image_type_name[<size_t>self.image.type]
+        """
+        Get the string name of this image's pixel type (floats, bytes, etc).
+        """
+        if sys.version_info.major > 2:
+            return ae_image_type_name[<size_t>self.image.type][3:].decode()
+        else:
+            return ae_image_type_name[<size_t>self.image.type][3:]
 
     def type_bytes(self):
         return ae_image_type_bytes[<size_t>self.image.type]
