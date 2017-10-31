@@ -814,15 +814,28 @@ cdef class VertexArray(Array):
         """
         return ae_vertex_format_from_sizes(tex, col, norm, pos)
 
-    def apply_to_element(self, bytes e, func, *a, **k):
+    def apply_to_element(self, str element, func, *a, **k):
+        """
+        Apply a function to each vertex element in an array (i.e. every normal).
+        Other methods may do what you want much faster! This is extremely slow!
+        """
+        cdef bytes e
+
         cdef void* ctx = ae_profile_enter("aegame/vtx.pyx",
                             "VertexArray.apply_to_element")
-
-        cdef size_t e_off = ae_vertex_format_element_offset(self.vertex_format, <char*>e)
-        cdef size_t e_num = ae_vertex_format_element_size(self.vertex_format, <char*>e)
+        cdef size_t e_off
+        cdef size_t e_num
 
         cdef size_t v_len = ae_vertex_format_size[<size_t>self.vertex_format]
         cdef size_t count = self.array.size // sizeof(float)
+
+        if sys.version_info.major > 2:
+            e = <bytes>element.encode('utf-8')
+        else:
+            e = <bytes>element
+
+        e_off = ae_vertex_format_element_offset(self.vertex_format, <char*>e)
+        e_num = ae_vertex_format_element_size(self.vertex_format, <char*>e)
 
         if (e_num == 2): v_get, v_set = self.get_vec2, self.set_vec2
         elif e_num == 3: v_get, v_set = self.get_vec3, self.set_vec3
