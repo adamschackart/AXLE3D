@@ -10,6 +10,8 @@ from mem cimport Array, ae_array_t
 from vec cimport Vec2, Vec3, Vec4
 from mat cimport Mat4x4
 
+import sys # version info
+
 cdef extern from "ae_vertex.h":
     # ===== [ vertex format descriptors ] ======================================
 
@@ -763,17 +765,53 @@ cdef class VertexArray(Array):
     def has_position(self):
         return ae_vertex_format_has_position(self.vertex_format)
 
-    def element_offset(self, bytes e):
+    def element_offset(self, str element):
+        """
+        Get the float offset of a given vertex element (color, normal, etc).
+        For example, the `v` (vertex pos) offset of T2F_N3F_V3F would be 5.
+        """
+        cdef bytes e
+
+        if sys.version_info.major > 2:
+            e = <bytes>element.encode('utf-8')
+        else:
+            e = <bytes>element
+
         return ae_vertex_format_element_offset(self.vertex_format, <char*>e)
 
-    def element_size(self, bytes e):
+    def element_size(self, str element):
+        """
+        Get the float count of a given vertex element (color, normal, etc).
+        For example, the `t` (texture coords) size of T2F_V3F would be 2.
+        """
+        cdef bytes e
+
+        if sys.version_info.major > 2:
+            e = <bytes>element.encode('utf-8')
+        else:
+            e = <bytes>element
+
         return ae_vertex_format_element_size(self.vertex_format, <char*>e)
 
-    def has_element(self, bytes e):
+    def has_element(self, str element):
+        """
+        Returns true if the vertex format of self contains a given element.
+        """
+        cdef bytes e
+
+        if sys.version_info.major > 2:
+            e = <bytes>element.encode('utf-8')
+        else:
+            e = <bytes>element
+
         return ae_vertex_format_has_element(self.vertex_format, <char*>e)
 
     @staticmethod
     def format_from_sizes(size_t tex, size_t col, size_t norm, size_t pos):
+        """
+        Given a vertex `descriptor` consisting of vertex element size information, this
+        function returns a vertex format enumerant (i.e. f(2, 0, 3, 3) -> T2F_N3F_V3F).
+        """
         return ae_vertex_format_from_sizes(tex, col, norm, pos)
 
     def apply_to_element(self, bytes e, func, *a, **k):
