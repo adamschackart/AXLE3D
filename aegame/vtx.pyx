@@ -900,39 +900,39 @@ cdef class VertexArray(Array):
 
         return (minv, maxv)
 
-    def vec2copy(self, bytes elem, Vec2 v):
+    def vec2copy(self, str elem, Vec2 v):
         cdef size_t size = ae_vertex_format_size[<size_t>self.vertex_format]
         assert self.element_size(elem) == 2, "wrong format: {}".format(self)
 
         if size == 2:
             vtx_vec2copy( <float*> (self.array.data), v.v, self.array.size // sizeof(float))
         else:
-            vtx_vec2copy_ex( <float*>self.array.data, v.v, self.array.size // sizeof(float),
-                    ae_vertex_format_element_offset(self.vertex_format, <char*>elem), size)
+            vtx_vec2copy_ex( <float*> self.array.data, v.v, self.array.size // sizeof(float),
+                                                            self.element_offset(elem), size)
 
         return self
 
-    def vec3copy(self, bytes elem, Vec3 v):
+    def vec3copy(self, str elem, Vec3 v):
         cdef size_t size = ae_vertex_format_size[<size_t>self.vertex_format]
         assert self.element_size(elem) == 3, "wrong format: {}".format(self)
 
         if size == 3:
             vtx_vec3copy( <float*> (self.array.data), v.v, self.array.size // sizeof(float))
         else:
-            vtx_vec3copy_ex( <float*>self.array.data, v.v, self.array.size // sizeof(float),
-                    ae_vertex_format_element_offset(self.vertex_format, <char*>elem), size)
+            vtx_vec3copy_ex( <float*> self.array.data, v.v, self.array.size // sizeof(float),
+                                                            self.element_offset(elem), size)
 
         return self
 
-    def vec4copy(self, bytes elem, Vec4 v):
+    def vec4copy(self, str elem, Vec4 v):
         cdef size_t size = ae_vertex_format_size[<size_t>self.vertex_format]
         assert self.element_size(elem) == 4, "wrong format: {}".format(self)
 
         if size == 4:
             vtx_vec4copy( <float*> (self.array.data), v.v, self.array.size // sizeof(float))
         else:
-            vtx_vec4copy_ex( <float*>self.array.data, v.v, self.array.size // sizeof(float),
-                    ae_vertex_format_element_offset(self.vertex_format, <char*>elem), size)
+            vtx_vec4copy_ex( <float*> self.array.data, v.v, self.array.size // sizeof(float),
+                                                            self.element_offset(elem), size)
 
         return self
 
