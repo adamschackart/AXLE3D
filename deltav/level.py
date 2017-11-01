@@ -515,7 +515,7 @@ class Level(object):
             if self.fade_to_damage < 0:
                 self.fade_to_damage = 0
 
-        # Player health restored 1 point every 5 secs
+        # The player's health is restored 1 point every 5 secs
         if self.player.health < self.player.max_health:
             self.set_health(self.player.health + dt / 5)
 
@@ -527,7 +527,7 @@ class Level(object):
         for baddie in self.baddies:
             baddie.time += dt
 
-            # Turn to face player.  Dot product of player_dir with plane
+            # Turn to face the player. Dot product of player_dir with plane
             # created by baddie facing dir gives sign of direction to turn.
             player_dir = self.player.collision.c.sub_vec(baddie.collision.c)
             facing_dir = baddie.get_facing_ray().v
@@ -542,7 +542,7 @@ class Level(object):
             player_dir.normalize()
             facing_dir.normalize()
 
-            # Move forward if player less than 90 degrees away
+            # Move forward if the player less than 90 degrees away from me
             facing = player_dir.dot(facing_dir)
             baddie.movement['forward'] = facing > 0
 

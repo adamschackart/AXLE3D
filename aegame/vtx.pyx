@@ -978,39 +978,39 @@ cdef class VertexArray(Array):
                                 # TODO: remove this function call overhead
                                 self.element_offset(elem), size)
 
-    def vec2add(self, bytes elem, Vec2 v):
+    def vec2add(self, str elem, Vec2 v):
         cdef size_t size = ae_vertex_format_size[<size_t>self.vertex_format]
         assert self.element_size(elem) == 2, "wrong format: {}".format(self)
 
         if size == 2:
             vtx_vec2add(<float*>self.array.data, v.v, self.array.size // sizeof(float))
         else:
-            vtx_vec2add_ex(<float*>self.array.data, v.v, self.array.size // sizeof(float),
-                ae_vertex_format_element_offset(self.vertex_format, <char*>elem), size)
+            vtx_vec2add_ex(<float*>self.array.data, # TODO avoid elem offset method call
+                v.v, self.array.size // sizeof(float), self.element_offset(elem), size)
 
         return self
 
-    def vec3add(self, bytes elem, Vec3 v):
+    def vec3add(self, str elem, Vec3 v):
         cdef size_t size = ae_vertex_format_size[<size_t>self.vertex_format]
         assert self.element_size(elem) == 3, "wrong format: {}".format(self)
 
         if size == 3:
             vtx_vec3add(<float*>self.array.data, v.v, self.array.size // sizeof(float))
         else:
-            vtx_vec3add_ex(<float*>self.array.data, v.v, self.array.size // sizeof(float),
-                ae_vertex_format_element_offset(self.vertex_format, <char*>elem), size)
+            vtx_vec3add_ex(<float*>self.array.data, # TODO avoid elem offset method call
+                v.v, self.array.size // sizeof(float), self.element_offset(elem), size)
 
         return self
 
-    def vec4add(self, bytes elem, Vec4 v):
+    def vec4add(self, str elem, Vec4 v):
         cdef size_t size = ae_vertex_format_size[<size_t>self.vertex_format]
         assert self.element_size(elem) == 4, "wrong format: {}".format(self)
 
         if size == 4:
             vtx_vec4add(<float*>self.array.data, v.v, self.array.size // sizeof(float))
         else:
-            vtx_vec4add_ex(<float*>self.array.data, v.v, self.array.size // sizeof(float),
-                ae_vertex_format_element_offset(self.vertex_format, <char*>elem), size)
+            vtx_vec4add_ex(<float*>self.array.data, # TODO avoid elem offset method call
+                v.v, self.array.size // sizeof(float), self.element_offset(elem), size)
 
         return self
 
@@ -1053,39 +1053,39 @@ cdef class VertexArray(Array):
 
         return self
 
-    def vec2mul(self, bytes elem, Vec2 v):
+    def vec2mul(self, str elem, Vec2 v):
         cdef size_t size = ae_vertex_format_size[<size_t>self.vertex_format]
         assert self.element_size(elem) == 2, "wrong format: {}".format(self)
 
         if size == 2:
             vtx_vec2mul(<float*>self.array.data, v.v, self.array.size // sizeof(float))
         else:
-            vtx_vec2mul_ex(<float*>self.array.data, v.v, self.array.size // sizeof(float),
-                ae_vertex_format_element_offset(self.vertex_format, <char*>elem), size)
+            vtx_vec2mul_ex(<float*>self.array.data, # TODO avoid elem offset method call
+                v.v, self.array.size // sizeof(float), self.element_offset(elem), size)
 
         return self
 
-    def vec3mul(self, bytes elem, Vec3 v):
+    def vec3mul(self, str elem, Vec3 v):
         cdef size_t size = ae_vertex_format_size[<size_t>self.vertex_format]
         assert self.element_size(elem) == 3, "wrong format: {}".format(self)
 
         if size == 3:
             vtx_vec3mul(<float*>self.array.data, v.v, self.array.size // sizeof(float))
         else:
-            vtx_vec3mul_ex(<float*>self.array.data, v.v, self.array.size // sizeof(float),
-                ae_vertex_format_element_offset(self.vertex_format, <char*>elem), size)
+            vtx_vec3mul_ex(<float*>self.array.data, # TODO avoid elem offset method call
+                v.v, self.array.size // sizeof(float), self.element_offset(elem), size)
 
         return self
 
-    def vec4mul(self, bytes elem, Vec4 v):
+    def vec4mul(self, str elem, Vec4 v):
         cdef size_t size = ae_vertex_format_size[<size_t>self.vertex_format]
         assert self.element_size(elem) == 4, "wrong format: {}".format(self)
 
         if size == 4:
             vtx_vec4mul(<float*>self.array.data, v.v, self.array.size // sizeof(float))
         else:
-            vtx_vec4mul_ex(<float*>self.array.data, v.v, self.array.size // sizeof(float),
-                ae_vertex_format_element_offset(self.vertex_format, <char*>elem), size)
+            vtx_vec4mul_ex(<float*>self.array.data, # TODO avoid elem offset method call
+                v.v, self.array.size // sizeof(float), self.element_offset(elem), size)
 
         return self
 
