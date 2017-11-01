@@ -1231,25 +1231,35 @@ cdef class VertexArray(Array):
                         epsilon,
                         self.array.size / sizeof(float))
 
-    def add_ex(self, bytes elem, VertexArray a, VertexArray b):
+    def add_ex(self, str elem, VertexArray a, VertexArray b):
+        """
+        Add a given element (pos etc) from each vertex of A and B into self.
+        """
+        cdef bytes b_elm
+
+        if sys.version_info.major > 2:
+            b_elm = <bytes>elem.encode('utf-8')
+        else:
+            b_elm = <bytes>elem
+
         vtx_add_ex( <float*> self.array.data,
             <const float* const>a.array.data,
             <const float* const>b.array.data,
 
             self.array.size / sizeof(float),
-            ae_vertex_format_element_offset(self.vertex_format, <char*>elem),
+            ae_vertex_format_element_offset(self.vertex_format, <char*>b_elm),
             ae_vertex_format_size[<size_t>self.vertex_format],
 
             a.array.size / sizeof(float),
-            ae_vertex_format_element_offset(a.vertex_format, <char*>elem),
+            ae_vertex_format_element_offset(a.vertex_format, <char*>b_elm),
             ae_vertex_format_size[<size_t>a.vertex_format],
 
             b.array.size / sizeof(float),
-            ae_vertex_format_element_offset(b.vertex_format, <char*>elem),
+            ae_vertex_format_element_offset(b.vertex_format, <char*>b_elm),
             ae_vertex_format_size[<size_t>b.vertex_format],
 
-            # TODO: we should probably assert that A and B sizes match this
-            ae_vertex_format_element_size(self.vertex_format, <char*>elem))
+            # TODO: we should probably assert that A and B sizes match this!
+            ae_vertex_format_element_size(self.vertex_format, <char*>b_elm))
 
         return self
 
@@ -1263,25 +1273,35 @@ cdef class VertexArray(Array):
 
         return self
 
-    def mul_ex(self, bytes elem, VertexArray a, VertexArray b):
+    def mul_ex(self, str elem, VertexArray a, VertexArray b):
+        """
+        Multiplies a given element from each vertex of A and B into self.
+        """
+        cdef bytes b_elm
+
+        if sys.version_info.major > 2:
+            b_elm = <bytes>elem.encode('utf-8')
+        else:
+            b_elm = <bytes>elem
+
         vtx_mul_ex( <float*> self.array.data,
             <const float* const>a.array.data,
             <const float* const>b.array.data,
 
             self.array.size / sizeof(float),
-            ae_vertex_format_element_offset(self.vertex_format, <char*>elem),
+            ae_vertex_format_element_offset(self.vertex_format, <char*>b_elm),
             ae_vertex_format_size[<size_t>self.vertex_format],
 
             a.array.size / sizeof(float),
-            ae_vertex_format_element_offset(a.vertex_format, <char*>elem),
+            ae_vertex_format_element_offset(a.vertex_format, <char*>b_elm),
             ae_vertex_format_size[<size_t>a.vertex_format],
 
             b.array.size / sizeof(float),
-            ae_vertex_format_element_offset(b.vertex_format, <char*>elem),
+            ae_vertex_format_element_offset(b.vertex_format, <char*>b_elm),
             ae_vertex_format_size[<size_t>b.vertex_format],
 
-            # TODO: we should probably assert that A and B sizes match this
-            ae_vertex_format_element_size(self.vertex_format, <char*>elem))
+            # TODO: we should probably assert that A and B sizes match this!
+            ae_vertex_format_element_size(self.vertex_format, <char*>b_elm))
 
         return self
 
@@ -1295,26 +1315,37 @@ cdef class VertexArray(Array):
 
         return self
 
-    def madd_ex(self, bytes elem, VertexArray a, VertexArray b, float s):
+    def madd_ex(self, str elem, VertexArray a, VertexArray b, float s):
+        """
+        Add a given element from each vertex of A and B into self. Before
+        the addition is performed, B is multiplied by a scaling factor S.
+        """
+        cdef bytes b_elm
+
+        if sys.version_info.major > 2:
+            b_elm = <bytes>elem.encode('utf-8')
+        else:
+            b_elm = <bytes>elem
+
         vtx_madd_ex( <float*>self.array.data,
             <const float* const>a.array.data,
             <const float* const>b.array.data,
             s,
 
             self.array.size / sizeof(float),
-            ae_vertex_format_element_offset(self.vertex_format, <char*>elem),
+            ae_vertex_format_element_offset(self.vertex_format, <char*>b_elm),
             ae_vertex_format_size[<size_t>self.vertex_format],
 
             a.array.size / sizeof(float),
-            ae_vertex_format_element_offset(a.vertex_format, <char*>elem),
+            ae_vertex_format_element_offset(a.vertex_format, <char*>b_elm),
             ae_vertex_format_size[<size_t>a.vertex_format],
 
             b.array.size / sizeof(float),
-            ae_vertex_format_element_offset(b.vertex_format, <char*>elem),
+            ae_vertex_format_element_offset(b.vertex_format, <char*>b_elm),
             ae_vertex_format_size[<size_t>b.vertex_format],
 
-            # TODO: we should probably assert that A and B sizes match this
-            ae_vertex_format_element_size(self.vertex_format, <char*>elem))
+            # TODO: we should probably assert that A and B sizes match this!
+            ae_vertex_format_element_size(self.vertex_format, <char*>b_elm))
 
         return self
 
@@ -1330,26 +1361,36 @@ cdef class VertexArray(Array):
 
         return self
 
-    def lerp_ex(self, bytes elem, VertexArray a, VertexArray b, float t):
+    def lerp_ex(self, str elem, VertexArray a, VertexArray b, float t):
+        """
+        Interpolate a given element from each vertex of A and B into self.
+        """
+        cdef bytes b_elm
+
+        if sys.version_info.major > 2:
+            b_elm = <bytes>elem.encode('utf-8')
+        else:
+            b_elm = <bytes>elem
+
         vtx_lerp_ex( <float*>self.array.data,
             <const float* const>a.array.data,
             <const float* const>b.array.data,
             t,
 
             self.array.size / sizeof(float),
-            ae_vertex_format_element_offset(self.vertex_format, <char*>elem),
+            ae_vertex_format_element_offset(self.vertex_format, <char*>b_elm),
             ae_vertex_format_size[<size_t>self.vertex_format],
 
             a.array.size / sizeof(float),
-            ae_vertex_format_element_offset(a.vertex_format, <char*>elem),
+            ae_vertex_format_element_offset(a.vertex_format, <char*>b_elm),
             ae_vertex_format_size[<size_t>a.vertex_format],
 
             b.array.size / sizeof(float),
-            ae_vertex_format_element_offset(b.vertex_format, <char*>elem),
+            ae_vertex_format_element_offset(b.vertex_format, <char*>b_elm),
             ae_vertex_format_size[<size_t>b.vertex_format],
 
-            # TODO: we should probably assert that A and B sizes match this
-            ae_vertex_format_element_size(self.vertex_format, <char*>elem))
+            # TODO: we should probably assert that A and B sizes match this!
+            ae_vertex_format_element_size(self.vertex_format, <char*>b_elm))
 
         return self
 
