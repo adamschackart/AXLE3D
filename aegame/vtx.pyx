@@ -1194,7 +1194,17 @@ cdef class VertexArray(Array):
 
         return self
 
-    def cmp_e_ex(self, bytes elem, VertexArray other, float epsilon):
+    def cmp_e_ex(self, str elem, VertexArray other, float epsilon):
+        """
+        Strided fuzzy (epsilon) comparison of elements between self and other.
+        """
+        cdef bytes b_elm
+
+        if sys.version_info.major > 2:
+            b_elm = <bytes>elem.encode('utf-8')
+        else:
+            b_elm = <bytes>elem
+
         assert self.element_size(elem) == other.element_size(elem), "self: " \
             "{} other: {} element: {} doesn't match".format(self, other, elem)
 
@@ -1204,14 +1214,14 @@ cdef class VertexArray(Array):
             epsilon,
 
             self.array.size / sizeof(float),
-            ae_vertex_format_element_offset(self.vertex_format, <char*>elem),
+            ae_vertex_format_element_offset(self.vertex_format, <char*>b_elm),
             ae_vertex_format_size[<size_t>self.vertex_format],
 
             other.array.size / sizeof(float),
-            ae_vertex_format_element_offset(other.vertex_format, <char*>elem),
+            ae_vertex_format_element_offset(other.vertex_format, <char*>b_elm),
             ae_vertex_format_size[<size_t>other.vertex_format],
 
-            ae_vertex_format_element_size(self.vertex_format, <char*>elem))
+            ae_vertex_format_element_size(self.vertex_format, <char*>b_elm))
 
     def cmp_e(self, VertexArray other, float epsilon):
         assert len(self) == len(other), "{} {}".format(self, other)
