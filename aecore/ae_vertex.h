@@ -51,7 +51,7 @@ TODO: add an extra field for number of elem channels (AE_T2F_N3F_V3F has 3 etc.)
     N(AE_V3F, 3, 0, 0, 0, 0, 0, 0, 0, 3), \
     N(AE_V4F, 4, 0, 0, 0, 0, 0, 0, 0, 4), \
     \
-    N(AE_T2F_V3F, 5, 0, 2, 0, 0, 0, 0, 3, 3), \
+    N(AE_T2F_V3F, 5, 0, 2, 0, 0, 0, 0, 2, 3), \
     N(AE_C3F_V3F, 6, 0, 0, 0, 3, 0, 0, 3, 3), \
     N(AE_N3F_V3F, 6, 0, 0, 0, 0, 0, 3, 3, 3), \
     N(AE_T4F_V4F, 8, 0, 4, 0, 0, 0, 0, 4, 4), \

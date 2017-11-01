@@ -1164,7 +1164,18 @@ cdef class VertexArray(Array):
 
         return self
 
-    def copy_ex(self, bytes elem, VertexArray src):
+    def copy_ex(self, str elem, VertexArray src):
+        """
+        Strided copy of elements from other (colors, normals, etc) into the
+        same elements of self. Src and dst must have the same vertex count.
+        """
+        cdef bytes el
+
+        if sys.version_info.major > 2:
+            el = <bytes>elem.encode('utf-8')
+        else:
+            el = <bytes>elem
+
         assert self.element_size(elem) == src.element_size(elem), "dst: "\
             "{} src: {} element: {} doesn't match".format(self, src, elem)
 
@@ -1172,14 +1183,14 @@ cdef class VertexArray(Array):
             <const float* const>src.array.data,
 
             self.array.size / sizeof(float),
-            ae_vertex_format_element_offset(self.vertex_format, <char*>elem),
+            ae_vertex_format_element_offset(self.vertex_format, <char*>el),
             ae_vertex_format_size[<size_t>self.vertex_format],
 
             src.array.size / sizeof(float),
-            ae_vertex_format_element_offset(src.vertex_format, <char*>elem),
+            ae_vertex_format_element_offset(src.vertex_format, <char*>el),
             ae_vertex_format_size[<size_t>src.vertex_format],
 
-            ae_vertex_format_element_size(self.vertex_format, <char*>elem))
+            ae_vertex_format_element_size(self.vertex_format, <char*>el))
 
         return self
 
