@@ -1128,39 +1128,39 @@ cdef class VertexArray(Array):
 
         return self
 
-    def vec2lerp(self, bytes elem, Vec2 v, float t):
+    def vec2lerp(self, str elem, Vec2 v, float t):
         cdef size_t size = ae_vertex_format_size[<size_t>self.vertex_format]
         assert self.element_size(elem) == 2, "wrong format: {}".format(self)
 
         if size == 2:
             vtx_vec2lerp(<float*>self.array.data, v.v, t, self.array.size // sizeof(float))
         else:
-            vtx_vec2lerp_ex(<float*>self.array.data, v.v, t, self.array.size // sizeof(float),
-                    ae_vertex_format_element_offset(self.vertex_format, <char*>elem), size)
+            vtx_vec2lerp_ex(<float*>self.array.data, # TODO avoid elem offset method call
+                v.v, t, self.array.size // sizeof(float), self.element_offset(elem), size)
 
         return self
 
-    def vec3lerp(self, bytes elem, Vec3 v, float t):
+    def vec3lerp(self, str elem, Vec3 v, float t):
         cdef size_t size = ae_vertex_format_size[<size_t>self.vertex_format]
         assert self.element_size(elem) == 3, "wrong format: {}".format(self)
 
         if size == 3:
             vtx_vec3lerp(<float*>self.array.data, v.v, t, self.array.size // sizeof(float))
         else:
-            vtx_vec3lerp_ex(<float*>self.array.data, v.v, t, self.array.size // sizeof(float),
-                    ae_vertex_format_element_offset(self.vertex_format, <char*>elem), size)
+            vtx_vec3lerp_ex(<float*>self.array.data, # TODO avoid elem offset method call
+                v.v, t, self.array.size // sizeof(float), self.element_offset(elem), size)
 
         return self
 
-    def vec4lerp(self, bytes elem, Vec4 v, float t):
+    def vec4lerp(self, str elem, Vec4 v, float t):
         cdef size_t size = ae_vertex_format_size[<size_t>self.vertex_format]
         assert self.element_size(elem) == 4, "wrong format: {}".format(self)
 
         if size == 4:
             vtx_vec4lerp(<float*>self.array.data, v.v, t, self.array.size // sizeof(float))
         else:
-            vtx_vec4lerp_ex(<float*>self.array.data, v.v, t, self.array.size // sizeof(float),
-                    ae_vertex_format_element_offset(self.vertex_format, <char*>elem), size)
+            vtx_vec4lerp_ex(<float*>self.array.data, # TODO avoid elem offset method call
+                v.v, t, self.array.size // sizeof(float), self.element_offset(elem), size)
 
         return self
 
