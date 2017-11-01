@@ -1407,6 +1407,11 @@ cdef class VertexArray(Array):
         return self
 
     def mat4x4row_transform(self, Mat4x4 m, bint normalize):
+        """
+        Multiply vertex positions (and possibly normals) by a transformation matrix.
+        If the matrix is simply a scale matrix, calling mul_ex will be much faster.
+        The same optimization rule applies for translation matrices / add_ex method.
+        """
         # TODO: transform normals and positions in one pass for better cache use
         cdef size_t size = ae_vertex_format_size[<size_t>self.vertex_format]
 

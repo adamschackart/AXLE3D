@@ -2354,9 +2354,10 @@ cdef class Texture:
         """
         cdef ae_image_error_t error = AE_IMAGE_NO_CODEC # the default for stubs
 
-        # convert the filename from a unicode string in python 3 to ascii bytes
         cdef bytes b_filename
+        cdef bytes err_string
 
+        # convert the filename from a unicode string in python 3 to ascii bytes
         if sys.version_info.major > 2:
             b_filename = <bytes>filename.encode('utf-8')
         else:
@@ -2366,7 +2367,12 @@ cdef class Texture:
             self.texture = gl_texture_load_ex(<char*>b_filename, &error)
 
             if error != AE_IMAGE_SUCCESS:
-                raise IOError(ae_image_error_message(error, <char*>b_filename))
+                err_string = ae_image_error_message(error, <char*>b_filename)
+
+                if sys.version_info.major > 2:
+                    raise IOError(err_string.decode()) # convert to unicode
+                else:
+                    raise IOError(err_string) # use oldschool python 2 str
 
             # convenient way to set some texture attributes inline
             for key, val in kwargs.items(): setattr(self, key, val)
