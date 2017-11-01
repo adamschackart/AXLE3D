@@ -429,7 +429,8 @@ int vtx_vec_cmp_e_ex(
         }
     }
 
-    AE_PROFILE_LEAVE(); return 1;
+    // NOTE: empty arrays should never compare as true
+    AE_PROFILE_LEAVE(); return floats != 0;
 }
 
 int vtx_flt_cmp_e_ex(const float* const vertices, const float value, // float comparison

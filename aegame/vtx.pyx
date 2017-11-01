@@ -936,7 +936,7 @@ cdef class VertexArray(Array):
 
         return self
 
-    def vec2cmp_e(self, bytes elem, Vec2 v, float epsilon):
+    def vec2cmp_e(self, str elem, Vec2 v, float epsilon):
         cdef size_t size = ae_vertex_format_size[<size_t>self.vertex_format]
         assert self.element_size(elem) == 2, "wrong format: {}".format(self)
 
@@ -946,9 +946,11 @@ cdef class VertexArray(Array):
 
         return vtx_vec2cmp_e_ex(<const float * const>self.array.data, v.v,
                                 epsilon, self.array.size // sizeof(float),
-                ae_vertex_format_element_offset(self.vertex_format, <char*>elem), size)
 
-    def vec3cmp_e(self, bytes elem, Vec3 v, float epsilon):
+                                # TODO: remove this function call overhead
+                                self.element_offset(elem), size)
+
+    def vec3cmp_e(self, str elem, Vec3 v, float epsilon):
         cdef size_t size = ae_vertex_format_size[<size_t>self.vertex_format]
         assert self.element_size(elem) == 3, "wrong format: {}".format(self)
 
@@ -958,9 +960,11 @@ cdef class VertexArray(Array):
 
         return vtx_vec3cmp_e_ex(<const float * const>self.array.data, v.v,
                                 epsilon, self.array.size // sizeof(float),
-                ae_vertex_format_element_offset(self.vertex_format, <char*>elem), size)
 
-    def vec4cmp_e(self, bytes elem, Vec4 v, float epsilon):
+                                # TODO: remove this function call overhead
+                                self.element_offset(elem), size)
+
+    def vec4cmp_e(self, str elem, Vec4 v, float epsilon):
         cdef size_t size = ae_vertex_format_size[<size_t>self.vertex_format]
         assert self.element_size(elem) == 4, "wrong format: {}".format(self)
 
@@ -970,7 +974,9 @@ cdef class VertexArray(Array):
 
         return vtx_vec4cmp_e_ex(<const float * const>self.array.data, v.v,
                                 epsilon, self.array.size // sizeof(float),
-                ae_vertex_format_element_offset(self.vertex_format, <char*>elem), size)
+
+                                # TODO: remove this function call overhead
+                                self.element_offset(elem), size)
 
     def vec2add(self, bytes elem, Vec2 v):
         cdef size_t size = ae_vertex_format_size[<size_t>self.vertex_format]
