@@ -9,6 +9,8 @@ from aegame.mem cimport *
 from aegame.img cimport *
 from aegame.exm cimport *
 
+import sys # version info
+
 cdef extern from "xl_core.h":
     # ==========================================================================
     # ~ [ macros & init ]
@@ -787,10 +789,18 @@ cdef class Object:
         cdef xl_object_type_t object_type = xl_object_type(self.ptr) # enum
         cdef bytes name = xl_object_type_short_name[< size_t >object_type]
 
+        cdef str nstr # TODO: move all string code after unknown detection
+
         if object_type == XL_OBJECT_TYPE_UNKNOWN:
             return self
 
-        return globals()[name.replace('_', ' ').title().replace(' ', '')] \
+        # XXX: is there a way to detect version num without calling python?
+        if sys.version_info.major > 2:
+            nstr = name.decode()
+        else:
+            nstr = <str>name
+
+        return globals()[nstr.replace('_', ' ').title().replace(' ', '')] \
                                             (reference = <size_t>self.ptr)
 
 def ObjectFrom(object obj, bint collect=False):
@@ -1269,7 +1279,12 @@ cdef class Window:
             """
             Push a queued state onto the application stack and activate it.
             """
-            cdef bytes state_repr = b'{}'.format(state)
+            cdef bytes state_repr
+
+            if sys.version_info.major > 2:
+                state_repr = '{}'.format(state).encode('utf-8') # unicode
+            else:
+                state_repr = b'{}'.format(state) # oldschool ascii string
 
             if state_stack:
                 if hasattr(state_stack[-1], 'deactivate'):
@@ -1287,7 +1302,12 @@ cdef class Window:
             """
             Remove the top state from the application stack and deactivate it.
             """
-            cdef bytes state_repr = b'{}'.format(state_stack[-1])
+            cdef bytes state_repr
+
+            if sys.version_info.major > 2:
+                state_repr = '{}'.format(state_stack[-1]).encode('utf-8')
+            else:
+                state_repr = b'{}'.format(state_stack[-1]) # utf or ascii
 
             if (hasattr(state_stack[-1], 'deactivate')):
                 state_stack[-1].deactivate(self)
