@@ -1245,13 +1245,21 @@ cdef class Window:
         xl_draw_line(self.window, a.v, b.v, NULL if color is None else color.v)
         return self
 
-    def draw_curve( self, Vec2 a, Vec2 b, Vec4 color=None, bytes mode=b'cubic_inout',
-                                                            size_t num_divisions=24):
+    def draw_curve(self, Vec2 a, Vec2 b, Vec4 color=None, str mode='cubic_inout',
+                                                        size_t num_divisions=24):
         """
-        Draw a simple bezier curve with a given easing mode (see aegame.exm modes).
+        Draw simple bezier curve with a given easing mode (see aegame.exm modes).
         """
-        xl_draw_curve( self.window, a.v, b.v, NULL if color is None else color.v,
-                        ae_ease_mode_from_short_name(<char*>mode), num_divisions)
+        cdef bytes b_mode
+
+        if sys.version_info.major > 2:
+            b_mode = <bytes>mode.encode('utf-8')
+        else:
+            b_mode = <bytes>mode
+
+        xl_draw_curve(self.window, a.v, b.v, NULL if color is None else color.v,
+                    ae_ease_mode_from_short_name(<char *>b_mode), num_divisions)
+
         return self
 
     def draw_circle(self, Circle circle, Vec4 color=None,
