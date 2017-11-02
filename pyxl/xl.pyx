@@ -1654,18 +1654,32 @@ cdef class Texture:
     def load_from_bytes(self, Window window, bytes data, **kwargs):
         return self.load_from_memory(window, <size_t>(<char*>data), len(data), **kwargs)
 
-    def load(self, Window window, bytes filename, **kwargs):
+    def load(self, Window window, str filename, **kwargs):
         """
         Load an image into a texture. Raises IOError if image loading fails.
         """
         cdef ae_image_error_t error = AE_IMAGE_NO_CODEC # default for stubs
 
+        cdef bytes b_filename
+        cdef bytes err_string
+
+        # convert unicode filename to ascii in python 3, leave it otherwise
+        if sys.version_info.major > 2:
+            b_filename = <bytes>filename.encode('utf-8')
+        else:
+            b_filename = <bytes>filename
+
         if not self.open:
             self.texture = xl_texture_load_ex(window.window,
-                                    <char*>filename, &error)
+                                <char *>b_filename, &error)
 
             if error != AE_IMAGE_SUCCESS:
-                raise IOError(ae_image_error_message(error, <char*>filename))
+                err_string = ae_image_error_message(error, <char*>b_filename)
+
+                if sys.version_info.major > 2:
+                    raise IOError(err_string.decode()) # convert to unicode
+                else:
+                    raise IOError(err_string) # use oldschool ascii string
 
             # convenient way to set some texture attributes inline
             for key, val in kwargs.items(): setattr(self, key, val)
