@@ -1127,26 +1127,48 @@ cdef class Window:
 
     property status:
         def __get__(self):
-            return xl_window_get_str(self.window, XL_WINDOW_PROPERTY_STATUS) # repr
+            cdef bytes s = xl_window_get_str(self.window, XL_WINDOW_PROPERTY_STATUS)
+            return s.decode() if sys.version_info.major > 2 else s
 
-        def __set__(self, bytes value):
-            xl_window_set_str(self.window, XL_WINDOW_PROPERTY_STATUS, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            xl_window_set_str(self.window, XL_WINDOW_PROPERTY_STATUS, <char*>string)
 
     property title:
         def __get__(self):
-            return xl_window_get_str(self.window, XL_WINDOW_PROPERTY_TITLE)
+            cdef bytes s = xl_window_get_str(self.window, XL_WINDOW_PROPERTY_TITLE)
+            return s.decode() if sys.version_info.major > 2 else s
 
-        def __set__(self, bytes value):
-            cdef const char* v_str = <const char*>value # cython magic here
-            xl_window_set_str(self.window, XL_WINDOW_PROPERTY_TITLE, v_str)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            xl_window_set_str(self.window, XL_WINDOW_PROPERTY_TITLE, <char*>string)
 
     property name:
         def __get__(self):
-            return xl_window_get_str(self.window, XL_WINDOW_PROPERTY_NAME)
+            cdef bytes s = xl_window_get_str(self.window, XL_WINDOW_PROPERTY_NAME)
+            return s.decode() if sys.version_info.major > 2 else s
 
-        def __set__(self, bytes value):
-            cdef const char* v_str = <const char*>value
-            xl_window_set_str(self.window, XL_WINDOW_PROPERTY_NAME, v_str)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            xl_window_set_str(self.window, XL_WINDOW_PROPERTY_NAME, <char*>string)
 
     property icon:
         def __get__(self):
