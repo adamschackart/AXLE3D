@@ -686,7 +686,13 @@ def implementation():
     """
     Identify the underlying platform layer, for 'safer' game-specific hacks.
     """
-    return (xl_implementation(), xl_audio_implementation())
+    cdef bytes video = xl_implementation() # implicitly cast pointers
+    cdef bytes audio = xl_audio_implementation() # separate sfx layer
+
+    if sys.version_info.major > 2:
+        return (video.decode(), audio.decode()) # convert to unicode
+    else:
+        return (video, audio) # use oldschool python 2 ascii strings
 
 # ==============================================================================
 # ~ [ generic objects ]

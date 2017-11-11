@@ -6119,6 +6119,12 @@ xl_event_from_sdl_window(xl_event_t* dst, SDL_WindowEvent* src)
         }
         break;
 
+        case SDL_WINDOWEVENT_TAKE_FOCUS:
+        {
+            dst->type = XL_EVENT_NOTHING;
+        }
+        break;
+
         case SDL_WINDOWEVENT_FOCUS_GAINED:
         {
             dst->type = XL_EVENT_WINDOW_GAIN_FOCUS;
@@ -6977,7 +6983,7 @@ void xl_quit(void)
 
 const char* xl_audio_implementation(void)
 {
-    return "SDL_mixer";
+    return "SDL2_mixer";
 }
 
 static int xl_audio_is_initialized;
