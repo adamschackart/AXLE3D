@@ -11,6 +11,7 @@ const char* ae_language_name (void) { AE_STUB(); return ""; }
 const char* ae_buildmode_name(void) { AE_STUB(); return ""; }
 const char* ae_platform_name (void) { AE_STUB(); return ""; }
 const char* ae_cpuinfo_name  (void) { AE_STUB(); return ""; }
+const char* ae_linkage_mode  (void) { AE_STUB(); return ""; }
 
 const char* ae_username(void) { AE_STUB(); return ""; }
 const char* ae_hostname(void) { AE_STUB(); return ""; }

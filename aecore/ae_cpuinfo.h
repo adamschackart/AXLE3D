@@ -48,6 +48,9 @@ AE_DECL const char* AE_CALL ae_platform_name(void);
 // get the human-readable cpu string (not shorthand "GenuineIntel" etc. strings)
 AE_DECL const char* AE_CALL ae_cpuinfo_name(void);
 
+// get the human-readable linkage mode (either "dynamic" for DLLs or "static")
+AE_DECL const char* AE_CALL ae_linkage_mode(void);
+
 /*
 ================================================================================
  * ~~ [ username and hostname ] ~~ *

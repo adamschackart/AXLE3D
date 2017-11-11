@@ -335,6 +335,15 @@ const char* ae_buildmode_name(void)
     #endif
 }
 
+const char* ae_linkage_mode(void)
+{
+    #if defined(AE_COMPILING_DLL)
+        return "dynamic";
+    #else
+        return "static";
+    #endif
+}
+
 /*
 ================================================================================
  * ~~ [ operating system name ] ~~ *
@@ -800,6 +809,7 @@ void ae_cpuinfo_init(int argc, char** argv)
     ae_log(CPUINFO, "switch coverage %sabled", // XXX move this
                     ae_switch_report_enabled() ? "en" : "dis");
 
+    ae_log(CPUINFO, "ae linked %sally", ae_linkage_mode());
     ae_log(CPUINFO, "compiled with %s", ae_compiler_name());
     ae_log(CPUINFO, "cpu string is %s", ae_cpuinfo_name());
     ae_log(CPUINFO, "runtime OS is %s", ae_platform_name());
