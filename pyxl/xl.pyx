@@ -1959,12 +1959,21 @@ cdef class Font:
         return self.load_from_memory( window, <size_t>(<char *>font),
                                     len(font), point_size, **kwargs)
 
-    def load(self, Window window, bytes filename, int point_size, **kwargs):
+    def load(self, Window window, str filename, int point_size, **kwargs):
         """
         Load a TrueType font from a file. Font path and name are automatically set.
         """
+        cdef bytes b_filename
+
         if not self.open:
-            self.font = xl_font_load(window.window, <char*>filename, point_size)
+            # convert the filename from a unicode string in python 3 to ascii bytes
+            if sys.version_info.major > 2:
+                b_filename = <bytes>filename.encode('utf-8')
+            else:
+                b_filename = <bytes>filename
+
+            # TODO: when xl_font_load_ex exists, call it instead for exception data
+            self.font = xl_font_load(window.window, <char*>b_filename, point_size)
 
             # for convenience, set named properties on load
             for k, v in kwargs.items(): setattr(self, k, v)
@@ -1976,6 +1985,7 @@ cdef class Font:
         Load a monospace font from the operating system. Useful for debugging tools.
         """
         if not self.open:
+            # TODO: when xl_font_load_system_monospace_ex exists, throw on errors
             self.font = xl_font_load_system_monospace(window.window, point_size)
 
             # for convenience, set named properties on load

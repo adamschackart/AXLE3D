@@ -7022,6 +7022,9 @@ void gl_coord3D_set_right_vector(gl_coord3D_t* coord, float* v)
 
 const char* gl_implementation(void)
 {
+    // TODO: in the future, this could detect system capabilities, allowing this
+    // string to be checked against in a driver load phase during initialization.
+    // the driver would issue GPU calls and some common code could be left here.
     return "SDL2_GL1";
 }
 
