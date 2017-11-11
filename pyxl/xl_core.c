@@ -1210,20 +1210,24 @@ void xl_draw_rect_ex(xl_window_t* window, float* rect, float* color,
 {
     if (xl_window_get_open(window))
     {
-        AE_PROFILE_ENTER(); // FIXME: super ugly inefficient hack!!!
+        /* FIXME: this is a super ugly inefficient hack, where
+         * we just use the texture pipeline to draw rectangles.
+         * eventually, we should issue the proper gl commands.
+         */
+        AE_PROFILE_ENTER();
 
-        ae_image_t image = AE_ZERO_STRUCT; // temp image
+        ae_image_t image = AE_ZERO_STRUCT; // temporary image
         float white[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
         float real_rect[4];
         xl_texture_t* temp;
 
-        if (ae_unlikely(color == NULL)) // default color
+        if (ae_unlikely(color == NULL)) // white default color
         {
             color = white;
         }
 
-        if (ae_likely(rect != NULL)) // allow fullscreen
+        if (ae_likely(rect != NULL)) // allow fullscreen rect
         {
             flt_rect_copy(real_rect, rect);
         }
@@ -1231,8 +1235,8 @@ void xl_draw_rect_ex(xl_window_t* window, float* rect, float* color,
         {
             vec2zero(real_rect);
 
-            real_rect[2] = xl_window_get_width (window);
-            real_rect[3] = xl_window_get_height(window);
+            real_rect[2] = xl_window_get_render_width (window);
+            real_rect[3] = xl_window_get_render_height(window);
         }
 
         image.width  = (size_t)ae_ftoi(real_rect[2]);
