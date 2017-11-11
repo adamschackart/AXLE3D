@@ -287,6 +287,7 @@ TODO: guard bytes, double free checks, free from out of heap checks, size maxes
 TODO: debug features we can share between the heap, block, and stack allocators
 TODO: on linux we can mmap and fault smallblock pages (create_mspace_with_base)
 TODO: linux usually uses glibc's tcmalloc, which allocates faster than dlmalloc
+TODO: allocation counter for leak checking (realloc with a NULL arg only bumps)
 --------------------------------------------------------------------------------
 */
 
@@ -865,7 +866,7 @@ void ae_block_free_ex(ae_memory_chunk_t * chunk, void* p, const char* filename,
  * ~~ [ stack allocator ] ~~ *
 --------------------------------------------------------------------------------
 TODO: micro-optimize this! reorder struct members, use size_t for 64bit, etc.
-TODO: stack realloc would be really easy to implement here (just change size)
+TODO: stack realloc could be really easy to implement here (just change size)
 TODO: pass filename, funcname, and lineno through to fallback heap allocation
 TODO: show memory profiling info at exit - max number of bytes allocated etc.
 TODO: function to free all stack memory at once rather than individual allocs
@@ -903,6 +904,8 @@ void ae_stack_create_ex(ae_memory_stack_t* stack, const char* name, u32 size,
 void ae_stack_destroy_ex(ae_memory_stack_t* stack, const char* filename,
                                 const char* funcname, const int lineno)
 {
+    /* TODO assert that zero bytes are left allocated on free?
+     */
     if (stack->mem_stack)
     {
         ae_log(STACK, "destroying stack \"%s\"", stack->name);
