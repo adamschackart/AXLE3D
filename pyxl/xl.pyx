@@ -2145,10 +2145,18 @@ cdef class Music:
 
     property status:
         def __get__(self):
-            return xl_music_get_str(XL_MUSIC_PROPERTY_STATUS)
+            cdef bytes s = xl_music_get_str(XL_MUSIC_PROPERTY_STATUS)
+            return s.decode() if sys.version_info.major > 2 else s
 
-        def __set__(self, bytes value):
-            xl_music_set_str(XL_MUSIC_PROPERTY_STATUS, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            xl_music_set_str(XL_MUSIC_PROPERTY_STATUS, <char*>string)
 
     property duration:
         def __get__(self):
@@ -2170,26 +2178,50 @@ cdef class Music:
 
     property path:
         def __get__(self):
-            return xl_music_get_str(XL_MUSIC_PROPERTY_PATH)
+            cdef bytes s = xl_music_get_str(XL_MUSIC_PROPERTY_PATH)
+            return s.decode() if sys.version_info.major > 2 else s
 
-        def __set__(self, bytes value):
-            xl_music_set_str(XL_MUSIC_PROPERTY_PATH, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            xl_music_set_str(XL_MUSIC_PROPERTY_PATH, <char*>string)
 
     property name:
         def __get__(self):
-            return xl_music_get_str(XL_MUSIC_PROPERTY_NAME)
+            cdef bytes s = xl_music_get_str(XL_MUSIC_PROPERTY_NAME)
+            return s.decode() if sys.version_info.major > 2 else s
 
-        def __set__(self, bytes value):
-            xl_music_set_str(XL_MUSIC_PROPERTY_NAME, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            xl_music_set_str(XL_MUSIC_PROPERTY_NAME, <char*>string)
 
     @classmethod
-    def fade_in( cls, bytes filename, bint loop, double fade_in,
-                                    double start_pos, **kwargs):
+    def fade_in(cls, str filename, bint loop, double fade_in,
+                                double start_pos, **kwargs):
         """
         Begin streaming a music file at a given point (in seconds),
         optionally fading in from silence over a number of seconds.
         """
-        xl_music_fade_in(<char*>filename, loop, fade_in, start_pos)
+        cdef bytes b_file
+
+        # convert unicode strings to bytes, or use oldschool ascii
+        if sys.version_info.major > 2:
+            b_file = <bytes>filename.encode('utf-8')
+        else:
+            b_file = <bytes>filename
+
+        xl_music_fade_in(<char *>b_file, loop, fade_in, start_pos)
 
         # for k, v in kwargs.items(): setattr(cls, k, v)
         for k, v in kwargs.items(): setattr(music, k, v)
@@ -2198,7 +2230,7 @@ cdef class Music:
     def fade_out(double fade_out): xl_music_fade_out(fade_out)
 
     @classmethod
-    def play(cls, bytes filename, **kwargs):
+    def play(cls, str filename, **kwargs):
         """
         Begin streaming a music file immediately from the beginning.
         """

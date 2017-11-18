@@ -7023,9 +7023,19 @@ void xl_audio_init(void)
             ae_error("audio library initialization failed: %s", SDL_GetError());
         }
 
-        if ((Mix_Init(MIX_INIT_OGG) & MIX_INIT_OGG) != MIX_INIT_OGG)
+        /* NOTE: MP3 support is no guarantee, as it requires certain packages to be
+         * installed on Linux systems and may be encumbered by patents. Therefore,
+         * it should be considered a debug/testing thing only (use OGG for release).
+         */
+        if ((Mix_Init(MIX_INIT_OGG | MIX_INIT_MP3) & (MIX_INIT_OGG | MIX_INIT_MP3))
+                                                  != (MIX_INIT_OGG | MIX_INIT_MP3))
         {
-            ae_error("mixer library initialization failed: %s", Mix_GetError());
+            ae_log(SDL, "failed to load MP3 driver: %s", Mix_GetError());
+
+            if ((Mix_Init(MIX_INIT_OGG) & MIX_INIT_OGG) != MIX_INIT_OGG)
+            {
+                ae_error("mixer library initialization failed: %s", Mix_GetError());
+            }
         }
 
         if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, chunk_size) < 0)
