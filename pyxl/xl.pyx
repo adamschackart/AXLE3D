@@ -2064,22 +2064,38 @@ cdef class Font:
 
         return cls(<size_t>xl_font_render_texture(self.font, "%s", <char*>s))
 
-    def blit( self, bytes string, Image dst, int x, int y,
-                                bint r=True, bint g=True,
-                                bint b=True, bint a=True):
+    def blit( self, str string, Image dst, int x, int y,
+                        bint r = True, bint g = True,
+                        bint b = True, bint a = True):
         """
         Blit a string into an image at (x, y), using standard alpha blending.
+        This is essentially the software rendering equivalent of Font.draw().
         """
-        xl_font_blit(self.font, &dst.image, x, y, r, g, b, a,
-                                        "%s", <char *>string)
+        cdef bytes s
+
+        if sys.version_info.major > 2:
+            s = <bytes>string.encode('utf-8') # convert unicode str to bytes
+        else:
+            s = <bytes>string # use the oldschool python 2 ascii byte string
+
+        xl_font_blit(self.font, &dst.image, x, y, r, g, b, a, "%s", <char*>s)
         return self
 
-    def draw(self, bytes string, Vec2 pos):
+    def draw(self, str string, Vec2 pos):
         """
-        Render a string into the current window render target at (x, y).
+        Render a string into the current window render target at (x, y). For
+        custom scaling, clipping, and/or rotation, render strings to textures
+        and call Texture.draw_ex(). Don't forget to close them afterwards!!!
         """
-        xl_font_draw(self.font, pos.v, "%s", <char *>string)
-        return self
+        cdef bytes b_string
+
+        # convert unicode strings to bytes, or keep oldschool ascii strings
+        if sys.version_info.major > 2:
+            b_string = <bytes>string.encode('utf-8')
+        else:
+            b_string = <bytes>string
+
+        xl_font_draw(self.font, pos.v, "%s", <char *>b_string); return self
 
 # ==============================================================================
 # ~ [ streaming music ]
