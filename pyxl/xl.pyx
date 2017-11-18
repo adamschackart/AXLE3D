@@ -2404,12 +2404,21 @@ cdef class Sound:
         return self.load_from_memory(<size_t>(<char *>sound),
                                         len(sound), **kwargs)
 
-    def load(self, bytes filename, **kwargs):
+    def load(self, str filename, **kwargs):
         """
         Load a sound effect from a file. Path and name are automatically set.
         """
+        cdef bytes b_filename
+
         if not self.open:
-            self.sound = xl_sound_load(<char*>filename)
+            # convert unicode filename to ascii, or keep oldschool bytes str
+            if sys.version_info.major > 2:
+                b_filename = <bytes>filename.encode('utf-8')
+            else:
+                b_filename = <bytes>filename
+
+            # TODO: call xl_sound_load_ex once it exists, for exception data
+            self.sound = xl_sound_load(< char* >b_filename)
 
             # for convenience, set named properties on load
             for k, v in kwargs.items(): setattr(self, k, v)
