@@ -2234,6 +2234,8 @@ cdef class Music:
         """
         Begin streaming a music file immediately from the beginning.
         """
+        # TODO: call xl_music_play in case the difference matters,
+        # like if play is implemented but fade_in is somehow not...
         cls.fade_in(filename, False, 0.0, 0.0, **kwargs)
 
     @staticmethod
@@ -2324,24 +2326,48 @@ cdef class Sound:
 
     property status:
         def __get__(self):
-            return xl_sound_get_str(self.sound, XL_SOUND_PROPERTY_STATUS) # repr
+            cdef bytes s = xl_sound_get_str(self.sound, XL_SOUND_PROPERTY_STATUS)
+            return s.decode() if sys.version_info.major > 2 else s
 
-        def __set__(self, bytes value):
-            xl_sound_set_str(self.sound, XL_SOUND_PROPERTY_STATUS, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            xl_sound_set_str(self.sound, XL_SOUND_PROPERTY_STATUS, <char*>string)
 
     property path:
         def __get__(self):
-            return xl_sound_get_str(self.sound, XL_SOUND_PROPERTY_PATH)
+            cdef bytes s = xl_sound_get_str(self.sound, XL_SOUND_PROPERTY_PATH)
+            return s.decode() if sys.version_info.major > 2 else s
 
-        def __set__(self, bytes value):
-            xl_sound_set_str(self.sound, XL_SOUND_PROPERTY_PATH, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            xl_sound_set_str(self.sound, XL_SOUND_PROPERTY_PATH, <char*>string)
 
     property name:
         def __get__(self):
-            return xl_sound_get_str(self.sound, XL_SOUND_PROPERTY_NAME)
+            cdef bytes s = xl_sound_get_str(self.sound, XL_SOUND_PROPERTY_NAME)
+            return s.decode() if sys.version_info.major > 2 else s
 
-        def __set__(self, bytes value):
-            xl_sound_set_str(self.sound, XL_SOUND_PROPERTY_NAME, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            xl_sound_set_str(self.sound, XL_SOUND_PROPERTY_NAME, <char*>string)
 
     property open:
         def __get__(self):
@@ -2872,24 +2898,48 @@ cdef class Animation:
 
     property status:
         def __get__(self):
-            return xl_animation_get_str(self.animation, XL_ANIMATION_PROPERTY_STATUS) # repr
+            cdef bytes s = xl_animation_get_str(self.animation, XL_ANIMATION_PROPERTY_STATUS)
+            return s.decode() if sys.version_info.major > 2 else s
 
-        def __set__(self, bytes value):
-            xl_animation_set_str(self.animation, XL_ANIMATION_PROPERTY_STATUS, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            xl_animation_set_str(self.animation, XL_ANIMATION_PROPERTY_STATUS, <char*>string)
 
     property path:
         def __get__(self):
-            return xl_animation_get_str(self.animation, XL_ANIMATION_PROPERTY_PATH)
+            cdef bytes s = xl_animation_get_str(self.animation, XL_ANIMATION_PROPERTY_PATH)
+            return s.decode() if sys.version_info.major > 2 else s
 
-        def __set__(self, bytes value):
-            xl_animation_set_str(self.animation, XL_ANIMATION_PROPERTY_PATH, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            xl_animation_set_str(self.animation, XL_ANIMATION_PROPERTY_PATH, <char*>string)
 
     property name:
         def __get__(self):
-            return xl_animation_get_str(self.animation, XL_ANIMATION_PROPERTY_NAME)
+            cdef bytes s = xl_animation_get_str(self.animation, XL_ANIMATION_PROPERTY_NAME)
+            return s.decode() if sys.version_info.major > 2 else s
 
-        def __set__(self, bytes value):
-            xl_animation_set_str(self.animation, XL_ANIMATION_PROPERTY_NAME, <char*>value)
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            xl_animation_set_str(self.animation, XL_ANIMATION_PROPERTY_NAME, <char*>string)
 
     property open:
         def __get__(self):
