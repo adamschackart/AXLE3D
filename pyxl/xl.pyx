@@ -2017,32 +2017,52 @@ cdef class Font:
 
         return self
 
-    def text_size(self, bytes string):
+    def text_size(self, str string):
         """
         Get the size of a string, as it would be rendered to an image or texture.
         """
+        cdef bytes b_string
+
         cdef int w = 0
         cdef int h = 0
 
-        xl_font_text_size(self.font, &w, &h, "%s", <char*>string)
+        if sys.version_info.major > 2:
+            b_string = <bytes>string.encode('utf-8') # utf -> bytes
+        else:
+            b_string = <bytes>string # use oldschool py2k ascii str
+
+        xl_font_text_size(self.font, &w, &h, "%s", <char*>b_string)
         return (w, h)
 
-    def render_image(self, bytes string, object cls=Image):
+    def render_image(self, str string, object cls=Image):
         """
-        Create a new image object with `string` rendered into it.
+        Create a new Image object with `string` rendered into it. The type
+        of the returned image can also be specified for custom subclassing.
         """
         cdef Image image = cls()
+        cdef bytes b_str
 
-        xl_font_render_image(self.font, &image.image,
-                                "%s", <char *>string)
+        if sys.version_info.major > 2:
+            b_str = <bytes>string.encode('utf-8') # convert utf-8 to bytes
+        else:
+            b_str = <bytes>string # keep oldschool py2k ascii bytes string
+
+        xl_font_render_image(self.font, &image.image, "%s", <char *>b_str)
         return image
 
-    def render_texture(self, bytes string, object cls=Texture):
+    def render_texture(self, str string, object cls=Texture):
         """
-        Create a new texture object with `string` rendered into it.
+        Create a new texture object with `string` rendered into it. The type
+        of the returned texture can also be specified for custom subclassing.
         """
-        return cls(< size_t >xl_font_render_texture(self.font,
-                                        "%s", <char *>string))
+        cdef bytes s
+
+        if sys.version_info.major > 2:
+            s = <bytes>string.encode('utf-8') # convert unicode str to bytes
+        else:
+            s = <bytes>string # use the oldschool python 2 ascii byte string
+
+        return cls(<size_t>xl_font_render_texture(self.font, "%s", <char*>s))
 
     def blit( self, bytes string, Image dst, int x, int y,
                                 bint r=True, bint g=True,
