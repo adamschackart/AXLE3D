@@ -2534,15 +2534,26 @@ cdef class Controller:
             return xl_controller_get_int(self.controller, XL_CONTROLLER_PROPERTY_ID)
 
     def _get_button_list(self, xl_controller_property_t prop):
+        """
+        Internal method to convert a button mask to a list of button strings.
+        """
         cdef int button_mask = xl_controller_get_int(self.controller, prop)
         cdef int i, b
+
         cdef list button_list = []
+        cdef bytes button_name
 
         for i in range(XL_CONTROLLER_BUTTON_INDEX_COUNT):
             b = 1 << i
 
             if (button_mask & b) != 0:
-                button_list.append(xl_controller_button_short_name[i])
+                button_name = <bytes>xl_controller_button_short_name[i]
+
+                # convert the ascii byte string to utf-8, or leave it as-is.
+                if sys.version_info.major > 2:
+                    button_list.append(button_name.decode()) # py3k unicode
+                else:
+                    button_list.append(button_name) # oldschool byte string
 
         return button_list
 
@@ -2571,14 +2582,24 @@ cdef class Controller:
                                     XL_CONTROLLER_PROPERTY_STICK_TRIBOOL)
 
     property last_pressed_button:
+        """
+        Get the string identifier of the last button pressed down on the controller.
+        """
         def __get__(self):
-            return xl_controller_button_short_name[xl_controller_get_int(
-                self.controller, XL_CONTROLLER_PROPERTY_LAST_PRESSED_BUTTON)]
+            cdef bytes s = xl_controller_button_short_name[xl_controller_get_int(
+                    self.controller, XL_CONTROLLER_PROPERTY_LAST_PRESSED_BUTTON)]
+
+            return s.decode() if sys.version_info.major > 2 else s
 
     property last_released_button:
+        """
+        Get the string identifier of the last button released up from the controller.
+        """
         def __get__(self):
-            return xl_controller_button_short_name[xl_controller_get_int(
-                self.controller, XL_CONTROLLER_PROPERTY_LAST_RELEASED_BUTTON)]
+            cdef bytes s = xl_controller_button_short_name[xl_controller_get_int(
+                    self.controller, XL_CONTROLLER_PROPERTY_LAST_RELEASED_BUTTON)]
+
+            return s.decode() if sys.version_info.major > 2 else s
 
     property last_pressed_time:
         def __get__(self):
