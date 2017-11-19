@@ -2492,9 +2492,20 @@ cdef class Controller:
     def __copy__(self):
         raise TypeError('cannot copy {}'.format(self))
 
-    def __call__(self, bytes button):
-        return bool(xl_controller_button_is_down(self.controller, # magic cast!
-                    xl_controller_button_index_from_short_name(<char*>button)))
+    def __call__(self, str button):
+        """
+        Given the string of a controller button, returns whether it is pressed.
+        """
+        cdef bytes b_str
+
+        # convert unicode button string to ascii, or keep the oldschool string
+        if sys.version_info.major > 2:
+            b_str = <bytes>button.encode('utf-8')
+        else:
+            b_str = <bytes>button
+
+        return bool(xl_controller_button_is_down(self.controller, # magic cast
+                    xl_controller_button_index_from_short_name(<char*>b_str)))
 
     @staticmethod
     def count_all(): return xl_controller_count_all()
