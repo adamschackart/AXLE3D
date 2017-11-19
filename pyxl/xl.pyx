@@ -2634,12 +2634,22 @@ cdef class Controller:
             xl_controller_get_dbl(self.controller, XL_CONTROLLER_PROPERTY_LEFT_STICK_Y))
 
     property status:
-        def __get__(self): return xl_controller_get_str(  self.controller,
-                                            XL_CONTROLLER_PROPERTY_STATUS)
+        def __get__(self):
+            cdef bytes s = xl_controller_get_str( self.controller,
+                                    XL_CONTROLLER_PROPERTY_STATUS)
 
-        def __set__(self, bytes value):
-            xl_controller_set_str(self.controller, XL_CONTROLLER_PROPERTY_STATUS,
-                                                                    <char*>value)
+            return s.decode() if sys.version_info.major > 2 else s
+
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8') # convert py3 utf-8 to ascii
+            else:
+                string = <bytes>value # keep oldschool python 2 ascii bytes string
+
+            xl_controller_set_str( self.controller, XL_CONTROLLER_PROPERTY_STATUS,
+                                                                    <char*>string)
 
     property name:
         def __get__(self): return xl_controller_get_str(self.controller,
@@ -3090,6 +3100,8 @@ class event(object):
         Grab a single event from the pump, optionally blocking until a new event
         (for tools that want to save power by only updating on user interaction).
         """
+        cdef bytes name
+
         cdef Controller controller = Controller(reference=0)
         cdef Sound sound = Sound(reference=0)
         cdef Window window = Window(reference=0)
@@ -3181,10 +3193,11 @@ class event(object):
             return ('controller_remove', controller)
 
         elif c_type == XL_EVENT_CONTROLLER_BUTTON:
+            name = xl_controller_button_short_name[<size_t>c_event.as_controller_button.button]
             controller.controller = c_event.as_controller_button.controller
 
             return ('controller_button', controller,
-                    xl_controller_button_short_name[<size_t>c_event.as_controller_button.button],
+                    name.decode() if sys.version_info.major > 2 else name,
                     bool(c_event.as_controller_button.pressed))
 
         elif c_type == XL_EVENT_CONTROLLER_TRIGGER:
