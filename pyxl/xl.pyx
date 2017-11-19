@@ -2581,20 +2581,20 @@ cdef class Controller:
                 self.controller, XL_CONTROLLER_PROPERTY_LAST_RELEASED_BUTTON)]
 
     property last_pressed_time:
-        def __get__(self): return xl_controller_get_dbl(self.controller,
-                            XL_CONTROLLER_PROPERTY_LAST_PRESSED_TIME)
+        def __get__(self):
+            return xl_controller_get_dbl(self.controller, XL_CONTROLLER_PROPERTY_LAST_PRESSED_TIME)
 
     property last_released_time:
-        def __get__(self): return xl_controller_get_dbl(self.controller,
-                            XL_CONTROLLER_PROPERTY_LAST_RELEASED_TIME)
+        def __get__(self):
+            return xl_controller_get_dbl(self.controller, XL_CONTROLLER_PROPERTY_LAST_RELEASED_TIME)
 
     property right_trigger:
-        def __get__(self): return xl_controller_get_dbl(self.controller,
-                                XL_CONTROLLER_PROPERTY_RIGHT_TRIGGER)
+        def __get__(self):
+            return xl_controller_get_dbl(self.controller, XL_CONTROLLER_PROPERTY_RIGHT_TRIGGER)
 
     property left_trigger:
-        def __get__(self): return xl_controller_get_dbl(self.controller,
-                                    XL_CONTROLLER_PROPERTY_LEFT_TRIGGER)
+        def __get__(self):
+            return xl_controller_get_dbl(self.controller, XL_CONTROLLER_PROPERTY_LEFT_TRIGGER)
 
     property right_deadzone:
         def __get__(self): return (
@@ -2773,6 +2773,10 @@ cdef class Controller:
         return xl_controller_get_stick_magnitude(self.controller, <char>ord(which))
 
     def get_stick(self, str which):
+        """
+        Get the cartesian coordinates (X and Y) of a given game controller stick.
+        Methods also exists to get polar coordinates (stick angle and magnitude).
+        """
         cdef double x
         cdef double y
 
