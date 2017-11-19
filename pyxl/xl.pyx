@@ -2663,8 +2663,11 @@ cdef class Controller:
                                                                     <char*>string)
 
     property name:
-        def __get__(self): return xl_controller_get_str(self.controller,
-                                            XL_CONTROLLER_PROPERTY_NAME)
+        def __get__(self):
+            cdef bytes s = xl_controller_get_str( self.controller,
+                                    XL_CONTROLLER_PROPERTY_NAME)
+
+            return s.decode() if sys.version_info.major > 2 else s
 
     property open:
         """
@@ -2725,35 +2728,51 @@ cdef class Controller:
 
         return bool(xl_controller_check_history(self.controller, m, len(buttons)))
 
-    def get_trigger(self, bytes which):
+    def get_trigger(self, str which):
         """
         Get the shoulder trigger state based on a character identifier ('L', 'R').
         """
         return xl_controller_get_trigger(self.controller, <char>ord(which))
 
-    def get_deadzone(self, bytes which):
+    def get_deadzone(self, str which):
+        """
+        Get the deadzone mode and margin value for a given game controller stick.
+        See xl_core.h for the listing of all supported controller deadzone modes.
+        """
         cdef xl_controller_deadzone_mode_t mode
+
+        cdef bytes b_mode
         cdef double value
 
         xl_controller_get_deadzone(self.controller, <char>ord(which), &mode, &value)
-        return (xl_controller_deadzone_short_name[<size_t>mode], value)
+        b_mode = xl_controller_deadzone_short_name[<size_t>mode]
 
-    def set_deadzone(self, bytes which, bytes mode, double value):
+        return (b_mode.decode() if sys.version_info.major > 2 else b_mode, value)
+
+    def set_deadzone(self, str which, str mode, double value):
         """
-        Set the deadzone mode and margin, for dealing with old worn out joysticks.
+        Set the deadzone mode and margin, for dealing with old worn out joysticks
+        or manipulating game feel for certain genres (FPS motion vs. aiming, etc).
         """
-        xl_controller_set_deadzone(self.controller, <char>ord(which),
-            xl_controller_deadzone_mode_from_short_name(<char*>mode), value)
+        cdef bytes mstr
+
+        if sys.version_info.major > 2:
+            mstr = <bytes>mode.encode('utf-8') # convert unicode string to ascii
+        else:
+            mstr = <bytes>mode # keep the oldschool python 2k ascii bytes string
+
+        xl_controller_set_deadzone(self.controller, <char>ord(which), # str2char
+            xl_controller_deadzone_mode_from_short_name(<char*>mstr), value)
 
         return self
 
-    def get_stick_angle(self, bytes which):
+    def get_stick_angle(self, str which):
         return xl_controller_get_stick_angle(self.controller, <char>ord(which))
 
-    def get_stick_magnitude(self, bytes which):
+    def get_stick_magnitude(self, str which):
         return xl_controller_get_stick_magnitude(self.controller, <char>ord(which))
 
-    def get_stick(self, bytes which):
+    def get_stick(self, str which):
         cdef double x
         cdef double y
 
