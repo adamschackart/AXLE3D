@@ -2978,19 +2978,32 @@ cdef class Animation:
 
         return self
 
-    def load(self, Window window, bytes filename, int frame_width=0,
-                                    int frame_height=0, **kwargs ):
+    def load(self, Window window, str filename, int frame_width = 0,
+                                    int frame_height = 0, **kwargs):
         """
         Load an animation file (supported file types depend upon the implementation).
         """
         cdef ae_image_error_t error_status = AE_IMAGE_NO_CODEC # default stub error
 
+        # convert unicode strings to bytes in py3k, or keep oldschool ascii strings
+        cdef bytes file_str, err
+
         if not self.open:
-            self.animation = xl_animation_load_ex(window.window, <char*>filename,
+            if sys.version_info.major > 2:
+                file_str = <bytes>filename.encode('utf-8')
+            else:
+                file_str = <bytes>filename
+
+            self.animation = xl_animation_load_ex(window.window, <char *>file_str,
                                         frame_width, frame_height, &error_status)
 
             if error_status != AE_IMAGE_SUCCESS:
-                raise IOError(ae_image_error_message(error_status, <char*>filename))
+                err = <bytes>ae_image_error_message(error_status, <char*>file_str)
+
+                if sys.version_info.major > 2:
+                    raise IOError(err.decode())
+                else:
+                    raise IOError(err)
 
             # convenient way to set named animation properties inline
             for key, val in kwargs.items(): setattr(self, key, val)
