@@ -2327,12 +2327,20 @@ cdef class Texture:
         """
         cdef ae_image_error_t error = AE_IMAGE_NO_CODEC
 
+        # convert ascii error message to unicode (in python 3 only)
+        cdef bytes error_bstring
+
         if not self.open:
             self.texture = gl_texture_load_from_memory_ex(<void*>ptr,
                                                     length, &error)
 
             if error != AE_IMAGE_SUCCESS:
-                raise IOError(ae_image_error_message(error, NULL))
+                error_bstring = ae_image_error_message(error, NULL)
+
+                if sys.version_info.major > 2:
+                    raise IOError(error_bstring.decode())
+                else:
+                    raise IOError(error_bstring)
 
             # convenient way to set some texture attributes inline
             for key, val in kwargs.items(): setattr(self, key, val)
@@ -2346,6 +2354,9 @@ cdef class Texture:
         return self.load_from_memory(data.address(), len(data), **kwargs)
 
     def load_from_bytes(self, bytes data, **kwargs):
+        """
+        Load a texture from a byte string, likely via open(filename, 'rb').read().
+        """
         return self.load_from_memory(<size_t>(<char*>data), len(data), **kwargs)
 
     def load(self, str filename, **kwargs):
