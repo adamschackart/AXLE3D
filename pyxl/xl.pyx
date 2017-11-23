@@ -2678,6 +2678,11 @@ cdef class Controller:
             xl_controller_get_dbl(self.controller, XL_CONTROLLER_PROPERTY_LEFT_STICK_Y))
 
     property status:
+        """
+        Get some interesting info about the controller, for internal use with __repr__().
+        Note that for most or all objects, setting the status string doesn't do anything -
+        it's just a legacy holdover from when I thought these strings might be parsable.
+        """
         def __get__(self):
             cdef bytes s = xl_controller_get_str( self.controller,
                                     XL_CONTROLLER_PROPERTY_STATUS)
@@ -2715,20 +2720,34 @@ cdef class Controller:
     def cast(self):
         return self
 
-    def last_button_pressed_time(self, bytes button):
+    def last_button_pressed_time(self, str button):
         """
         Get the absolute last time a given button was pressed. To get the relative
         time (time since press), use aegame.utl.seconds() - last button press time.
         """
-        return (xl_controller_get_last_button_pressed_time(self.controller,
-                xl_controller_button_index_from_short_name(<char*>button)))
+        cdef bytes bt_str
 
-    def last_button_released_time(self, bytes button):
+        if sys.version_info.major > 2:
+            bt_str = <bytes>button.encode('utf-8') # convert utf-8 to bytes
+        else:
+            bt_str = <bytes>button # keep oldschool python 2 button strings
+
+        return (xl_controller_get_last_button_pressed_time(self.controller,
+                xl_controller_button_index_from_short_name(<char*>bt_str)))
+
+    def last_button_released_time(self, str button):
         """
         Get the last absolute time the user let go of a given controller button.
         """
+        cdef bytes bt_str
+
+        if sys.version_info.major > 2:
+            bt_str = <bytes>button.encode('utf-8') # convert utf-8 to bytes
+        else:
+            bt_str = <bytes>button # keep oldschool python 2 button strings
+
         return (xl_controller_get_last_button_released_time(self.controller,
-                xl_controller_button_index_from_short_name(<char*>button)))
+                xl_controller_button_index_from_short_name(<char*>bt_str)))
 
     def clear_history(self):
         """
