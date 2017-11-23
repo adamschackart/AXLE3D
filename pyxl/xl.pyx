@@ -2566,20 +2566,20 @@ cdef class Controller:
             return self._get_button_list(XL_CONTROLLER_PROPERTY_UP_BUTTONS)
 
     property shoulder_tribool:
-        def __get__(self): return xl_controller_get_int(self.controller,
-                                XL_CONTROLLER_PROPERTY_SHOULDER_TRIBOOL)
+        def __get__(self):
+            return xl_controller_get_int(self.controller, XL_CONTROLLER_PROPERTY_SHOULDER_TRIBOOL)
 
     property dpad_horizontal_tribool:
-        def __get__(self): return xl_controller_get_int(self.controller,
-                        XL_CONTROLLER_PROPERTY_DPAD_HORIZONTAL_TRIBOOL)
+        def __get__(self):
+            return xl_controller_get_int(self.controller, XL_CONTROLLER_PROPERTY_DPAD_HORIZONTAL_TRIBOOL)
 
     property dpad_vertical_tribool:
-        def __get__(self): return xl_controller_get_int( self.controller,
-                            XL_CONTROLLER_PROPERTY_DPAD_VERTICAL_TRIBOOL)
+        def __get__(self):
+            return xl_controller_get_int(self.controller, XL_CONTROLLER_PROPERTY_DPAD_VERTICAL_TRIBOOL)
 
     property stick_tribool:
-        def __get__(self): return xl_controller_get_int( self.controller,
-                                    XL_CONTROLLER_PROPERTY_STICK_TRIBOOL)
+        def __get__(self):
+            return xl_controller_get_int(self.controller, XL_CONTROLLER_PROPERTY_STICK_TRIBOOL)
 
     property last_pressed_button:
         """
@@ -2725,13 +2725,29 @@ cdef class Controller:
         xl_controller_clear_history(self.controller); return self
 
     cdef int _button_mask(self, object button):
+        """
+        Internal method to convert a button list (or a single button) to a mask.
+        """
         cdef int mask = 0
 
+        # button names have to be converted to ascii before they can be used
+        cdef bytes s
+
         if isinstance(button, list):
-            for sb in button:
-                mask |= <int>xl_controller_button_bit_from_short_name(<char*>sb)
+            for bn in button:
+                if sys.version_info.major > 2:
+                    s = <bytes>bn.encode('utf-8') # convert utf-8 to ascii str
+                else:
+                    s = <bytes>bn # keep oldschool python 2 ascii bytes string
+
+                mask |= <int>xl_controller_button_bit_from_short_name(<char*>s)
         else:
-            mask |= <int>xl_controller_button_bit_from_short_name(<char*>button)
+            if sys.version_info.major > 2:
+                s = <bytes>button.encode('utf-8') # convert utf-8 to ascii str
+            else:
+                s = <bytes>button # keep oldschool python 2 ascii bytes string
+
+            mask |= <int>xl_controller_button_bit_from_short_name(<char*>s)
 
         return mask
 
