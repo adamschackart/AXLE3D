@@ -2465,6 +2465,10 @@ cdef class Controller:
     cdef xl_controller_t* controller
 
     def __init__(self, size_t reference):
+        """
+        Given a pointer cast to an integer, create a handle to a game controller.
+        Any invalid pointer (such as zero) will safely create a `closed` object.
+        """
         self.controller = <xl_controller_t*>reference
 
     def __repr__(self):
@@ -2530,6 +2534,10 @@ cdef class Controller:
         return objects
 
     property id:
+        """
+        Get the unique integer identifier for this controller. For the actual
+        pointer to the controller object, use the `address()` method instead.
+        """
         def __get__(self):
             return xl_controller_get_int(self.controller, XL_CONTROLLER_PROPERTY_ID)
 
@@ -2618,42 +2626,46 @@ cdef class Controller:
             return xl_controller_get_dbl(self.controller, XL_CONTROLLER_PROPERTY_LEFT_TRIGGER)
 
     property right_deadzone:
-        def __get__(self): return (
-            xl_controller_get_str(self.controller, XL_CONTROLLER_PROPERTY_RIGHT_DEADZONE_MODE),
-            xl_controller_get_dbl(self.controller, XL_CONTROLLER_PROPERTY_RIGHT_DEADZONE_VALUE))
+        def __get__(self):
+            cdef bytes s = xl_controller_get_str(self.controller, XL_CONTROLLER_PROPERTY_RIGHT_DEADZONE_MODE)
+
+            return (s.decode() if sys.version_info.major > 2 else s, # convert ascii string to unicode?
+                    xl_controller_get_dbl(self.controller, XL_CONTROLLER_PROPERTY_RIGHT_DEADZONE_VALUE))
 
         def __set__(self, tuple value):
-            cdef bytes mode = value[0]
+            cdef bytes mode = value[0].encode('utf-8') if sys.version_info.major > 2 else value[0]
 
             xl_controller_set_str(self.controller, XL_CONTROLLER_PROPERTY_RIGHT_DEADZONE_MODE, <char*>mode)
             xl_controller_set_dbl(self.controller, XL_CONTROLLER_PROPERTY_RIGHT_DEADZONE_VALUE, value[1])
 
     property left_deadzone:
-        def __get__(self): return (
-            xl_controller_get_str(self.controller, XL_CONTROLLER_PROPERTY_LEFT_DEADZONE_MODE),
-            xl_controller_get_dbl(self.controller, XL_CONTROLLER_PROPERTY_LEFT_DEADZONE_VALUE))
+        def __get__(self):
+            cdef bytes s = xl_controller_get_str(self.controller, XL_CONTROLLER_PROPERTY_LEFT_DEADZONE_MODE)
+
+            return (s.decode() if sys.version_info.major > 2 else s, # convert ascii string to unicode?
+                    xl_controller_get_dbl(self.controller, XL_CONTROLLER_PROPERTY_LEFT_DEADZONE_VALUE))
 
         def __set__(self, tuple value):
-            cdef bytes mode = value[0]
+            cdef bytes mode = value[0].encode('utf-8') if sys.version_info.major > 2 else value[0]
 
             xl_controller_set_str(self.controller, XL_CONTROLLER_PROPERTY_LEFT_DEADZONE_MODE, <char*>mode)
             xl_controller_set_dbl(self.controller, XL_CONTROLLER_PROPERTY_LEFT_DEADZONE_VALUE, value[1])
 
     property right_stick_angle:
-        def __get__(self): return xl_controller_get_dbl( self.controller,
-                                XL_CONTROLLER_PROPERTY_RIGHT_STICK_ANGLE)
+        def __get__(self):
+            return xl_controller_get_dbl(self.controller, XL_CONTROLLER_PROPERTY_RIGHT_STICK_ANGLE)
 
     property right_stick_magnitude:
-        def __get__(self): return xl_controller_get_dbl( self.controller,
-                            XL_CONTROLLER_PROPERTY_RIGHT_STICK_MAGNITUDE)
+        def __get__(self):
+            return xl_controller_get_dbl(self.controller, XL_CONTROLLER_PROPERTY_RIGHT_STICK_MAGNITUDE)
 
     property left_stick_angle:
-        def __get__(self): return xl_controller_get_dbl(self.controller,
-                                XL_CONTROLLER_PROPERTY_LEFT_STICK_ANGLE)
+        def __get__(self):
+            return xl_controller_get_dbl(self.controller, XL_CONTROLLER_PROPERTY_LEFT_STICK_ANGLE)
 
     property left_stick_magnitude:
-        def __get__(self): return xl_controller_get_dbl(self.controller,
-                            XL_CONTROLLER_PROPERTY_LEFT_STICK_MAGNITUDE)
+        def __get__(self):
+            return xl_controller_get_dbl(self.controller, XL_CONTROLLER_PROPERTY_LEFT_STICK_MAGNITUDE)
 
     property right_stick:
         def __get__(self): return (
