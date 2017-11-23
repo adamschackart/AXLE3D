@@ -2626,6 +2626,9 @@ cdef class Controller:
             return xl_controller_get_dbl(self.controller, XL_CONTROLLER_PROPERTY_LEFT_TRIGGER)
 
     property right_deadzone:
+        """
+        Get/set the right stick deadzone mode and value via a tuple (i.e. ('scaled_radial', 0.2)).
+        """
         def __get__(self):
             cdef bytes s = xl_controller_get_str(self.controller, XL_CONTROLLER_PROPERTY_RIGHT_DEADZONE_MODE)
 
@@ -2639,6 +2642,9 @@ cdef class Controller:
             xl_controller_set_dbl(self.controller, XL_CONTROLLER_PROPERTY_RIGHT_DEADZONE_VALUE, value[1])
 
     property left_deadzone:
+        """
+        Get/set the left stick deadzone mode and value via a tuple (i.e. ('scaled_radial', 0.2)).
+        """
         def __get__(self):
             cdef bytes s = xl_controller_get_str(self.controller, XL_CONTROLLER_PROPERTY_LEFT_DEADZONE_MODE)
 
@@ -2701,6 +2707,11 @@ cdef class Controller:
                                                                     <char*>string)
 
     property name:
+        """
+        Get the string identifier of the controller ("Sony DualShock 4 USB" etc).
+        On the PC implementation, this string is taken from the SDL mapping file,
+        and on consoles this will likely contain the port `self` is plugged into.
+        """
         def __get__(self):
             cdef bytes s = xl_controller_get_str( self.controller,
                                     XL_CONTROLLER_PROPERTY_NAME)
@@ -2709,7 +2720,8 @@ cdef class Controller:
 
     property open:
         """
-        Returns True if the controller is active (currently plugged in).
+        Returns True if the controller is active (currently plugged in). Unlike
+        most objects, the controller cannot be manually closed, only unplugged.
         """
         def __get__(self): return xl_controller_get_int(self.controller,
                                             XL_CONTROLLER_PROPERTY_OPEN)
