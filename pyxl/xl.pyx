@@ -1671,12 +1671,20 @@ cdef class Texture:
         """
         cdef ae_image_error_t error = AE_IMAGE_NO_CODEC # stub default
 
+        # convert ascii error message to unicode (for python 3 only)
+        cdef bytes error_bstring
+
         if not self.open:
             self.texture = xl_texture_load_from_memory_ex(window.window,
                                             <void*>ptr, length, &error)
 
             if error != AE_IMAGE_SUCCESS:
-                raise IOError(ae_image_error_message(error, NULL))
+                error_bstring = ae_image_error_message(error, NULL)
+
+                if sys.version_info.major > 2:
+                    raise IOError(error_bstring.decode())
+                else:
+                    raise IOError(error_bstring)
 
             # convenient way to set some texture attributes inline
             for key, val in kwargs.items(): setattr(self, key, val)
@@ -1690,6 +1698,9 @@ cdef class Texture:
         return self.load_from_memory(window, data.address(), len(data), **kwargs)
 
     def load_from_bytes(self, Window window, bytes data, **kwargs):
+        """
+        Load a texture from a byte string, likely via open(filename, 'rb').read().
+        """
         return self.load_from_memory(window, <size_t>(<char*>data), len(data), **kwargs)
 
     def load(self, Window window, str filename, **kwargs):
@@ -1961,6 +1972,7 @@ cdef class Font:
         Load a TrueType font from a pointer (cast to an integer) and a buffer size.
         """
         if not self.open:
+            # TODO: use xl_font_load_from_memory_ex for exception data
             self.font = xl_font_load_from_memory(window.window,
                                 <void*>ptr, length, point_size)
 

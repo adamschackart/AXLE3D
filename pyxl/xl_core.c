@@ -5064,6 +5064,7 @@ TODO: animation blitting, which will require a blit function with src clipping.
 TODO: linear interpolation between frames; probably have to use a software blit.
 TODO: apply easing method to animation current time across its entire duration?
 TODO: if interpolating within the frame (between frames), use frame ease method?
+TODO: xl_animation_load_from_memory(_ex) for loading animations from pack files.
 NOTE: this is a transliteration of an old system, and has a few... janky spots.
 --------------------------------------------------------------------------------
 */
