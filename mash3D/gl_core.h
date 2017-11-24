@@ -413,6 +413,10 @@ gl_log_internal_state_ex(const char* filename, const char* funcname);
 GL_DECL void GL_CALL gl_enter3D(int w, int h, double FOV, double znear, double zfar);
 GL_DECL void GL_CALL gl_leave3D(void);
 
+// NOTE: when rendering a 2D scene in an XL window using GL textures, one must
+// call this function first, otherwise graphics could be displayed upside-down.
+// this disables XL's resolution-independent renderer until leave2D is called.
+
 GL_DECL void GL_CALL gl_enter2D(int w, int h);
 GL_DECL void GL_CALL gl_leave2D(void);
 
