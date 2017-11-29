@@ -41,6 +41,10 @@ AE_DECL double AE_CALL ae_frame_delta(void);
  */
 static c_inline double ae_time_wave_ex(double time, double rate, double offset)
 {
+    // NOTE: this function was hacked out in a graphing calculator, and seemed
+    // correct, but apparently this is necessary to make rate scale properly...
+    rate = 1.0 / rate;
+
     return -cos(time * ((2.0 * M_PI) / rate) - offset) * 0.5 + 0.5;
 }
 
