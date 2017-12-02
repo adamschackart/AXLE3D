@@ -1135,10 +1135,25 @@ static c_inline xl_keyboard_mod_bit_t // get modifier bitmask from name
     /* TODO: move this call to the implementation file and export it,
      * on account of these standard lib calls that might be replaced.
      */
-    if (!strcmp(name, "shift")) return XL_KEYBOARD_MOD_BIT_SHIFT;
-    if (!strcmp(name, "control")) return XL_KEYBOARD_MOD_BIT_CONTROL;
-    if (!strcmp(name, "alt")) return XL_KEYBOARD_MOD_BIT_ALT;
-    if (!strcmp(name, "gui")) return XL_KEYBOARD_MOD_BIT_GUI;
+    if (!strcmp(name, "shift"))
+    {
+        return (xl_keyboard_mod_bit_t) XL_KEYBOARD_MOD_BIT_SHIFT;
+    }
+
+    if (!strcmp(name, "control"))
+    {
+        return (xl_keyboard_mod_bit_t) XL_KEYBOARD_MOD_BIT_CONTROL;
+    }
+
+    if (!strcmp(name, "alt"))
+    {
+        return (xl_keyboard_mod_bit_t) XL_KEYBOARD_MOD_BIT_ALT;
+    }
+
+    if (!strcmp(name, "gui"))
+    {
+        return (xl_keyboard_mod_bit_t) XL_KEYBOARD_MOD_BIT_GUI;
+    }
 
     return ((xl_keyboard_mod_bit_t)
             AE_IDX2BIT(xl_keyboard_mod_index_from_short_name(name)));
@@ -1327,8 +1342,14 @@ XL_DECL double XL_CALL // get last time a given key was released
 xl_keyboard_get_last_key_released_time(xl_keyboard_t * keyboard,
                                     xl_keyboard_key_index_t key);
 
+/* The input history system is used for things like cheat codes, fighting
+ * game key combos, etc. This function clears the input history, which
+ * avoids repeatedly calling behavior triggered by successful key combos.
+ */
 XL_DECL void XL_CALL xl_keyboard_clear_history(xl_keyboard_t* keyboard);
 
+/* Returns true if the last N key inputs match with given state vectors.
+ */
 XL_DECL int XL_CALL xl_keyboard_check_history( xl_keyboard_t* keyboard,
                 const xl_keyboard_key_bit_t* const masks, size_t count);
 
