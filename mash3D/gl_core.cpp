@@ -54,7 +54,7 @@
 #define GL_OBJECT_COUNT_LIMIT 1024
 
 /* Global sets for each object type, so we can check objects for liveness, plus a
- * bunch of other neat stuff. Renamed due to ae_particle_emitter_set being taken.
+ * bunch of other neat stuff. Renamed due to gl_particle_emitter_set being taken.
  */
 #define N(cap, low) static ae_ptrset_t gl_ ## low ## _lst;
 GL_OBJECT_TYPE_N

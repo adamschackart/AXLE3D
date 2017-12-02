@@ -615,6 +615,106 @@ void xl_sound_close_all(void)
 
 /*
 ================================================================================
+ * ~~ [ keyboard input ] ~~ *
+--------------------------------------------------------------------------------
+*/
+
+void
+xl_keyboard_set_int(xl_keyboard_t* keyboard, xl_keyboard_property_t prop, int value)
+{
+    AE_STUB();
+}
+
+int
+xl_keyboard_get_int(xl_keyboard_t* keyboard, xl_keyboard_property_t prop)
+{
+    AE_STUB(); return 0;
+}
+
+void
+xl_keyboard_set_dbl(xl_keyboard_t* keyboard, xl_keyboard_property_t prop, double value)
+{
+    AE_STUB();
+}
+
+double
+xl_keyboard_get_dbl(xl_keyboard_t* keyboard, xl_keyboard_property_t prop)
+{
+    AE_STUB(); return 0.0;
+}
+
+void
+xl_keyboard_set_str(xl_keyboard_t* keyboard, xl_keyboard_property_t prop, const char* value)
+{
+    AE_STUB();
+}
+
+const char*
+xl_keyboard_get_str(xl_keyboard_t* keyboard, xl_keyboard_property_t prop)
+{
+    AE_STUB(); return "";
+}
+
+void
+xl_keyboard_set_ptr(xl_keyboard_t* keyboard, xl_keyboard_property_t prop, void* value)
+{
+    AE_STUB();
+}
+
+void*
+xl_keyboard_get_ptr(xl_keyboard_t* keyboard, xl_keyboard_property_t prop)
+{
+    AE_STUB(); return NULL;
+}
+
+void xl_keyboard_list_all(xl_keyboard_t** keyboards)
+{
+    AE_STUB();
+}
+
+xl_keyboard_mod_index_t xl_keyboard_mod_index_from_short_name(const char* name)
+{
+    AE_STUB(); return XL_KEYBOARD_MOD_INDEX_COUNT; // XXX: might cause crashes!
+}
+
+xl_keyboard_key_index_t xl_keyboard_key_index_from_short_name(const char* name)
+{
+    AE_STUB(); return XL_KEYBOARD_KEY_INDEX_UNKNOWN;
+}
+
+double xl_keyboard_get_last_key_pressed_time (xl_keyboard_t* keyboard,
+                                        xl_keyboard_key_index_t key)
+{
+    AE_STUB(); return 0.0;
+}
+
+double xl_keyboard_get_last_key_released_time(xl_keyboard_t* keyboard,
+                                        xl_keyboard_key_index_t key)
+{
+    AE_STUB(); return 0.0;
+}
+
+void xl_keyboard_clear_history(xl_keyboard_t* keyboard)
+{
+    AE_STUB();
+}
+
+int xl_keyboard_check_history(xl_keyboard_t* keyboard, // cheat check!!!
+                const xl_keyboard_key_bit_t* const masks, size_t count)
+{
+    AE_STUB(); return 0;
+}
+
+/*
+================================================================================
+ * ~~ [ mouse input ] ~~ *
+--------------------------------------------------------------------------------
+*/
+
+// TODO
+
+/*
+================================================================================
  * ~~ [ controller input ] ~~ *
 --------------------------------------------------------------------------------
 */

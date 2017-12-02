@@ -53,4 +53,5 @@ OOOOO \\,oo8888ooo,,******,o888,
          ?8P?88P
           V''V'
           '  ' '''
-from .xl import *
+from . xl import *
+from . import xl

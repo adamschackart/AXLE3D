@@ -82,6 +82,7 @@ XL_DECL const char* XL_CALL xl_audio_implementation(void);
     N(FONT, font)               \
     N(SOUND, sound)             \
     N(ANIMATION, animation)     \
+    N(KEYBOARD, keyboard)       \
 
 #if 0
 #define N(cap, low) typedef struct xl_internal_ ## low ## _t xl_ ## low ## _t;
@@ -956,6 +957,391 @@ XL_DECL void XL_CALL xl_sound_close_all(void);
 
 /*
 ================================================================================
+ * ~~ [ keyboard input ] ~~ *
+--------------------------------------------------------------------------------
+*/
+
+#define XL_KEYBOARD_PROPERTY_N                                                  \
+                                                                                \
+    /* the total number of active keyboards */                                  \
+    N(XL_KEYBOARD_PROPERTY_TOTAL, int, int, total)                              \
+                                                                                \
+    /* the keyboard's unique integer identifier */                              \
+    N(XL_KEYBOARD_PROPERTY_ID, int, int, id)                                    \
+                                                                                \
+    /* the current state of the keyboard mods and keys */                       \
+    N(XL_KEYBOARD_PROPERTY_DOWN_MODS, int, int, down_mods)                      \
+    N(XL_KEYBOARD_PROPERTY_UP_MODS, int, int, up_mods)                          \
+    N(XL_KEYBOARD_PROPERTY_DOWN_KEYS, void*, ptr, down_keys)                    \
+    N(XL_KEYBOARD_PROPERTY_UP_KEYS, void*, ptr, up_keys)                        \
+                                                                                \
+    /* the last key pressed or released on a given keyboard */                  \
+    N(XL_KEYBOARD_PROPERTY_LAST_PRESSED_KEY, int, int, last_pressed_key)        \
+    N(XL_KEYBOARD_PROPERTY_LAST_RELEASED_KEY, int, int, last_released_key)      \
+                                                                                \
+    /* the last time a supported key was pressed or released on the keyboard */ \
+    N(XL_KEYBOARD_PROPERTY_LAST_PRESSED_TIME, double, dbl, last_pressed_time)   \
+    N(XL_KEYBOARD_PROPERTY_LAST_RELEASED_TIME, double, dbl, last_released_time) \
+                                                                                \
+    /* the current state of the keyboard as a string */                         \
+    N(XL_KEYBOARD_PROPERTY_STATUS, const char*, str, status)                    \
+                                                                                \
+    /* the keyboard's string identifier */                                      \
+    N(XL_KEYBOARD_PROPERTY_NAME, const char*, str, name)                        \
+                                                                                \
+    /* whether or not the keyboard is plugged in */                             \
+    N(XL_KEYBOARD_PROPERTY_OPEN, int, int, open)                                \
+                                                                                \
+    /* the total number of keyboard properties */                               \
+    N(XL_KEYBOARD_PROPERTY_COUNT, int, int, _)                                  \
+
+typedef enum xl_keyboard_property_t
+{
+    #define N(x, t, s, n) x,
+    XL_KEYBOARD_PROPERTY_N
+    #undef N
+} \
+    xl_keyboard_property_t;
+
+static const char* xl_keyboard_property_name[] =
+{
+    #define N(x, t, s, n) #x,
+    XL_KEYBOARD_PROPERTY_N
+    #undef N
+};
+
+static const char* xl_keyboard_property_type[] =
+{
+    #define N(x, t, s, n) #s,
+    XL_KEYBOARD_PROPERTY_N
+    #undef N
+};
+
+XL_DECL void XL_CALL
+xl_keyboard_set_int(xl_keyboard_t* kbd, xl_keyboard_property_t prop, int value);
+
+XL_DECL int XL_CALL
+xl_keyboard_get_int(xl_keyboard_t* kbd, xl_keyboard_property_t prop);
+
+XL_DECL void XL_CALL
+xl_keyboard_set_dbl(xl_keyboard_t* kbd, xl_keyboard_property_t prop, double value);
+
+XL_DECL double XL_CALL
+xl_keyboard_get_dbl(xl_keyboard_t* kbd, xl_keyboard_property_t prop);
+
+XL_DECL void XL_CALL
+xl_keyboard_set_str(xl_keyboard_t* kbd, xl_keyboard_property_t prop, const char* value);
+
+XL_DECL const char* XL_CALL
+xl_keyboard_get_str(xl_keyboard_t* kbd, xl_keyboard_property_t prop);
+
+XL_DECL void XL_CALL
+xl_keyboard_set_ptr(xl_keyboard_t* kbd, xl_keyboard_property_t prop, void* value);
+
+XL_DECL void* XL_CALL
+xl_keyboard_get_ptr(xl_keyboard_t* kbd, xl_keyboard_property_t prop);
+
+/* Make shorthand wrappers so we don't have to type SUPER_GIGANTIC_ENUM_NAMES in C code.
+ * xl_keyboard_get_str(kbd, XL_KEYBOARD_PROPERTY_STATUS) = xl_keyboard_get_status(kbd).
+ */
+#define N(x, type, short_type, name)                                            \
+                                                                                \
+    static c_inline void xl_keyboard_set_ ## name (xl_keyboard_t* c, type val)  \
+    {                                                                           \
+        xl_keyboard_set_ ## short_type (c, x, val);                             \
+    }                                                                           \
+                                                                                \
+    static c_inline type xl_keyboard_get_ ## name (xl_keyboard_t* keyboard)     \
+    {                                                                           \
+        return xl_keyboard_get_ ## short_type (keyboard, x);                    \
+    }                                                                           \
+
+XL_KEYBOARD_PROPERTY_N
+#undef N
+
+static c_inline size_t xl_keyboard_count_all(void)
+{
+    return (size_t)xl_keyboard_get_total(NULL);
+}
+
+XL_DECL void XL_CALL xl_keyboard_list_all(xl_keyboard_t** keyboards);
+
+/* ===== [ modifiers and keys ] ============================================= */
+
+#define XL_KEYBOARD_MOD_N                   \
+                                            \
+    N(LEFT_SHIFT,       left_shift,     0 ) \
+    N(RIGHT_SHIFT,      right_shift,    1 ) \
+    N(LEFT_CONTROL,     left_control,   2 ) \
+    N(RIGHT_CONTROL,    right_control,  3 ) \
+    N(LEFT_ALT,         left_alt,       4 ) \
+    N(RIGHT_ALT,        right_alt,      5 ) \
+    N(LEFT_GUI,         left_gui,       6 ) \
+    N(RIGHT_GUI,        right_gui,      7 ) \
+    N(NUMLOCK,          numlock,        8 ) \
+    N(CAPSLOCK,         capslock,       9 ) \
+    N(COUNT,            _,              10) \
+
+typedef enum xl_keyboard_mod_index_t
+{
+    #define N(cap, low, val) XL_KEYBOARD_MOD_INDEX_ ## cap,
+    XL_KEYBOARD_MOD_N
+    #undef N
+} \
+    xl_keyboard_mod_index_t;
+
+static const char* xl_keyboard_mod_index_name[] =
+{
+    #define N(cap, low, val) AE_STRINGIFY(XL_KEYBOARD_MOD_INDEX_ ## cap),
+    XL_KEYBOARD_MOD_N
+    #undef N
+};
+
+static const char* xl_keyboard_mod_short_name[] =
+{
+    #define N(cap, low, val) #low,
+    XL_KEYBOARD_MOD_N
+    #undef N
+};
+
+typedef enum xl_keyboard_mod_bit_t
+{
+    #define N(cap, low, val) XL_KEYBOARD_MOD_BIT_ ## cap = AE_IDX2BIT(val),
+    XL_KEYBOARD_MOD_N
+    #undef N
+} \
+    xl_keyboard_mod_bit_t;
+
+#define XL_KEYBOARD_MOD_BIT_NONE 0 /* no modifier key is tested for */
+
+#define XL_KEYBOARD_MOD_BIT_SHIFT /* test for either shift key */ \
+    (XL_KEYBOARD_MOD_BIT_LEFT_SHIFT | XL_KEYBOARD_MOD_BIT_RIGHT_SHIFT)
+
+#define XL_KEYBOARD_MOD_BIT_CONTROL /* test for either control key */ \
+    (XL_KEYBOARD_MOD_BIT_LEFT_CONTROL | XL_KEYBOARD_MOD_BIT_RIGHT_CONTROL)
+
+#define XL_KEYBOARD_MOD_BIT_ALT /* test for either alt key */ \
+    (XL_KEYBOARD_MOD_BIT_LEFT_ALT | XL_KEYBOARD_MOD_BIT_RIGHT_ALT)
+
+#define XL_KEYBOARD_MOD_BIT_GUI /* test for either gui key */ \
+    (XL_KEYBOARD_MOD_BIT_LEFT_GUI | XL_KEYBOARD_MOD_BIT_RIGHT_GUI)
+
+XL_DECL xl_keyboard_mod_index_t XL_CALL // get modifier from name
+        xl_keyboard_mod_index_from_short_name(const char * name);
+
+static c_inline xl_keyboard_mod_bit_t // get modifier bitmask from name
+                xl_keyboard_mod_bit_from_short_name(const char * name)
+{
+    /* TODO: move this call to the implementation file and export it,
+     * on account of these standard lib calls that might be replaced.
+     */
+    if (!strcmp(name, "shift")) return XL_KEYBOARD_MOD_BIT_SHIFT;
+    if (!strcmp(name, "control")) return XL_KEYBOARD_MOD_BIT_CONTROL;
+    if (!strcmp(name, "alt")) return XL_KEYBOARD_MOD_BIT_ALT;
+    if (!strcmp(name, "gui")) return XL_KEYBOARD_MOD_BIT_GUI;
+
+    return ((xl_keyboard_mod_bit_t)
+            AE_IDX2BIT(xl_keyboard_mod_index_from_short_name(name)));
+}
+
+static c_inline int
+xl_keyboard_mod_is_down(xl_keyboard_t* k, xl_keyboard_mod_index_t i)
+{
+    return (xl_keyboard_get_down_mods(k) & AE_IDX2BIT(i)) != 0;
+}
+
+static c_inline int
+xl_keyboard_mod_is_up(xl_keyboard_t* k, xl_keyboard_mod_index_t i)
+{
+    return !xl_keyboard_mod_is_down(k, i);
+}
+
+#define XL_KEYBOARD_KEY_N               \
+                                        \
+    /* unsupported key (browser etc) */ \
+    N(UNKNOWN,          unknown)        \
+                                        \
+    N(A,                a)              \
+    N(B,                b)              \
+    N(C,                c)              \
+    N(D,                d)              \
+    N(E,                e)              \
+    N(F,                f)              \
+    N(G,                g)              \
+    N(H,                h)              \
+    N(I,                i)              \
+    N(J,                j)              \
+    N(K,                k)              \
+    N(L,                l)              \
+    N(M,                m)              \
+    N(N,                n)              \
+    N(O,                o)              \
+    N(P,                p)              \
+    N(Q,                q)              \
+    N(R,                r)              \
+    N(S,                s)              \
+    N(T,                t)              \
+    N(U,                u)              \
+    N(V,                v)              \
+    N(W,                w)              \
+    N(X,                x)              \
+    N(Y,                y)              \
+    N(Z,                z)              \
+                                        \
+    N(1,                1)              \
+    N(2,                2)              \
+    N(3,                3)              \
+    N(4,                4)              \
+    N(5,                5)              \
+    N(6,                6)              \
+    N(7,                7)              \
+    N(8,                8)              \
+    N(9,                9)              \
+    N(0,                0)              \
+                                        \
+    N(RETURN,           return)         \
+    N(ESCAPE,           escape)         \
+    N(BACKSPACE,        backspace)      \
+    N(TAB,              tab)            \
+    N(SPACE,            space)          \
+    N(MINUS,            minus)          \
+    N(EQUALS,           equals)         \
+    N(LEFT_BRACKET,     left_bracket)   \
+    N(RIGHT_BRACKET,    right_bracket)  \
+    N(BACKSLASH,        backslash)      \
+    N(SEMICOLON,        semicolon)      \
+    N(APOSTROPHE,       apostrophe)     \
+    N(GRAVE,            grave)          \
+    N(COMMA,            comma)          \
+    N(PERIOD,           period)         \
+    N(SLASH,            slash)          \
+                                        \
+    N(F1,               f1)             \
+    N(F2,               f2)             \
+    N(F3,               f3)             \
+    N(F4,               f4)             \
+    N(F5,               f5)             \
+    N(F6,               f6)             \
+    N(F7,               f7)             \
+    N(F8,               f8)             \
+    N(F9,               f9)             \
+    N(F10,              f10)            \
+    N(F11,              f11)            \
+    N(F12,              f12)            \
+                                        \
+    N(PRINT_SCREEN,     print_screen)   \
+    N(SCROLL_LOCK,      scroll_lock)    \
+    N(PAUSE,            pause)          \
+                                        \
+    /* `help` on some mac keyboards */  \
+    N(INSERT,           insert)         \
+    N(DELETE,           delete)         \
+    N(HOME,             home)           \
+    N(PAGE_UP,          page_up)        \
+    N(PAGE_DOWN,        page_down)      \
+    N(END,              end)            \
+                                        \
+    N(RIGHT,            right)          \
+    N(LEFT,             left)           \
+    N(DOWN,             down)           \
+    N(UP,               up)             \
+                                        \
+    N(KP_DIVIDE,        kp_divide)      \
+    N(KP_MULTIPLY,      kp_multiply)    \
+    N(KP_MINUS,         kp_minus)       \
+    N(KP_PLUS,          kp_plus)        \
+    N(KP_ENTER,         kp_enter)       \
+    N(KP_PERIOD,        kp_period)      \
+                                        \
+    N(KP_1,             kp_1)           \
+    N(KP_2,             kp_2)           \
+    N(KP_3,             kp_3)           \
+    N(KP_4,             kp_4)           \
+    N(KP_5,             kp_5)           \
+    N(KP_6,             kp_6)           \
+    N(KP_7,             kp_7)           \
+    N(KP_8,             kp_8)           \
+    N(KP_9,             kp_9)           \
+    N(KP_0,             kp_0)           \
+                                        \
+    N(LEFT_SHIFT,       left_shift)     \
+    N(RIGHT_SHIFT,      right_shift)    \
+    N(LEFT_CONTROL,     left_control)   \
+    N(RIGHT_CONTROL,    right_control)  \
+    N(LEFT_ALT,         left_alt)       \
+    N(RIGHT_ALT,        right_alt)      \
+    N(LEFT_GUI,         left_gui)       \
+    N(RIGHT_GUI,        right_gui)      \
+                                        \
+    /* `clear` on some mac keyboards */ \
+    N(NUMLOCK,          numlock)        \
+    N(CAPSLOCK,         capslock)       \
+                                        \
+    N(COUNT,            _)              \
+
+typedef enum xl_keyboard_key_index_t
+{
+    #define N(cap, low) XL_KEYBOARD_KEY_INDEX_ ## cap,
+    XL_KEYBOARD_KEY_N
+    #undef N
+} \
+    xl_keyboard_key_index_t;
+
+static const char* xl_keyboard_key_index_name[] =
+{
+    #define N(cap, low) AE_STRINGIFY(XL_KEYBOARD_KEY_INDEX_ ## cap),
+    XL_KEYBOARD_KEY_N
+    #undef N
+};
+
+static const char* xl_keyboard_key_short_name[] =
+{
+    #define N(cap, low) #low,
+    XL_KEYBOARD_KEY_N
+    #undef N
+};
+
+typedef u8 // we can't fit all keys into a 32-bit int, so we use a key bit vector
+xl_keyboard_key_bit_t[(XL_KEYBOARD_KEY_INDEX_COUNT + (CHAR_BIT - 1)) / CHAR_BIT];
+
+XL_DECL xl_keyboard_key_index_t XL_CALL // get keycode from name
+        xl_keyboard_key_index_from_short_name(const char* name);
+
+static c_inline int
+xl_keyboard_key_is_down(xl_keyboard_t* k, xl_keyboard_key_index_t i)
+{
+    return ae_bitvector_get((u8*)xl_keyboard_get_down_keys(k), i);
+}
+
+static c_inline int
+xl_keyboard_key_is_up(xl_keyboard_t* k, xl_keyboard_key_index_t i)
+{
+    return !xl_keyboard_key_is_down(k, i);
+}
+
+XL_DECL double XL_CALL // get last time a given key was pressed
+xl_keyboard_get_last_key_pressed_time (xl_keyboard_t * keyboard,
+                                    xl_keyboard_key_index_t key);
+
+XL_DECL double XL_CALL // get last time a given key was released
+xl_keyboard_get_last_key_released_time(xl_keyboard_t * keyboard,
+                                    xl_keyboard_key_index_t key);
+
+XL_DECL void XL_CALL xl_keyboard_clear_history(xl_keyboard_t* keyboard);
+
+XL_DECL int XL_CALL xl_keyboard_check_history( xl_keyboard_t* keyboard,
+                const xl_keyboard_key_bit_t* const masks, size_t count);
+
+/*
+================================================================================
+ * ~~ [ mouse input ] ~~ *
+--------------------------------------------------------------------------------
+*/
+
+// TODO
+
+/*
+================================================================================
  * ~~ [ controller input ] ~~ *
 --------------------------------------------------------------------------------
 */
@@ -1515,6 +1901,14 @@ XL_DECL void XL_CALL xl_animation_close_all(void);
                                                                                     \
     /* an animation has finished playing back */                                    \
     N(XL_EVENT_ANIMATION_FINISHED, animation_finished, xl_animation_t* animation;)  \
+                                                                                    \
+    /* the user plugged in or unplugged a recognized and valid keyboard */          \
+    N(XL_EVENT_KEYBOARD_INSERT, keyboard_insert, xl_keyboard_t* keyboard;)          \
+    N(XL_EVENT_KEYBOARD_REMOVE, keyboard_remove, xl_keyboard_t* keyboard;)          \
+                                                                                    \
+    /* the user hit a key on an active plugged-in keyboard device or released it */ \
+    N(XL_EVENT_KEYBOARD_KEY, keyboard_key, xl_keyboard_t * keyboard;                \
+            xl_keyboard_mod_bit_t mods; xl_keyboard_key_index_t key; int pressed;)  \
                                                                                     \
     /* the user plugged in or unplugged a recognized and valid game controller */   \
     N(XL_EVENT_CONTROLLER_INSERT, controller_insert, xl_controller_t* controller;)  \

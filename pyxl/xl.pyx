@@ -2,6 +2,8 @@
 # Copyright (c) 2012-2017 Adam Schackart / "AJ Hackman", all rights reserved.
 # Distributed under the BSD license v2 (opensource.org/licenses/BSD-3-Clause)
 # ------------------------------------------------------------------------------
+# TODO: return button/key lists as sets where possible, as order doesn't matter
+# ------------------------------------------------------------------------------
 from aegame.utl cimport *
 from aegame.vec cimport *
 from aegame.lin cimport *
@@ -40,6 +42,7 @@ cdef extern from "xl_core.h":
     ctypedef void xl_font_t
     ctypedef void xl_sound_t
     ctypedef void xl_animation_t
+    ctypedef void xl_keyboard_t
 
     ctypedef enum xl_object_type_t:
         XL_OBJECT_TYPE_UNKNOWN
@@ -49,6 +52,7 @@ cdef extern from "xl_core.h":
         XL_OBJECT_TYPE_FONT
         XL_OBJECT_TYPE_SOUND
         XL_OBJECT_TYPE_ANIMATION
+        XL_OBJECT_TYPE_KEYBOARD
         XL_OBJECT_TYPE_COUNT
 
     xl_object_type_t xl_object_type(void *)
@@ -379,6 +383,222 @@ cdef extern from "xl_core.h":
     void xl_sound_close_all()
 
     # ==========================================================================
+    # ~ [ keyboard input ]
+    # ==========================================================================
+
+    ctypedef enum xl_keyboard_property_t:
+        XL_KEYBOARD_PROPERTY_TOTAL
+        XL_KEYBOARD_PROPERTY_ID
+        XL_KEYBOARD_PROPERTY_DOWN_MODS
+        XL_KEYBOARD_PROPERTY_UP_MODS
+        XL_KEYBOARD_PROPERTY_DOWN_KEYS
+        XL_KEYBOARD_PROPERTY_UP_KEYS
+        XL_KEYBOARD_PROPERTY_LAST_PRESSED_KEY
+        XL_KEYBOARD_PROPERTY_LAST_RELEASED_KEY
+        XL_KEYBOARD_PROPERTY_LAST_PRESSED_TIME
+        XL_KEYBOARD_PROPERTY_LAST_RELEASED_TIME
+        XL_KEYBOARD_PROPERTY_STATUS
+        XL_KEYBOARD_PROPERTY_NAME
+        XL_KEYBOARD_PROPERTY_OPEN
+        XL_KEYBOARD_PROPERTY_COUNT
+
+    const char* xl_keyboard_property_name[]
+    const char* xl_keyboard_property_type[]
+
+    void xl_keyboard_set_int(xl_keyboard_t* keyboard, xl_keyboard_property_t prop, int val)
+    int xl_keyboard_get_int(xl_keyboard_t* keyboard, xl_keyboard_property_t prop) # integer
+
+    void xl_keyboard_set_dbl(xl_keyboard_t* keyboard, xl_keyboard_property_t prop, double val)
+    double xl_keyboard_get_dbl(xl_keyboard_t* keyboard, xl_keyboard_property_t prop) # double
+
+    void xl_keyboard_set_str(xl_keyboard_t* keyboard, xl_keyboard_property_t prop, const char* val)
+    const char* xl_keyboard_get_str(xl_keyboard_t* keyboard, xl_keyboard_property_t prop) # string
+
+    void xl_keyboard_set_ptr(xl_keyboard_t* keyboard, xl_keyboard_property_t prop, void* val)
+    void* xl_keyboard_get_ptr(xl_keyboard_t* keyboard, xl_keyboard_property_t prop) # pointer
+
+    size_t xl_keyboard_count_all()
+    void xl_keyboard_list_all(xl_keyboard_t** keyboards)
+
+    # ===== [ modifiers and keys ] =============================================
+
+    ctypedef enum xl_keyboard_mod_index_t:
+        XL_KEYBOARD_MOD_INDEX_LEFT_SHIFT
+        XL_KEYBOARD_MOD_INDEX_RIGHT_SHIFT
+        XL_KEYBOARD_MOD_INDEX_LEFT_CONTROL
+        XL_KEYBOARD_MOD_INDEX_RIGHT_CONTROL
+        XL_KEYBOARD_MOD_INDEX_LEFT_ALT
+        XL_KEYBOARD_MOD_INDEX_RIGHT_ALT
+        XL_KEYBOARD_MOD_INDEX_LEFT_GUI
+        XL_KEYBOARD_MOD_INDEX_RIGHT_GUI
+        XL_KEYBOARD_MOD_INDEX_NUMLOCK
+        XL_KEYBOARD_MOD_INDEX_CAPSLOCK
+        XL_KEYBOARD_MOD_INDEX_COUNT
+
+    const char* xl_keyboard_mod_index_name[]
+    const char* xl_keyboard_mod_short_name[]
+
+    ctypedef enum xl_keyboard_mod_bit_t:
+        XL_KEYBOARD_MOD_BIT_LEFT_SHIFT
+        XL_KEYBOARD_MOD_BIT_RIGHT_SHIFT
+        XL_KEYBOARD_MOD_BIT_SHIFT
+        XL_KEYBOARD_MOD_BIT_LEFT_CONTROL
+        XL_KEYBOARD_MOD_BIT_RIGHT_CONTROL
+        XL_KEYBOARD_MOD_BIT_CONTROL
+        XL_KEYBOARD_MOD_BIT_LEFT_ALT
+        XL_KEYBOARD_MOD_BIT_RIGHT_ALT
+        XL_KEYBOARD_MOD_BIT_ALT
+        XL_KEYBOARD_MOD_BIT_LEFT_GUI
+        XL_KEYBOARD_MOD_BIT_RIGHT_GUI
+        XL_KEYBOARD_MOD_BIT_GUI
+        XL_KEYBOARD_MOD_BIT_NUMLOCK
+        XL_KEYBOARD_MOD_BIT_CAPSLOCK
+
+    xl_keyboard_mod_index_t \
+    xl_keyboard_mod_index_from_short_name(const char* name)
+
+    xl_keyboard_mod_bit_t \
+    xl_keyboard_mod_bit_from_short_name(const char* name)
+
+    int xl_keyboard_mod_is_down(xl_keyboard_t*, xl_keyboard_mod_index_t)
+    int xl_keyboard_mod_is_up(xl_keyboard_t*, xl_keyboard_mod_index_t)
+
+    ctypedef enum xl_keyboard_key_index_t:
+        XL_KEYBOARD_KEY_INDEX_A
+        XL_KEYBOARD_KEY_INDEX_B
+        XL_KEYBOARD_KEY_INDEX_C
+        XL_KEYBOARD_KEY_INDEX_D
+        XL_KEYBOARD_KEY_INDEX_E
+        XL_KEYBOARD_KEY_INDEX_F
+        XL_KEYBOARD_KEY_INDEX_G
+        XL_KEYBOARD_KEY_INDEX_H
+        XL_KEYBOARD_KEY_INDEX_I
+        XL_KEYBOARD_KEY_INDEX_J
+        XL_KEYBOARD_KEY_INDEX_K
+        XL_KEYBOARD_KEY_INDEX_L
+        XL_KEYBOARD_KEY_INDEX_M
+        XL_KEYBOARD_KEY_INDEX_N
+        XL_KEYBOARD_KEY_INDEX_O
+        XL_KEYBOARD_KEY_INDEX_P
+        XL_KEYBOARD_KEY_INDEX_Q
+        XL_KEYBOARD_KEY_INDEX_R
+        XL_KEYBOARD_KEY_INDEX_S
+        XL_KEYBOARD_KEY_INDEX_T
+        XL_KEYBOARD_KEY_INDEX_U
+        XL_KEYBOARD_KEY_INDEX_V
+        XL_KEYBOARD_KEY_INDEX_W
+        XL_KEYBOARD_KEY_INDEX_X
+        XL_KEYBOARD_KEY_INDEX_Y
+        XL_KEYBOARD_KEY_INDEX_Z
+        XL_KEYBOARD_KEY_INDEX_1
+        XL_KEYBOARD_KEY_INDEX_2
+        XL_KEYBOARD_KEY_INDEX_3
+        XL_KEYBOARD_KEY_INDEX_4
+        XL_KEYBOARD_KEY_INDEX_5
+        XL_KEYBOARD_KEY_INDEX_6
+        XL_KEYBOARD_KEY_INDEX_7
+        XL_KEYBOARD_KEY_INDEX_8
+        XL_KEYBOARD_KEY_INDEX_9
+        XL_KEYBOARD_KEY_INDEX_0
+        XL_KEYBOARD_KEY_INDEX_RETURN
+        XL_KEYBOARD_KEY_INDEX_ESCAPE
+        XL_KEYBOARD_KEY_INDEX_BACKSPACE
+        XL_KEYBOARD_KEY_INDEX_TAB
+        XL_KEYBOARD_KEY_INDEX_SPACE
+        XL_KEYBOARD_KEY_INDEX_MINUS
+        XL_KEYBOARD_KEY_INDEX_EQUALS
+        XL_KEYBOARD_KEY_INDEX_LEFT_BRACKET
+        XL_KEYBOARD_KEY_INDEX_RIGHT_BRACKET
+        XL_KEYBOARD_KEY_INDEX_BACKSLASH
+        XL_KEYBOARD_KEY_INDEX_SEMICOLON
+        XL_KEYBOARD_KEY_INDEX_APOSTROPHE
+        XL_KEYBOARD_KEY_INDEX_GRAVE
+        XL_KEYBOARD_KEY_INDEX_COMMA
+        XL_KEYBOARD_KEY_INDEX_PERIOD
+        XL_KEYBOARD_KEY_INDEX_SLASH
+        XL_KEYBOARD_KEY_INDEX_F1
+        XL_KEYBOARD_KEY_INDEX_F2
+        XL_KEYBOARD_KEY_INDEX_F3
+        XL_KEYBOARD_KEY_INDEX_F4
+        XL_KEYBOARD_KEY_INDEX_F5
+        XL_KEYBOARD_KEY_INDEX_F6
+        XL_KEYBOARD_KEY_INDEX_F7
+        XL_KEYBOARD_KEY_INDEX_F8
+        XL_KEYBOARD_KEY_INDEX_F9
+        XL_KEYBOARD_KEY_INDEX_F10
+        XL_KEYBOARD_KEY_INDEX_F11
+        XL_KEYBOARD_KEY_INDEX_F12
+        XL_KEYBOARD_KEY_INDEX_PRINT_SCREEN
+        XL_KEYBOARD_KEY_INDEX_SCROLL_LOCK
+        XL_KEYBOARD_KEY_INDEX_PAUSE
+        XL_KEYBOARD_KEY_INDEX_INSERT
+        XL_KEYBOARD_KEY_INDEX_DELETE
+        XL_KEYBOARD_KEY_INDEX_HOME
+        XL_KEYBOARD_KEY_INDEX_PAGE_UP
+        XL_KEYBOARD_KEY_INDEX_PAGE_DOWN
+        XL_KEYBOARD_KEY_INDEX_END
+        XL_KEYBOARD_KEY_INDEX_RIGHT
+        XL_KEYBOARD_KEY_INDEX_LEFT
+        XL_KEYBOARD_KEY_INDEX_DOWN
+        XL_KEYBOARD_KEY_INDEX_UP
+        XL_KEYBOARD_KEY_INDEX_KP_DIVIDE
+        XL_KEYBOARD_KEY_INDEX_KP_MULTIPLY
+        XL_KEYBOARD_KEY_INDEX_KP_MINUS
+        XL_KEYBOARD_KEY_INDEX_KP_PLUS
+        XL_KEYBOARD_KEY_INDEX_KP_ENTER
+        XL_KEYBOARD_KEY_INDEX_KP_PERIOD
+        XL_KEYBOARD_KEY_INDEX_KP_1
+        XL_KEYBOARD_KEY_INDEX_KP_2
+        XL_KEYBOARD_KEY_INDEX_KP_3
+        XL_KEYBOARD_KEY_INDEX_KP_4
+        XL_KEYBOARD_KEY_INDEX_KP_5
+        XL_KEYBOARD_KEY_INDEX_KP_6
+        XL_KEYBOARD_KEY_INDEX_KP_7
+        XL_KEYBOARD_KEY_INDEX_KP_8
+        XL_KEYBOARD_KEY_INDEX_KP_9
+        XL_KEYBOARD_KEY_INDEX_KP_0
+        XL_KEYBOARD_KEY_INDEX_LEFT_SHIFT
+        XL_KEYBOARD_KEY_INDEX_RIGHT_SHIFT
+        XL_KEYBOARD_KEY_INDEX_LEFT_CONTROL
+        XL_KEYBOARD_KEY_INDEX_RIGHT_CONTROL
+        XL_KEYBOARD_KEY_INDEX_LEFT_ALT
+        XL_KEYBOARD_KEY_INDEX_RIGHT_ALT
+        XL_KEYBOARD_KEY_INDEX_LEFT_GUI
+        XL_KEYBOARD_KEY_INDEX_RIGHT_GUI
+        XL_KEYBOARD_KEY_INDEX_NUMLOCK
+        XL_KEYBOARD_KEY_INDEX_CAPSLOCK
+        XL_KEYBOARD_KEY_INDEX_COUNT
+
+    const char* xl_keyboard_key_index_name[]
+    const char* xl_keyboard_key_short_name[]
+
+    # we can't fit all keys into a 32-bit bitmask, so we use a key bitvector
+    ctypedef u8 xl_keyboard_key_bit_t[(XL_KEYBOARD_KEY_INDEX_COUNT + 7) / 8]
+
+    xl_keyboard_key_index_t \
+    xl_keyboard_key_index_from_short_name(const char* name)
+
+    int xl_keyboard_key_is_down(xl_keyboard_t*, xl_keyboard_key_index_t)
+    int xl_keyboard_key_is_up(xl_keyboard_t*, xl_keyboard_key_index_t)
+
+    double xl_keyboard_get_last_key_pressed_time (xl_keyboard_t* keyboard,
+                                            xl_keyboard_key_index_t key)
+
+    double xl_keyboard_get_last_key_released_time(xl_keyboard_t* keyboard,
+                                            xl_keyboard_key_index_t key)
+
+    void xl_keyboard_clear_history(xl_keyboard_t* keyboard)
+
+    int xl_keyboard_check_history(xl_keyboard_t* keyboard, # check for combo
+                    const xl_keyboard_key_bit_t* const masks, size_t count)
+
+    # ==========================================================================
+    # ~ [ mouse input ]
+    # ==========================================================================
+
+    # TODO
+
+    # ==========================================================================
     # ~ [ controller input ]
     # ==========================================================================
 
@@ -598,6 +818,9 @@ cdef extern from "xl_core.h":
         XL_EVENT_MUSIC_FINISHED
         XL_EVENT_SOUND_FINISHED
         XL_EVENT_ANIMATION_FINISHED
+        XL_EVENT_KEYBOARD_INSERT
+        XL_EVENT_KEYBOARD_REMOVE
+        XL_EVENT_KEYBOARD_KEY
         XL_EVENT_CONTROLLER_INSERT
         XL_EVENT_CONTROLLER_REMOVE
         XL_EVENT_CONTROLLER_BUTTON
@@ -629,6 +852,15 @@ cdef extern from "xl_core.h":
 
     ctypedef struct _xl_animation_event_t:
         xl_animation_t* animation
+
+    ctypedef struct _xl_keyboard_event_t:
+        xl_keyboard_t* keyboard
+
+    ctypedef struct _xl_keyboard_key_event_t:
+        xl_keyboard_t* keyboard
+        xl_keyboard_mod_bit_t mods
+        xl_keyboard_key_index_t key
+        int pressed
 
     ctypedef struct _xl_controller_event_t:
         xl_controller_t* controller
@@ -665,6 +897,9 @@ cdef extern from "xl_core.h":
         _xl_window_event_t                      as_window_mouse_leave
         _xl_sound_event_t                       as_sound_finished
         _xl_animation_event_t                   as_animation_finished
+        _xl_keyboard_event_t                    as_keyboard_insert
+        _xl_keyboard_event_t                    as_keyboard_remove
+        _xl_keyboard_key_event_t                as_keyboard_key
         _xl_controller_event_t                  as_controller_insert
         _xl_controller_event_t                  as_controller_remove
         _xl_controller_button_event_t           as_controller_button
@@ -802,9 +1037,9 @@ cdef class Object:
 
         # XXX: is there a way to detect version num without calling python?
         if sys.version_info.major > 2:
-            nstr = name.decode()
+            nstr = name.decode() # convert ascii type name to UTF for py3k
         else:
-            nstr = <str>name
+            nstr = <str>name # keep the oldschool byte string for python 2
 
         return globals()[nstr.replace('_', ' ').title().replace(' ', '')] \
                                             (reference = <size_t>self.ptr)
@@ -2464,6 +2699,314 @@ cdef class Sound:
     def stop_all(): xl_sound_stop(NULL)
 
 # ==============================================================================
+# ~ [ keyboard input ]
+# ==============================================================================
+
+cdef class Keyboard:
+    """
+    Interface to a standard keyboard for press/release and text editing events.
+    """
+    cdef xl_keyboard_t* keyboard
+
+    def __init__(self, size_t reference=0):
+        """
+        Create a keyboard object with a pre-existing pointer. As keyboards are
+        input devices, they cannot be manually created (only in plugin events).
+        """
+        self.keyboard = <xl_keyboard_t*>reference
+
+    def __repr__(self):
+        return "{}({})".format(self.__class__.__name__, self.status)
+
+    def __hash__(self):
+        return hash(self.address())
+
+    def __richcmp__(self, Keyboard other, int op):
+        if   op == 0: return self.address() <  other.address()
+        elif op == 1: return self.address() <= other.address()
+        elif op == 2: return self.address() == other.address()
+        elif op == 3: return self.address() != other.address()
+        elif op == 4: return self.address() >  other.address()
+        elif op == 5: return self.address() >= other.address()
+
+        else: assert 0
+
+    def __nonzero__(self):
+        return xl_keyboard_get_int(self.keyboard, XL_KEYBOARD_PROPERTY_OPEN)
+
+    def __reduce__(self):
+        raise TypeError('cannot pickle {}'.format(self))
+
+    def __copy__(self):
+        raise TypeError('cannot copy {}'.format(self))
+
+    def __call__(self, str key):
+        """
+        Check if a given key is currently being pressed on this keyboard.
+        """
+        cdef bytes k_str
+
+        # TODO: for performance reasons, use the C api for this convenience
+
+        if key == 'shift': return self('left_shift') or self('right_shift')
+        if key == 'control': return self('left_control') or self('right_control')
+        if key == 'alt': return self('left_alt') or self('right_alt')
+        if key == 'gui': return self('left_gui') or self('right_gui')
+
+        # convert the potentially unicode key string to bytes if necessary
+        if sys.version_info.major > 2:
+            k_str = <bytes>key.encode('utf-8')
+        else:
+            k_str = <bytes>key
+
+        return bool(xl_keyboard_key_is_down(self.keyboard, # magic casting
+                    xl_keyboard_key_index_from_short_name(<char *>k_str)))
+
+    @staticmethod
+    def count_all(): return xl_keyboard_count_all()
+
+    @classmethod
+    def list_all(cls):
+        """
+        Gather references to all open, active, valid keyboards in a single list.
+        """
+        cdef xl_keyboard_t* keyboards[4096]
+        cdef int i
+        cdef list objects = []
+
+        if xl_keyboard_count_all() > 4096:
+            raise MemoryError("too many open keyboards for temp")
+
+        xl_keyboard_list_all(keyboards)
+
+        for i in range(<int>xl_keyboard_count_all()):
+            objects.append(cls(reference = <size_t>keyboards[i]))
+
+        return objects
+
+    property id:
+        def __get__(self):
+            return xl_keyboard_get_int(self.keyboard, XL_KEYBOARD_PROPERTY_ID)
+
+    property down_mods:
+        def __get__(self):
+            return self._mod_list(xl_keyboard_get_int(self.keyboard, XL_KEYBOARD_PROPERTY_DOWN_MODS))
+
+    property up_mods:
+        def __get__(self):
+            return self._mod_list(xl_keyboard_get_int(self.keyboard, XL_KEYBOARD_PROPERTY_UP_MODS))
+
+    property down_keys:
+        def __get__(self):
+            return self._key_list(<size_t>xl_keyboard_get_ptr(self.keyboard, XL_KEYBOARD_PROPERTY_DOWN_KEYS))
+
+    property up_keys:
+        def __get__(self):
+            return self._key_list(<size_t>xl_keyboard_get_ptr(self.keyboard, XL_KEYBOARD_PROPERTY_UP_KEYS))
+
+    property last_pressed_key:
+        def __get__(self):
+            cdef bytes s = xl_keyboard_get_str(self.keyboard, XL_KEYBOARD_PROPERTY_LAST_PRESSED_KEY)
+            return s.decode() if sys.version_info.major > 2 else s
+
+    property last_released_key:
+        def __get__(self):
+            cdef bytes s = xl_keyboard_get_str(self.keyboard, XL_KEYBOARD_PROPERTY_LAST_RELEASED_KEY)
+            return s.decode() if sys.version_info.major > 2 else s
+
+    property last_pressed_time:
+        def __get__(self):
+            return xl_keyboard_get_dbl(self.keyboard, XL_KEYBOARD_PROPERTY_LAST_PRESSED_TIME)
+
+    property last_released_time:
+        def __get__(self):
+            return xl_keyboard_get_dbl(self.keyboard, XL_KEYBOARD_PROPERTY_LAST_RELEASED_TIME)
+
+    property status:
+        def __get__(self):
+            cdef bytes s = xl_keyboard_get_str(self.keyboard, XL_KEYBOARD_PROPERTY_STATUS)
+            return s.decode() if sys.version_info.major > 2 else s # convert str to utf-8
+
+        def __set__(self, str value):
+            cdef bytes string
+
+            # in python 3k, convert the unicode status string to ascii, otherwise keep it
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            xl_keyboard_set_str(self.keyboard, XL_KEYBOARD_PROPERTY_STATUS, <char*>string)
+
+    property name:
+        def __get__(self):
+            cdef bytes s = xl_keyboard_get_str(self.keyboard, XL_KEYBOARD_PROPERTY_NAME)
+            return s.decode() if sys.version_info.major > 2 else s # convert to unicode
+
+    property open:
+        def __get__(self):
+            return xl_keyboard_get_int(self.keyboard, XL_KEYBOARD_PROPERTY_OPEN)
+
+    def address(self):
+        return <size_t>self.keyboard
+
+    def cast(self):
+        return self
+
+    @staticmethod
+    def _mod_list(xl_keyboard_mod_bit_t mods):
+        """
+        Convert a modifier bitmask to a list of short mod names.
+        """
+        cdef int i, b
+
+        cdef list values = []
+        cdef bytes mod_string
+
+        for i in range(XL_KEYBOARD_MOD_INDEX_COUNT):
+            b = 1 << i
+
+            if (mods & b) != 0:
+                mod_string = <bytes>xl_keyboard_mod_short_name[i]
+
+                if sys.version_info.major > 2:
+                    values.append(mod_string.decode()) # unicode
+                else:
+                    values.append(mod_string) # py2k ascii bytes
+
+        if mods & XL_KEYBOARD_MOD_BIT_SHIFT: values.append('shift')
+        if mods & XL_KEYBOARD_MOD_BIT_CONTROL: values.append('control')
+        if mods & XL_KEYBOARD_MOD_BIT_ALT: values.append('alt')
+        if mods & XL_KEYBOARD_MOD_BIT_GUI: values.append('gui')
+
+        return values
+
+    @staticmethod
+    def _key_list(size_t keys):
+        """
+        Convert a keyboard key bitvector to a list of short key names.
+        Keys is actually a u8 pointer, to circumvent type limitations.
+        """
+        cdef u8* key_bitvector = <u8*>keys # cast int to pointer
+        cdef int i
+
+        cdef list values = []
+        cdef bytes key_string
+
+        # NOTE: short modifier key names are also appended to the end of this list,
+        # just like in mod_list. this is simply for user convenience when checking.
+
+        for i in range(XL_KEYBOARD_KEY_INDEX_COUNT):
+            if ae_bitvector_get(key_bitvector, i):
+                key_string = <bytes>xl_keyboard_key_short_name[i]
+
+                if sys.version_info.major > 2:
+                    values.append(key_string.decode()) # unicode
+                else:
+                    values.append(key_string) # py2k ascii bytes
+
+        if (ae_bitvector_get(key_bitvector, XL_KEYBOARD_KEY_INDEX_LEFT_SHIFT) or
+            ae_bitvector_get(key_bitvector, XL_KEYBOARD_KEY_INDEX_RIGHT_SHIFT)):
+            values.append('shift')
+
+        if (ae_bitvector_get(key_bitvector, XL_KEYBOARD_KEY_INDEX_LEFT_CONTROL) or
+            ae_bitvector_get(key_bitvector, XL_KEYBOARD_KEY_INDEX_RIGHT_CONTROL)):
+            values.append('control')
+
+        if (ae_bitvector_get(key_bitvector, XL_KEYBOARD_KEY_INDEX_LEFT_ALT) or
+            ae_bitvector_get(key_bitvector, XL_KEYBOARD_KEY_INDEX_RIGHT_ALT)):
+            values.append('alt')
+
+        if (ae_bitvector_get(key_bitvector, XL_KEYBOARD_KEY_INDEX_LEFT_GUI) or
+            ae_bitvector_get(key_bitvector, XL_KEYBOARD_KEY_INDEX_RIGHT_GUI)):
+            values.append('gui')
+
+        return values
+
+    def last_key_pressed_time(self, str key):
+        """
+        Get the absolute last time a given key was pressed. To get the relative
+        time (time since press), use aegame.utl.seconds() - last key press time.
+        """
+        cdef bytes bkey
+
+        if sys.version_info.major > 2:
+            bkey = <bytes>key.encode('utf-8') # convert utf-8 to bytes
+        else:
+            bkey = <bytes>key # keep the oldschool python 2 key string
+
+        return (xl_keyboard_get_last_key_pressed_time(self.keyboard,
+                xl_keyboard_key_index_from_short_name(<char*>bkey)))
+
+    def last_key_released_time(self, str key):
+        """
+        Get the last absolute time the user let go of a given keyboard key.
+        """
+        cdef bytes bkey
+
+        if sys.version_info.major > 2:
+            bkey = <bytes>key.encode('utf-8') # convert utf-8 to bytes
+        else:
+            bkey = <bytes>key # keep the oldschool python 2 key string
+
+        return (xl_keyboard_get_last_key_released_time(self.keyboard,
+                xl_keyboard_key_index_from_short_name(<char*>bkey)))
+
+    def clear_history(self):
+        """
+        Reset input tracking so a cheat code doesn't register an effect many times.
+        """
+        xl_keyboard_clear_history(self.keyboard); return self
+
+    cdef void _key_bitvector(self, u8* out, object key):
+        """
+        Internal method to convert a key list (or a single key) to a bitvector.
+        """
+        cdef int i
+
+        # key names have to be converted to ascii before they can be used here
+        cdef bytes s
+
+        for i in range(sizeof(xl_keyboard_key_bit_t)):
+            out[i] = 0
+
+        if isinstance(key, list):
+            for kn in key:
+                if sys.version_info.major > 2:
+                    s = <bytes>kn.encode('utf-8') # convert utf-8 to ascii string
+                else:
+                    s = <bytes>kn # keep an oldschool python 2 ascii bytes string
+
+                ae_bitvector_set(out, xl_keyboard_key_index_from_short_name(<char*>s), 1)
+        else:
+            if sys.version_info.major > 2:
+                s = <bytes>key.encode('utf-8') # convert utf-8 to ascii string
+            else:
+                s = <bytes>key # keep an oldschool python 2 ascii bytes string
+
+            ae_bitvector_set(out, xl_keyboard_key_index_from_short_name(<char*>s), 1)
+
+    def check_history(self, list keys):
+        """
+        Returns True if the last N keyboard inputs match a list. This can be used
+        for cheat code and fighting game combo systems. List items can either be
+        key names as strings, or another list of key strings for (A + B, C) combos.
+        """
+        cdef xl_keyboard_key_bit_t key_vecs[1024]
+        cdef int i
+
+        if len(keys) > 1024: raise MemoryError("too many keyboard keys for temp!")
+        for i, key in enumerate(keys): self._key_bitvector(key_vecs[i], key)
+
+        return bool(xl_keyboard_check_history(self.keyboard, key_vecs, len(keys)))
+
+# ==============================================================================
+# ~ [ mouse input ]
+# ==============================================================================
+
+# TODO
+
+# ==============================================================================
 # ~ [ controller input ]
 # ==============================================================================
 
@@ -3229,6 +3772,7 @@ class event(object):
         cdef bytes name
 
         cdef Controller controller = Controller(reference=0)
+        cdef Keyboard keyboard = Keyboard(reference=0)
         cdef Sound sound = Sound(reference=0)
         cdef Window window = Window(reference=0)
         cdef Animation animation = Animation(reference=0)
@@ -3307,6 +3851,25 @@ class event(object):
             animation.animation = c_event.as_animation_finished.animation
 
             return ('animation_finished', animation)
+
+        elif c_type == XL_EVENT_KEYBOARD_INSERT:
+            keyboard.keyboard = c_event.as_keyboard_insert.keyboard
+
+            return ('keyboard_insert', keyboard)
+
+        elif c_type == XL_EVENT_KEYBOARD_REMOVE:
+            keyboard.keyboard = c_event.as_keyboard_remove.keyboard
+
+            return ('keyboard_remove', keyboard)
+
+        elif c_type == XL_EVENT_KEYBOARD_KEY:
+            name = xl_keyboard_key_short_name[<size_t>c_event.as_keyboard_key.key]
+            keyboard.keyboard = c_event.as_keyboard_key.keyboard
+
+            return ('keyboard_key', keyboard,
+                    Keyboard._mod_list(c_event.as_keyboard_key.mods),
+                    name.decode() if sys.version_info.major > 2 else name,
+                    bool(c_event.as_keyboard_key.pressed))
 
         elif c_type == XL_EVENT_CONTROLLER_INSERT:
             controller.controller = c_event.as_controller_insert.controller

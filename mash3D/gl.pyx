@@ -2117,9 +2117,9 @@ cdef class Object:
 
         # XXX: is there a way to detect version num without calling python?
         if sys.version_info.major > 2:
-            nstr = name.decode()
+            nstr = name.decode() # convert ascii type name to UTF for py3k
         else:
-            nstr = <str>name
+            nstr = <str>name # keep the oldschool byte string for python 2
 
         return globals()[nstr.replace('_', ' ').title().replace(' ', '')] \
                                             (reference = <size_t>self.ptr)

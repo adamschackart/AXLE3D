@@ -8,7 +8,6 @@
 --- TODO: handle graphics device lost event? system meltdown (everything gone)?
 --- TODO: laptop & mobile device power information, more advanced GPU/sfx stats
 --- TODO: unsafe "high-perf" mode that removes open checks from rendering calls
---- TODO: handle keyboard / mouse devices in the same way we handle controllers
 --- TODO: implementation that calls into the final handmade hero platform layer
 --- TODO: user data pointer property for every object (use a global hash table)
 --- TODO: renderer x/y (camera viewport) - subtracted from draw x/y coordinates
@@ -91,10 +90,11 @@ void xl_object_list_all(void ** objects)
 
 void xl_object_close_all(void)
 {
-    AE_STATIC_ASSERT(all_objects_covered, XL_OBJECT_TYPE_COUNT == 7);
+    AE_STATIC_ASSERT(all_objects_covered, XL_OBJECT_TYPE_COUNT == 8);
     AE_PROFILE_ENTER();
 
-    // window closes textures and fonts. controllers can't be closed.
+    // window closes textures and fonts. controllers can't be closed,
+    // along with keyboard and mouse objects (closed by unplugging).
     xl_animation_close_all();
     xl_sound_close_all();
     xl_window_close_all();
@@ -4030,6 +4030,582 @@ void xl_sound_close_all(void)
 
 /*
 ================================================================================
+ * ~~ [ keyboard input ] ~~ *
+--------------------------------------------------------------------------------
+TODO: onscreen keyboard support for mobile (open when onscreen, closed when off)
+TODO: handle text editing events with the keyboard - keyboard version of history
+--------------------------------------------------------------------------------
+*/
+
+typedef struct xl_internal_keyboard_t
+{
+    double last_released_key_time;
+    double last_pressed_key_time;
+
+    double last_key_released_time[XL_KEYBOARD_KEY_INDEX_COUNT];
+    double last_key_pressed_time [XL_KEYBOARD_KEY_INDEX_COUNT];
+
+    xl_keyboard_key_index_t last_released_key;
+    xl_keyboard_key_index_t last_pressed_key;
+
+    xl_keyboard_key_bit_t history[64];
+    size_t next_history_write_index;
+
+    int id; // random int
+    double time_inserted;
+} \
+    xl_internal_keyboard_t;
+
+// there's only one keyboard, so this event is only fired once on initialization.
+// some consoles (ps2) support keyboard and mouse accessories, hence the events.
+static u32 xl_keyboard_insert_event_type;
+
+static void xl_keyboard_close_all(void)
+{
+    // since there's only one keyboard plugged in, we don't bother creating fake
+    // keyboard remove events. this is only necessary for leak detection anyways.
+    size_t i = 0, n = xl_keyboard_count_all();
+
+    xl_keyboard_t** keyboards = (xl_keyboard_t**)alloca(
+                            n * sizeof(xl_keyboard_t*));
+
+    ae_ptrset_list(&xl_keyboard_set, (void**)keyboards);
+
+    for (; i < n; i++)
+    {
+        ae_ptrset_remove(&xl_keyboard_set, keyboards[i]);
+        ae_free(keyboards[i]);
+    }
+}
+
+static xl_keyboard_mod_bit_t xl_keyboard_mod_mask_from_sdl(SDL_Keymod sdl_state);
+static xl_keyboard_key_index_t xl_keyboard_key_index_from_sdl(SDL_Scancode code);
+
+void
+xl_keyboard_set_int(xl_keyboard_t* keyboard, xl_keyboard_property_t property, int value)
+{
+    xl_internal_keyboard_t* data = (xl_internal_keyboard_t*)keyboard; // private data
+
+    ae_switch (property, xl_keyboard_property, XL_KEYBOARD_PROPERTY, suffix)
+    {
+        default:
+        {
+            AE_WARN("%s in %s", xl_keyboard_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
+}
+
+int
+xl_keyboard_get_int(xl_keyboard_t* keyboard, xl_keyboard_property_t property)
+{
+    xl_internal_keyboard_t* data = (xl_internal_keyboard_t*)keyboard; // private data
+
+    ae_switch (property, xl_keyboard_property, XL_KEYBOARD_PROPERTY, suffix)
+    {
+        case XL_KEYBOARD_PROPERTY_TOTAL:
+        {
+            return xl_keyboard_set.count;
+        }
+        break;
+
+        case XL_KEYBOARD_PROPERTY_ID:
+        {
+            if (xl_keyboard_get_open(keyboard)) return data->id;
+        }
+        break;
+
+        // NOTE: the modifier system isn't necessary at all, as mod key presses are
+        // reported as regular keys as well - it's just a convenience for the user.
+
+        case XL_KEYBOARD_PROPERTY_DOWN_MODS:
+        {
+            if (xl_keyboard_get_open(keyboard))
+            {
+                return xl_keyboard_mod_mask_from_sdl(SDL_GetModState());
+            }
+        }
+        break;
+
+        case XL_KEYBOARD_PROPERTY_UP_MODS:
+        {
+            return ~xl_keyboard_get_down_mods(keyboard) & \
+                    (~(~0 << XL_KEYBOARD_MOD_INDEX_COUNT));
+        }
+        break;
+
+        case XL_KEYBOARD_PROPERTY_LAST_PRESSED_KEY:
+        {
+            if (xl_keyboard_get_open(keyboard)) return (int)data->last_pressed_key;
+        }
+        break;
+
+        case XL_KEYBOARD_PROPERTY_LAST_RELEASED_KEY:
+        {
+            if (xl_keyboard_get_open(keyboard)) return (int)data->last_released_key;
+        }
+        break;
+
+        case XL_KEYBOARD_PROPERTY_OPEN:
+        {
+            return xl_is_init() && ae_ptrset_contains(&xl_keyboard_set, keyboard);
+        }
+        break;
+
+        default:
+        {
+            AE_WARN("%s in %s", xl_keyboard_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
+
+    return 0;
+}
+
+void
+xl_keyboard_set_dbl(xl_keyboard_t* keyboard, xl_keyboard_property_t property, double value)
+{
+    xl_internal_keyboard_t* data = (xl_internal_keyboard_t*)keyboard; // private data
+
+    ae_switch (property, xl_keyboard_property, XL_KEYBOARD_PROPERTY, suffix)
+    {
+        default:
+        {
+            AE_WARN("%s in %s", xl_keyboard_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
+}
+
+double
+xl_keyboard_get_dbl(xl_keyboard_t* keyboard, xl_keyboard_property_t property)
+{
+    xl_internal_keyboard_t* data = (xl_internal_keyboard_t*)keyboard; // private data
+
+    ae_switch (property, xl_keyboard_property, XL_KEYBOARD_PROPERTY, suffix)
+    {
+        case XL_KEYBOARD_PROPERTY_LAST_PRESSED_TIME:
+        {
+            if (xl_keyboard_get_open(keyboard)) return data->last_pressed_key_time;
+        }
+        break;
+
+        case XL_KEYBOARD_PROPERTY_LAST_RELEASED_TIME:
+        {
+            if (xl_keyboard_get_open(keyboard)) return data->last_released_key_time;
+        }
+        break;
+
+        default:
+        {
+            AE_WARN("%s in %s", xl_keyboard_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
+
+    return 0.0;
+}
+
+void
+xl_keyboard_set_str(xl_keyboard_t* keyboard, xl_keyboard_property_t property, const char* value)
+{
+    xl_internal_keyboard_t* data = (xl_internal_keyboard_t*)keyboard; // private data
+
+    ae_switch (property, xl_keyboard_property, XL_KEYBOARD_PROPERTY, suffix)
+    {
+        default:
+        {
+            AE_WARN("%s in %s", xl_keyboard_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
+}
+
+const char*
+xl_keyboard_get_str(xl_keyboard_t* keyboard, xl_keyboard_property_t property)
+{
+    xl_internal_keyboard_t* data = (xl_internal_keyboard_t*)keyboard; // private data
+
+    ae_switch (property, xl_keyboard_property, XL_KEYBOARD_PROPERTY, suffix)
+    {
+        case XL_KEYBOARD_PROPERTY_LAST_PRESSED_KEY:
+        {
+            return xl_keyboard_key_short_name[xl_keyboard_get_last_pressed_key(keyboard)];
+        }
+        break;
+
+        case XL_KEYBOARD_PROPERTY_LAST_RELEASED_KEY:
+        {
+            return xl_keyboard_key_short_name[xl_keyboard_get_last_released_key(keyboard)];
+        }
+        break;
+
+        case XL_KEYBOARD_PROPERTY_STATUS:
+        {
+            // TODO: return a status string with some more information (name etc.)
+            return xl_keyboard_get_open(keyboard) ? "open" : "closed";
+        }
+        break;
+
+        case XL_KEYBOARD_PROPERTY_NAME:
+        {
+            // TODO: query for the actual name of the keyboard (not available in SDL)
+        }
+        break;
+
+        default:
+        {
+            AE_WARN("%s in %s", xl_keyboard_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
+
+    return "";
+}
+
+void
+xl_keyboard_set_ptr(xl_keyboard_t* keyboard, xl_keyboard_property_t property, void* value)
+{
+    xl_internal_keyboard_t* data = (xl_internal_keyboard_t*)keyboard; // private data
+
+    ae_switch (property, xl_keyboard_property, XL_KEYBOARD_PROPERTY, suffix)
+    {
+        default:
+        {
+            AE_WARN("%s in %s", xl_keyboard_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
+}
+
+void*
+xl_keyboard_get_ptr(xl_keyboard_t* keyboard, xl_keyboard_property_t property)
+{
+    xl_internal_keyboard_t* data = (xl_internal_keyboard_t*)keyboard; // private data
+
+    ae_switch (property, xl_keyboard_property, XL_KEYBOARD_PROPERTY, suffix)
+    {
+        case XL_KEYBOARD_PROPERTY_DOWN_KEYS:
+        {
+            static xl_keyboard_key_bit_t keys;
+
+            // always clear the bitvector to zero at every invocation of this property
+            memset(keys, 0, sizeof(keys));
+
+            if (xl_keyboard_get_open(keyboard))
+            {
+                int i = 0, sdl_scancode_count; // get the current keyboard state from SDL
+                const Uint8* sdl_scancodes = SDL_GetKeyboardState(&sdl_scancode_count);
+
+                for (; i < sdl_scancode_count; i++)
+                {
+                    if (sdl_scancodes[i])
+                    {
+                        xl_keyboard_key_index_t key_index = xl_keyboard_key_index_from_sdl((SDL_Scancode) i);
+                        if (key_index != XL_KEYBOARD_KEY_INDEX_UNKNOWN) ae_bitvector_set(keys, key_index, 1);
+                    }
+                }
+
+                // XXX never report unknown keys as part of the key state
+                ae_bitvector_set(keys, XL_KEYBOARD_KEY_INDEX_UNKNOWN, 0);
+            }
+
+            return (void*)keys;
+        }
+        break;
+
+        case XL_KEYBOARD_PROPERTY_UP_KEYS:
+        {
+            size_t i; // iterate key state vector and invert all bits
+            u8* keys = (u8*)xl_keyboard_get_down_keys(keyboard);
+
+            for (i = 0; i < sizeof(xl_keyboard_key_bit_t); i++)
+            {
+                keys[i] = ~keys[i];
+            }
+
+            // XXX never report unknown keys as part of the key state
+            ae_bitvector_set(keys, XL_KEYBOARD_KEY_INDEX_UNKNOWN, 0);
+
+            return (void*)keys;
+        }
+        break;
+
+        default:
+        {
+            AE_WARN("%s in %s", xl_keyboard_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
+
+    return NULL;
+}
+
+static int xl_keyboard_compare_time_inserted(const void* av, const void* bv)
+{
+    xl_internal_keyboard_t* a = *(xl_internal_keyboard_t**)av;
+    xl_internal_keyboard_t* b = *(xl_internal_keyboard_t**)bv;
+
+    if (a->time_inserted < b->time_inserted) return -1;
+    if (a->time_inserted > b->time_inserted) return +1;
+
+    return 0;
+}
+
+void xl_keyboard_list_all(xl_keyboard_t** keyboards)
+{
+    ae_ptrset_list(&xl_keyboard_set, (void**)keyboards);
+
+    qsort(keyboards, xl_keyboard_count_all(), // keep stable order
+        sizeof(xl_keyboard_t*), xl_keyboard_compare_time_inserted);
+}
+
+/* ===== [ modifiers and keys ] ============================================= */
+
+xl_keyboard_mod_index_t
+xl_keyboard_mod_index_from_short_name(const char * name)
+{
+    size_t i = 0, n = XL_KEYBOARD_MOD_INDEX_COUNT;
+
+    for (; i < n; i++)
+    {
+        if (!strcmp(xl_keyboard_mod_short_name[i], name))
+        {
+            return (xl_keyboard_mod_index_t)i;
+        }
+    }
+
+    ae_assert(0, "\"%s\" is not a valid mod name", name);
+    return XL_KEYBOARD_MOD_INDEX_COUNT;
+}
+
+xl_keyboard_key_index_t
+xl_keyboard_key_index_from_short_name(const char * name)
+{
+    size_t i = 0, n = XL_KEYBOARD_KEY_INDEX_COUNT;
+
+    for (; i < n; i++)
+    {
+        if (!strcmp(xl_keyboard_key_short_name[i], name))
+        {
+            return (xl_keyboard_key_index_t)i;
+        }
+    }
+
+    ae_assert(0, "\"%s\" is not a valid key name", name);
+    return XL_KEYBOARD_KEY_INDEX_COUNT;
+}
+
+double
+xl_keyboard_get_last_key_pressed_time (xl_keyboard_t* keyboard, xl_keyboard_key_index_t key)
+{
+    if (xl_keyboard_get_open(keyboard))
+    {
+        return ((xl_internal_keyboard_t *)keyboard)->last_key_pressed_time[key];
+    }
+    else
+    {
+        return 0.0;
+    }
+}
+
+double
+xl_keyboard_get_last_key_released_time(xl_keyboard_t* keyboard, xl_keyboard_key_index_t key)
+{
+    if (xl_keyboard_get_open(keyboard))
+    {
+        return ((xl_internal_keyboard_t *)keyboard)->last_key_released_time[key];
+    }
+    else
+    {
+        return 0.0;
+    }
+}
+
+void xl_keyboard_clear_history(xl_keyboard_t* keyboard)
+{
+    if (xl_keyboard_get_open(keyboard))
+    {
+        xl_internal_keyboard_t* data = (xl_internal_keyboard_t*)keyboard;
+
+        data->next_history_write_index = 0;
+        memset(data->history, 0, sizeof(data->history));
+    }
+}
+
+int xl_keyboard_check_history(xl_keyboard_t* keyboard, // cheat check!!!
+                const xl_keyboard_key_bit_t* const masks, size_t count)
+{
+    if (xl_keyboard_get_open(keyboard))
+    {
+        /* Do a backwards comparison through the key history ring buffer.
+         * Count doesn't need to be range checked (history index wraps).
+         */
+        xl_internal_keyboard_t* data = (xl_internal_keyboard_t*)keyboard;
+        const size_t next = data->next_history_write_index;
+
+        size_t i = next ? next - 1 : AE_ARRAY_COUNT(data->history) - 1;
+
+        while (count)
+        {
+            if (memcmp(data->history[i], masks[--count], sizeof(xl_keyboard_key_bit_t)))
+            {
+                return 0;
+            }
+
+            i = i ? i - 1 : AE_ARRAY_COUNT(data->history) - 1;
+        }
+
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+static xl_keyboard_mod_bit_t xl_keyboard_mod_mask_from_sdl(SDL_Keymod sdl_state)
+{
+    int mod = 0;
+
+    if (sdl_state & KMOD_LSHIFT) mod |= XL_KEYBOARD_MOD_BIT_LEFT_SHIFT;
+    if (sdl_state & KMOD_RSHIFT) mod |= XL_KEYBOARD_MOD_BIT_RIGHT_SHIFT;
+    if (sdl_state & KMOD_LCTRL) mod |= XL_KEYBOARD_MOD_BIT_LEFT_CONTROL;
+    if (sdl_state & KMOD_RCTRL) mod |= XL_KEYBOARD_MOD_BIT_RIGHT_CONTROL;
+    if (sdl_state & KMOD_LALT) mod |= XL_KEYBOARD_MOD_BIT_LEFT_ALT;
+    if (sdl_state & KMOD_RALT) mod |= XL_KEYBOARD_MOD_BIT_RIGHT_ALT;
+    if (sdl_state & KMOD_LGUI) mod |= XL_KEYBOARD_MOD_BIT_LEFT_GUI;
+    if (sdl_state & KMOD_RGUI) mod |= XL_KEYBOARD_MOD_BIT_RIGHT_GUI;
+    if (sdl_state & KMOD_NUM) mod |= XL_KEYBOARD_MOD_BIT_NUMLOCK;
+    if (sdl_state & KMOD_CAPS) mod |= XL_KEYBOARD_MOD_BIT_CAPSLOCK;
+
+    return (xl_keyboard_mod_bit_t)mod;
+}
+
+static xl_keyboard_key_index_t xl_keyboard_key_index_from_sdl(SDL_Scancode code)
+{
+    switch (code)
+    {
+        case SDL_SCANCODE_A: return XL_KEYBOARD_KEY_INDEX_A;
+        case SDL_SCANCODE_B: return XL_KEYBOARD_KEY_INDEX_B;
+        case SDL_SCANCODE_C: return XL_KEYBOARD_KEY_INDEX_C;
+        case SDL_SCANCODE_D: return XL_KEYBOARD_KEY_INDEX_D;
+        case SDL_SCANCODE_E: return XL_KEYBOARD_KEY_INDEX_E;
+        case SDL_SCANCODE_F: return XL_KEYBOARD_KEY_INDEX_F;
+        case SDL_SCANCODE_G: return XL_KEYBOARD_KEY_INDEX_G;
+        case SDL_SCANCODE_H: return XL_KEYBOARD_KEY_INDEX_H;
+        case SDL_SCANCODE_I: return XL_KEYBOARD_KEY_INDEX_I;
+        case SDL_SCANCODE_J: return XL_KEYBOARD_KEY_INDEX_J;
+        case SDL_SCANCODE_K: return XL_KEYBOARD_KEY_INDEX_K;
+        case SDL_SCANCODE_L: return XL_KEYBOARD_KEY_INDEX_L;
+        case SDL_SCANCODE_M: return XL_KEYBOARD_KEY_INDEX_M;
+        case SDL_SCANCODE_N: return XL_KEYBOARD_KEY_INDEX_N;
+        case SDL_SCANCODE_O: return XL_KEYBOARD_KEY_INDEX_O;
+        case SDL_SCANCODE_P: return XL_KEYBOARD_KEY_INDEX_P;
+        case SDL_SCANCODE_Q: return XL_KEYBOARD_KEY_INDEX_Q;
+        case SDL_SCANCODE_R: return XL_KEYBOARD_KEY_INDEX_R;
+        case SDL_SCANCODE_S: return XL_KEYBOARD_KEY_INDEX_S;
+        case SDL_SCANCODE_T: return XL_KEYBOARD_KEY_INDEX_T;
+        case SDL_SCANCODE_U: return XL_KEYBOARD_KEY_INDEX_U;
+        case SDL_SCANCODE_V: return XL_KEYBOARD_KEY_INDEX_V;
+        case SDL_SCANCODE_W: return XL_KEYBOARD_KEY_INDEX_W;
+        case SDL_SCANCODE_X: return XL_KEYBOARD_KEY_INDEX_X;
+        case SDL_SCANCODE_Y: return XL_KEYBOARD_KEY_INDEX_Y;
+        case SDL_SCANCODE_Z: return XL_KEYBOARD_KEY_INDEX_Z;
+        case SDL_SCANCODE_1: return XL_KEYBOARD_KEY_INDEX_1;
+        case SDL_SCANCODE_2: return XL_KEYBOARD_KEY_INDEX_2;
+        case SDL_SCANCODE_3: return XL_KEYBOARD_KEY_INDEX_3;
+        case SDL_SCANCODE_4: return XL_KEYBOARD_KEY_INDEX_4;
+        case SDL_SCANCODE_5: return XL_KEYBOARD_KEY_INDEX_5;
+        case SDL_SCANCODE_6: return XL_KEYBOARD_KEY_INDEX_6;
+        case SDL_SCANCODE_7: return XL_KEYBOARD_KEY_INDEX_7;
+        case SDL_SCANCODE_8: return XL_KEYBOARD_KEY_INDEX_8;
+        case SDL_SCANCODE_9: return XL_KEYBOARD_KEY_INDEX_9;
+        case SDL_SCANCODE_0: return XL_KEYBOARD_KEY_INDEX_0;
+        case SDL_SCANCODE_RETURN: return XL_KEYBOARD_KEY_INDEX_RETURN;
+        case SDL_SCANCODE_ESCAPE: return XL_KEYBOARD_KEY_INDEX_ESCAPE;
+        case SDL_SCANCODE_BACKSPACE: return XL_KEYBOARD_KEY_INDEX_BACKSPACE;
+        case SDL_SCANCODE_TAB: return XL_KEYBOARD_KEY_INDEX_TAB;
+        case SDL_SCANCODE_SPACE: return XL_KEYBOARD_KEY_INDEX_SPACE;
+        case SDL_SCANCODE_MINUS: return XL_KEYBOARD_KEY_INDEX_MINUS;
+        case SDL_SCANCODE_EQUALS: return XL_KEYBOARD_KEY_INDEX_EQUALS;
+        case SDL_SCANCODE_LEFTBRACKET: return XL_KEYBOARD_KEY_INDEX_LEFT_BRACKET;
+        case SDL_SCANCODE_RIGHTBRACKET: return XL_KEYBOARD_KEY_INDEX_RIGHT_BRACKET;
+        case SDL_SCANCODE_BACKSLASH: return XL_KEYBOARD_KEY_INDEX_BACKSLASH;
+        case SDL_SCANCODE_SEMICOLON: return XL_KEYBOARD_KEY_INDEX_SEMICOLON;
+        case SDL_SCANCODE_APOSTROPHE: return XL_KEYBOARD_KEY_INDEX_APOSTROPHE;
+        case SDL_SCANCODE_GRAVE: return XL_KEYBOARD_KEY_INDEX_GRAVE;
+        case SDL_SCANCODE_COMMA: return XL_KEYBOARD_KEY_INDEX_COMMA;
+        case SDL_SCANCODE_PERIOD: return XL_KEYBOARD_KEY_INDEX_PERIOD;
+        case SDL_SCANCODE_SLASH: return XL_KEYBOARD_KEY_INDEX_SLASH;
+        case SDL_SCANCODE_F1: return XL_KEYBOARD_KEY_INDEX_F1;
+        case SDL_SCANCODE_F2: return XL_KEYBOARD_KEY_INDEX_F2;
+        case SDL_SCANCODE_F3: return XL_KEYBOARD_KEY_INDEX_F3;
+        case SDL_SCANCODE_F4: return XL_KEYBOARD_KEY_INDEX_F4;
+        case SDL_SCANCODE_F5: return XL_KEYBOARD_KEY_INDEX_F5;
+        case SDL_SCANCODE_F6: return XL_KEYBOARD_KEY_INDEX_F6;
+        case SDL_SCANCODE_F7: return XL_KEYBOARD_KEY_INDEX_F7;
+        case SDL_SCANCODE_F8: return XL_KEYBOARD_KEY_INDEX_F8;
+        case SDL_SCANCODE_F9: return XL_KEYBOARD_KEY_INDEX_F9;
+        case SDL_SCANCODE_F10: return XL_KEYBOARD_KEY_INDEX_F10;
+        case SDL_SCANCODE_F11: return XL_KEYBOARD_KEY_INDEX_F11;
+        case SDL_SCANCODE_F12: return XL_KEYBOARD_KEY_INDEX_F12;
+        case SDL_SCANCODE_PRINTSCREEN: return XL_KEYBOARD_KEY_INDEX_PRINT_SCREEN;
+        case SDL_SCANCODE_SCROLLLOCK: return XL_KEYBOARD_KEY_INDEX_SCROLL_LOCK;
+        case SDL_SCANCODE_PAUSE: return XL_KEYBOARD_KEY_INDEX_PAUSE;
+        case SDL_SCANCODE_INSERT: return XL_KEYBOARD_KEY_INDEX_INSERT;
+        case SDL_SCANCODE_DELETE: return XL_KEYBOARD_KEY_INDEX_DELETE;
+        case SDL_SCANCODE_HOME: return XL_KEYBOARD_KEY_INDEX_HOME;
+        case SDL_SCANCODE_PAGEUP: return XL_KEYBOARD_KEY_INDEX_PAGE_UP;
+        case SDL_SCANCODE_PAGEDOWN: return XL_KEYBOARD_KEY_INDEX_PAGE_DOWN;
+        case SDL_SCANCODE_END: return XL_KEYBOARD_KEY_INDEX_END;
+        case SDL_SCANCODE_RIGHT: return XL_KEYBOARD_KEY_INDEX_RIGHT;
+        case SDL_SCANCODE_LEFT: return XL_KEYBOARD_KEY_INDEX_LEFT;
+        case SDL_SCANCODE_DOWN: return XL_KEYBOARD_KEY_INDEX_DOWN;
+        case SDL_SCANCODE_UP: return XL_KEYBOARD_KEY_INDEX_UP;
+        case SDL_SCANCODE_KP_DIVIDE: return XL_KEYBOARD_KEY_INDEX_KP_DIVIDE;
+        case SDL_SCANCODE_KP_MULTIPLY: return XL_KEYBOARD_KEY_INDEX_KP_MULTIPLY;
+        case SDL_SCANCODE_KP_MINUS: return XL_KEYBOARD_KEY_INDEX_KP_MINUS;
+        case SDL_SCANCODE_KP_PLUS: return XL_KEYBOARD_KEY_INDEX_KP_PLUS;
+        case SDL_SCANCODE_KP_ENTER: return XL_KEYBOARD_KEY_INDEX_KP_ENTER;
+        case SDL_SCANCODE_KP_PERIOD: return XL_KEYBOARD_KEY_INDEX_KP_PERIOD;
+        case SDL_SCANCODE_KP_1: return XL_KEYBOARD_KEY_INDEX_KP_1;
+        case SDL_SCANCODE_KP_2: return XL_KEYBOARD_KEY_INDEX_KP_2;
+        case SDL_SCANCODE_KP_3: return XL_KEYBOARD_KEY_INDEX_KP_3;
+        case SDL_SCANCODE_KP_4: return XL_KEYBOARD_KEY_INDEX_KP_4;
+        case SDL_SCANCODE_KP_5: return XL_KEYBOARD_KEY_INDEX_KP_5;
+        case SDL_SCANCODE_KP_6: return XL_KEYBOARD_KEY_INDEX_KP_6;
+        case SDL_SCANCODE_KP_7: return XL_KEYBOARD_KEY_INDEX_KP_7;
+        case SDL_SCANCODE_KP_8: return XL_KEYBOARD_KEY_INDEX_KP_8;
+        case SDL_SCANCODE_KP_9: return XL_KEYBOARD_KEY_INDEX_KP_9;
+        case SDL_SCANCODE_KP_0: return XL_KEYBOARD_KEY_INDEX_KP_0;
+        case SDL_SCANCODE_LSHIFT: return XL_KEYBOARD_KEY_INDEX_LEFT_SHIFT;
+        case SDL_SCANCODE_RSHIFT: return XL_KEYBOARD_KEY_INDEX_RIGHT_SHIFT;
+        case SDL_SCANCODE_LCTRL: return XL_KEYBOARD_KEY_INDEX_LEFT_CONTROL;
+        case SDL_SCANCODE_RCTRL: return XL_KEYBOARD_KEY_INDEX_RIGHT_CONTROL;
+        case SDL_SCANCODE_LALT: return XL_KEYBOARD_KEY_INDEX_LEFT_ALT;
+        case SDL_SCANCODE_RALT: return XL_KEYBOARD_KEY_INDEX_RIGHT_ALT;
+        case SDL_SCANCODE_LGUI: return XL_KEYBOARD_KEY_INDEX_LEFT_GUI;
+        case SDL_SCANCODE_RGUI: return XL_KEYBOARD_KEY_INDEX_RIGHT_GUI;
+        case SDL_SCANCODE_NUMLOCKCLEAR: return XL_KEYBOARD_KEY_INDEX_NUMLOCK;
+        case SDL_SCANCODE_CAPSLOCK: return XL_KEYBOARD_KEY_INDEX_CAPSLOCK;
+
+        default: break;
+    }
+
+    return XL_KEYBOARD_KEY_INDEX_UNKNOWN;
+}
+
+/*
+================================================================================
+ * ~~ [ mouse input ] ~~ *
+--------------------------------------------------------------------------------
+*/
+
+// TODO
+
+/*
+================================================================================
  * ~~ [ controller input ] ~~ *
 --------------------------------------------------------------------------------
 NOTE: a portion of this is inspired by http://www.coranac.com/tonc/text/keys.htm
@@ -6189,7 +6765,31 @@ xl_event_from_sdl_window(xl_event_t* dst, SDL_WindowEvent* src)
 static void
 xl_event_from_sdl_keyboard(xl_event_t* dst, SDL_KeyboardEvent* src)
 {
-    dst->type = XL_EVENT_NOTHING; // TODO
+    if (src->repeat == 0)
+    {
+        dst->type = XL_EVENT_KEYBOARD_KEY;
+
+        ae_assert(xl_keyboard_count_all() == 1, // allocation check
+                    "got keyboard event without active keyboard!");
+
+        xl_keyboard_list_all(&dst->as_keyboard_key.keyboard); // convert keyboard state
+
+        dst->as_keyboard_key.mods = xl_keyboard_mod_mask_from_sdl((SDL_Keymod)src->keysym.mod);
+        dst->as_keyboard_key.key = xl_keyboard_key_index_from_sdl(src->keysym.scancode);
+
+        if (dst->as_keyboard_key.key == XL_KEYBOARD_KEY_INDEX_UNKNOWN)
+        {
+            dst->type = XL_EVENT_NOTHING; // ignore unknown key codes
+        }
+        else
+        {
+            dst->as_keyboard_key.pressed = src->state == SDL_PRESSED;
+        }
+    }
+    else
+    {
+        dst->type = XL_EVENT_NOTHING;
+    }
 }
 
 static void
@@ -6488,6 +7088,10 @@ static void xl_event_from_sdl(xl_event_t* dst, SDL_Event* src)
                 dst->type = XL_EVENT_SOUND_FINISHED;
                 dst->as_sound_finished.sound = (xl_sound_t*)src->user.data1;
             }
+            else if (src->type == xl_keyboard_insert_event_type)
+            {
+                dst->type = XL_EVENT_KEYBOARD_INSERT;
+            }
             else
             {
                 ae_log(SDL, "unhandled event %X", (int)src->type);
@@ -6679,10 +7283,10 @@ static void xl_event_internal(xl_event_t* dst, SDL_Event* src)
         }
         break;
 
-        // HACK we don't handle keyboard events yet, so do some basic stuff here.
+    #if 0
         case SDL_KEYDOWN:
         {
-            switch (src->key.keysym.sym)
+            switch (src->key.keysym.sym) // keyboard isn't handled, do some basic stuff.
             {
                 case SDLK_ESCAPE:
                 {
@@ -6706,8 +7310,68 @@ static void xl_event_internal(xl_event_t* dst, SDL_Event* src)
             }
         }
         break;
+    #else
+        case SDL_KEYDOWN:
+        case SDL_KEYUP:
+        {
+            if (dst->type == XL_EVENT_KEYBOARD_KEY && // check valid press
+                dst->as_keyboard_key.key != XL_KEYBOARD_KEY_INDEX_UNKNOWN)
+            {
+                double time = ae_seconds(); // roughly when the key action happened
 
-        default: break;
+                xl_internal_keyboard_t * data = (xl_internal_keyboard_t *)
+                                            dst->as_keyboard_key.keyboard;
+
+                // make sure the system-wide keyboard state is what we would expect
+                assert(xl_keyboard_get_open(dst->as_keyboard_key.keyboard) &&
+                                                xl_keyboard_count_all() == 1);
+
+                if (dst->as_keyboard_key.pressed)
+                {
+                    data->last_pressed_key = dst->as_keyboard_key.key;
+
+                    data->last_key_pressed_time[dst->as_keyboard_key.key] = time;
+                    data->last_pressed_key_time = time;
+
+                    memcpy( data->history[data->next_history_write_index++], // history
+                            xl_keyboard_get_down_keys(dst->as_keyboard_key.keyboard),
+                            sizeof(xl_keyboard_key_bit_t) );
+
+                    if (data->next_history_write_index == AE_ARRAY_COUNT(data->history))
+                    {
+                        data->next_history_write_index = 0;
+                    }
+                }
+                else
+                {
+                    data->last_released_key = dst->as_keyboard_key.key;
+
+                    data->last_key_released_time[dst->as_keyboard_key.key] = time;
+                    data->last_released_key_time = time;
+                }
+            }
+        }
+        break;
+    #endif
+
+        default:
+        {
+            if (src->type == xl_keyboard_insert_event_type) // allocate and setup
+            {
+                xl_internal_keyboard_t* data = (xl_internal_keyboard_t*)
+                            ae_calloc(1, sizeof(xl_internal_keyboard_t));
+
+                data->time_inserted = ae_seconds(); // random identifier & sort key
+                data->id = (int)ae_random_xorshift32_ex(&xl_keyboard_id_state);
+
+                dst->as_keyboard_insert.keyboard = (xl_keyboard_t*)data;
+                if (!ae_ptrset_add(&xl_keyboard_set, data))
+                {
+                    AE_WARN("keyboard not new to the set (is set code stubbed?)");
+                }
+            }
+        }
+        break;
     }
 }
 
@@ -6902,7 +7566,7 @@ void xl_init(void)
 
         xl_log_sdl_version_info();
 
-        // this gets rid of a few invalid renderer warnings in the linux log
+        // this gets rid of a few invalid renderer warnings in the linux log.
         if (SDL_GL_LoadLibrary(NULL) < 0)
         {
             ae_error("failed to load OS opengl library: %s", SDL_GetError());
@@ -6911,6 +7575,28 @@ void xl_init(void)
         if (SDL_GameControllerAddMapping(controller_mapping) < 0)
         {
             ae_error("failed to add controller mapping: %s", SDL_GetError());
+        }
+
+        /* keyboard remove events are never fired, as there's only one keyboard
+         * connected, so we don't need to register a custom user event for it.
+         */
+        xl_keyboard_insert_event_type = SDL_RegisterEvents(1);
+        if (xl_keyboard_insert_event_type == (u32)-1)
+        {
+            ae_error("failed to allocate a custom event type (out of events)!");
+        }
+
+        if (1) // push the main PC keyboard connection event to SDL on startup.
+        {
+            SDL_Event event = AE_ZERO_STRUCT;
+
+            event.user.type = xl_keyboard_insert_event_type;
+            event.user.timestamp = SDL_GetTicks();
+
+            if (SDL_PushEvent(&event) < 0)
+            {
+                AE_WARN("failed to push keyboard event: %s", SDL_GetError());
+            }
         }
 
         xl_animation_finished_event_type = SDL_RegisterEvents(1);
@@ -6957,6 +7643,7 @@ void xl_quit(void)
         SDL_GL_UnloadLibrary();
 
         xl_controller_close_all();
+        xl_keyboard_close_all();
         xl_window_close_all();
         xl_animation_close_all();
 
