@@ -3,6 +3,7 @@
 # Distributed under the BSD license v2 (opensource.org/licenses/BSD-3-Clause)
 # ------------------------------------------------------------------------------
 # TODO: return button/key lists as sets where possible, as order doesn't matter
+# TODO: should we use tuples for input history? performance is likely better...
 # ------------------------------------------------------------------------------
 from aegame.utl cimport *
 from aegame.vec cimport *

@@ -4033,7 +4033,8 @@ void xl_sound_close_all(void)
  * ~~ [ keyboard input ] ~~ *
 --------------------------------------------------------------------------------
 TODO: onscreen keyboard support for mobile (open when onscreen, closed when off)
-TODO: handle text editing events with the keyboard - keyboard version of history
+TODO: handle SDL unicode text editing and input events, with the global keyboard
+TODO: keyboard tribools: up+down, left+right, a+d, w+s, left and right modifiers
 --------------------------------------------------------------------------------
 */
 
