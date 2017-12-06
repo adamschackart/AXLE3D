@@ -44,6 +44,7 @@ cdef extern from "xl_core.h":
     ctypedef void xl_sound_t
     ctypedef void xl_animation_t
     ctypedef void xl_keyboard_t
+    ctypedef void xl_mouse_t
 
     ctypedef enum xl_object_type_t:
         XL_OBJECT_TYPE_UNKNOWN
@@ -54,6 +55,7 @@ cdef extern from "xl_core.h":
         XL_OBJECT_TYPE_SOUND
         XL_OBJECT_TYPE_ANIMATION
         XL_OBJECT_TYPE_KEYBOARD
+        XL_OBJECT_TYPE_MOUSE
         XL_OBJECT_TYPE_COUNT
 
     xl_object_type_t xl_object_type(void *)
@@ -95,6 +97,7 @@ cdef extern from "xl_core.h":
         XL_WINDOW_PROPERTY_GRABBED
         XL_WINDOW_PROPERTY_OPENGL
         XL_WINDOW_PROPERTY_VSYNC
+        XL_WINDOW_PROPERTY_PRIMARY
         XL_WINDOW_PROPERTY_OPEN
         XL_WINDOW_PROPERTY_STATUS
         XL_WINDOW_PROPERTY_TITLE
@@ -400,6 +403,7 @@ cdef extern from "xl_core.h":
         XL_KEYBOARD_PROPERTY_LAST_RELEASED_TIME
         XL_KEYBOARD_PROPERTY_STATUS
         XL_KEYBOARD_PROPERTY_NAME
+        XL_KEYBOARD_PROPERTY_PRIMARY
         XL_KEYBOARD_PROPERTY_OPEN
         XL_KEYBOARD_PROPERTY_COUNT
 
@@ -597,7 +601,72 @@ cdef extern from "xl_core.h":
     # ~ [ mouse input ]
     # ==========================================================================
 
-    # TODO
+    ctypedef enum xl_mouse_property_t:
+        XL_MOUSE_PROPERTY_TOTAL
+        XL_MOUSE_PROPERTY_ID
+        XL_MOUSE_PROPERTY_DOWN_BUTTONS
+        XL_MOUSE_PROPERTY_UP_BUTTONS
+        XL_MOUSE_PROPERTY_TRIBOOL
+        XL_MOUSE_PROPERTY_LAST_PRESSED_BUTTON
+        XL_MOUSE_PROPERTY_LAST_RELEASED_BUTTON
+        XL_MOUSE_PROPERTY_LAST_PRESSED_TIME
+        XL_MOUSE_PROPERTY_LAST_RELEASED_TIME
+        XL_MOUSE_PROPERTY_RELATIVE
+        XL_MOUSE_PROPERTY_VISIBLE
+        XL_MOUSE_PROPERTY_STATUS
+        XL_MOUSE_PROPERTY_NAME
+        XL_MOUSE_PROPERTY_PRIMARY
+        XL_MOUSE_PROPERTY_OPEN
+        XL_MOUSE_PROPERTY_COUNT
+
+    const char* xl_mouse_property_name[]
+    const char* xl_mouse_property_type[]
+
+    void xl_mouse_set_int(xl_mouse_t* mouse, xl_mouse_property_t prop, int val)
+    int xl_mouse_get_int(xl_mouse_t* mouse, xl_mouse_property_t prop) # integer
+
+    void xl_mouse_set_dbl(xl_mouse_t* mouse, xl_mouse_property_t prop, double val)
+    double xl_mouse_get_dbl(xl_mouse_t* mouse, xl_mouse_property_t prop) # double
+
+    void xl_mouse_set_str(xl_mouse_t* mouse, xl_mouse_property_t prop, const char* val)
+    const char* xl_mouse_get_str(xl_mouse_t* mouse, xl_mouse_property_t prop) # string
+
+    size_t xl_mouse_count_all()
+    void xl_mouse_list_all(xl_mouse_t** mice)
+
+    # ===== [ mouse buttons ] ==================================================
+
+    ctypedef enum xl_mouse_button_index_t:
+        XL_MOUSE_BUTTON_INDEX_LEFT
+        XL_MOUSE_BUTTON_INDEX_MIDDLE
+        XL_MOUSE_BUTTON_INDEX_RIGHT
+        XL_MOUSE_BUTTON_INDEX_COUNT
+
+    const char* xl_mouse_button_index_name[]
+    const char* xl_mouse_button_short_name[]
+
+    ctypedef enum xl_mouse_button_bit_t:
+        pass
+
+    xl_mouse_button_index_t \
+    xl_mouse_button_index_from_short_name(const char* name)
+
+    xl_mouse_button_bit_t \
+    xl_mouse_button_bit_from_short_name(const char* name)
+
+    int xl_mouse_button_is_down(xl_mouse_t* c, xl_mouse_button_index_t b)
+    int xl_mouse_button_is_up(xl_mouse_t* c, xl_mouse_button_index_t b)
+
+    double xl_mouse_get_last_button_pressed_time(xl_mouse_t * mouse,
+                                    xl_mouse_button_index_t button)
+
+    double xl_mouse_get_last_button_released_time(xl_mouse_t* mouse,
+                                    xl_mouse_button_index_t button)
+
+    void xl_mouse_clear_history(xl_mouse_t* mouse) # mouse button history
+
+    int xl_mouse_check_history(xl_mouse_t* mouse, const int* const masks,
+                                                            size_t count)
 
     # ==========================================================================
     # ~ [ controller input ]
@@ -630,6 +699,7 @@ cdef extern from "xl_core.h":
         XL_CONTROLLER_PROPERTY_RIGHT_STICK_Y
         XL_CONTROLLER_PROPERTY_LEFT_STICK_X
         XL_CONTROLLER_PROPERTY_LEFT_STICK_Y
+        XL_CONTROLLER_PROPERTY_PRIMARY
         XL_CONTROLLER_PROPERTY_OPEN
         XL_CONTROLLER_PROPERTY_STATUS
         XL_CONTROLLER_PROPERTY_NAME
@@ -822,6 +892,11 @@ cdef extern from "xl_core.h":
         XL_EVENT_KEYBOARD_INSERT
         XL_EVENT_KEYBOARD_REMOVE
         XL_EVENT_KEYBOARD_KEY
+        XL_EVENT_MOUSE_INSERT
+        XL_EVENT_MOUSE_REMOVE
+        XL_EVENT_MOUSE_BUTTON
+        XL_EVENT_MOUSE_WHEEL
+        XL_EVENT_MOUSE_MOTION
         XL_EVENT_CONTROLLER_INSERT
         XL_EVENT_CONTROLLER_REMOVE
         XL_EVENT_CONTROLLER_BUTTON
@@ -835,6 +910,10 @@ cdef extern from "xl_core.h":
 
     ctypedef struct _xl_window_event_t:
         xl_window_t* window
+
+    ctypedef struct _xl_window_mouse_event_t:
+        xl_window_t* window
+        xl_mouse_t* mouse
 
     ctypedef struct _xl_window_move_event_t:
         xl_window_t* window
@@ -862,6 +941,24 @@ cdef extern from "xl_core.h":
         xl_keyboard_mod_bit_t mods
         xl_keyboard_key_index_t key
         int pressed
+
+    ctypedef struct _xl_mouse_event_t:
+        xl_mouse_t* mouse
+
+    ctypedef struct _xl_mouse_button_event_t:
+        xl_mouse_t* mouse
+        xl_mouse_button_index_t button
+        int pressed
+
+    ctypedef struct _xl_mouse_wheel_event_t:
+        xl_mouse_t* mouse
+        int x, y
+
+    ctypedef struct _xl_mouse_motion_event_t:
+        xl_mouse_t* mouse
+        xl_window_t* window
+        xl_mouse_button_bit_t buttons
+        double x, y, dx, dy
 
     ctypedef struct _xl_controller_event_t:
         xl_controller_t* controller
@@ -894,13 +991,18 @@ cdef extern from "xl_core.h":
         _xl_window_event_t                      as_window_redraw
         _xl_window_event_t                      as_window_gain_focus
         _xl_window_event_t                      as_window_lose_focus
-        _xl_window_event_t                      as_window_mouse_enter
-        _xl_window_event_t                      as_window_mouse_leave
+        _xl_window_mouse_event_t                as_window_mouse_enter
+        _xl_window_mouse_event_t                as_window_mouse_leave
         _xl_sound_event_t                       as_sound_finished
         _xl_animation_event_t                   as_animation_finished
         _xl_keyboard_event_t                    as_keyboard_insert
         _xl_keyboard_event_t                    as_keyboard_remove
         _xl_keyboard_key_event_t                as_keyboard_key
+        _xl_mouse_event_t                       as_mouse_insert
+        _xl_mouse_event_t                       as_mouse_remove
+        _xl_mouse_button_event_t                as_mouse_button
+        _xl_mouse_wheel_event_t                 as_mouse_wheel
+        _xl_mouse_motion_event_t                as_mouse_motion
         _xl_controller_event_t                  as_controller_insert
         _xl_controller_event_t                  as_controller_remove
         _xl_controller_button_event_t           as_controller_button
@@ -1359,6 +1461,10 @@ cdef class Window:
 
         def __set__(self, bint value):
             xl_window_set_int(self.window, XL_WINDOW_PROPERTY_VSYNC, value)
+
+    property primary:
+        def __get__(self):
+            return xl_window_get_int(self.window, XL_WINDOW_PROPERTY_PRIMARY)
 
     property open:
         def __get__(self):
@@ -2844,6 +2950,10 @@ cdef class Keyboard:
             cdef bytes s = xl_keyboard_get_str(self.keyboard, XL_KEYBOARD_PROPERTY_NAME)
             return s.decode() if sys.version_info.major > 2 else s # convert to unicode
 
+    property primary:
+        def __get__(self):
+            return xl_keyboard_get_int(self.keyboard, XL_KEYBOARD_PROPERTY_PRIMARY)
+
     property open:
         def __get__(self):
             return xl_keyboard_get_int(self.keyboard, XL_KEYBOARD_PROPERTY_OPEN)
@@ -3005,7 +3115,263 @@ cdef class Keyboard:
 # ~ [ mouse input ]
 # ==============================================================================
 
-# TODO
+cdef class Mouse:
+    """
+    Interface to a mouse device for buttons, scroll events, and cursor motion.
+    """
+    cdef xl_mouse_t* mouse
+
+    def __init__(self, size_t reference=0):
+        self.mouse = <xl_mouse_t*>reference
+
+    def __repr__(self):
+        return "{}({})".format(self.__class__.__name__, self.status)
+
+    def __hash__(self):
+        return hash(self.address())
+
+    def __richcmp__(self, Mouse other, int op):
+        if   op == 0: return self.address() <  other.address()
+        elif op == 1: return self.address() <= other.address()
+        elif op == 2: return self.address() == other.address()
+        elif op == 3: return self.address() != other.address()
+        elif op == 4: return self.address() >  other.address()
+        elif op == 5: return self.address() >= other.address()
+
+        else: assert 0
+
+    def __nonzero__(self):
+        return xl_mouse_get_int(self.mouse, XL_MOUSE_PROPERTY_OPEN)
+
+    def __reduce__(self):
+        raise TypeError('cannot pickle {}'.format(self))
+
+    def __copy__(self):
+        raise TypeError('cannot copy {}'.format(self))
+
+    def __call__(self, str button):
+        """
+        Given the string of a mouse button, returns whether it is pressed.
+        """
+        cdef bytes b_str
+
+        # convert unicode button str to ascii, or keep the oldschool bytes
+        if sys.version_info.major > 2:
+            b_str = <bytes>button.encode('utf-8')
+        else:
+            b_str = <bytes>button
+
+        return bool(xl_mouse_button_is_down(self.mouse, # magic bytes cast
+                    xl_mouse_button_index_from_short_name(<char *>b_str)))
+
+    @staticmethod
+    def count_all(): return xl_mouse_count_all()
+
+    @classmethod
+    def list_all(cls):
+        """
+        Gather references to all open mice in a single list.
+        """
+        cdef xl_mouse_t* mice[256]
+        cdef int i
+        cdef list objects = []
+
+        if xl_mouse_count_all() > 256:
+            raise MemoryError("too many open mice for temp")
+
+        xl_mouse_list_all(mice)
+
+        for i in range(<int>xl_mouse_count_all()):
+            objects.append(cls(reference = <size_t>mice[i]))
+
+        return objects
+
+    property id:
+        def __get__(self):
+            return xl_mouse_get_int(self.mouse, XL_MOUSE_PROPERTY_ID)
+
+    property down_buttons:
+        def __get__(self):
+            return self._button_list(xl_mouse_get_int(self.mouse, XL_MOUSE_PROPERTY_DOWN_BUTTONS))
+
+    property up_buttons:
+        def __get__(self):
+            return self._button_list(xl_mouse_get_int(self.mouse, XL_MOUSE_PROPERTY_UP_BUTTONS))
+
+    property tribool:
+        def __get__(self):
+            return xl_mouse_get_int(self.mouse, XL_MOUSE_PROPERTY_TRIBOOL)
+
+    property last_pressed_button:
+        def __get__(self):
+            cdef bytes s = xl_mouse_get_str(self.mouse, XL_MOUSE_PROPERTY_LAST_PRESSED_BUTTON)
+            return s.decode() if sys.version_info.major > 2 else s
+
+    property last_released_button:
+        def __get__(self):
+            cdef bytes s = xl_mouse_get_str(self.mouse, XL_MOUSE_PROPERTY_LAST_RELEASED_BUTTON)
+            return s.decode() if sys.version_info.major > 2 else s
+
+    property last_pressed_time:
+        def __get__(self):
+            return xl_mouse_get_dbl(self.mouse, XL_MOUSE_PROPERTY_LAST_PRESSED_TIME)
+
+    property last_released_time:
+        def __get__(self):
+            return xl_mouse_get_dbl(self.mouse, XL_MOUSE_PROPERTY_LAST_RELEASED_TIME)
+
+    property relative:
+        """
+        When the mouse is in relative mode, the cursor is hidden, and the driver
+        will try to report continuous motion in the current window. Only relative
+        motion events will be delivered, and the mouse position will not change.
+        """
+        def __get__(self):
+            return xl_mouse_get_int(self.mouse, XL_MOUSE_PROPERTY_RELATIVE)
+
+        def __set__(self, bint value):
+            xl_mouse_set_int(self.mouse, XL_MOUSE_PROPERTY_RELATIVE, value)
+
+    property visible:
+        def __get__(self):
+            return xl_mouse_get_int(self.mouse, XL_MOUSE_PROPERTY_VISIBLE)
+
+        def __set__(self, bint value):
+            xl_mouse_set_int(self.mouse, XL_MOUSE_PROPERTY_VISIBLE, value)
+
+    property status:
+        def __get__(self):
+            cdef bytes s = xl_mouse_get_str(self.mouse, XL_MOUSE_PROPERTY_STATUS)
+            return s.decode() if sys.version_info.major > 2 else s # get unicode
+
+        def __set__(self, str value):
+            cdef bytes string
+
+            # if we need unicode strings for python 3k, convert the ascii status
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            xl_mouse_set_str(self.mouse, XL_MOUSE_PROPERTY_STATUS, <char*>string)
+
+    property name:
+        def __get__(self):
+            cdef bytes s = xl_mouse_get_str(self.mouse, XL_MOUSE_PROPERTY_NAME)
+            return s.decode() if sys.version_info.major > 2 else s # to unicode
+
+    property primary:
+        def __get__(self):
+            return xl_mouse_get_int(self.mouse, XL_MOUSE_PROPERTY_PRIMARY)
+
+    property open:
+        def __get__(self):
+            return xl_mouse_get_int(self.mouse, XL_MOUSE_PROPERTY_OPEN)
+
+    def address(self):
+        return <size_t>self.mouse
+
+    def cast(self):
+        return self
+
+    @staticmethod
+    def _button_list(xl_mouse_button_bit_t button_mask):
+        """
+        Internal method to convert a mouse button mask to a list of strings.
+        """
+        cdef int i, b
+
+        cdef list button_list = []
+        cdef bytes button_name
+
+        for i in range(XL_MOUSE_BUTTON_INDEX_COUNT):
+            b = 1 << i
+
+            if (button_mask & b) != 0:
+                button_name = <bytes>xl_mouse_button_short_name[i]
+
+                if sys.version_info.major > 2:
+                    button_list.append(button_name.decode()) # py3k unicode
+                else:
+                    button_list.append(button_name) # oldschool byte string
+
+        return button_list
+
+    def last_button_pressed_time(self, str button):
+        """
+        Get the absolute last time a given button was pressed. To get the relative
+        time (time since press), use aegame.utl.seconds() - last button press time.
+        """
+        cdef bytes b
+
+        if sys.version_info.major > 2:
+            b = <bytes>button.encode('utf-8') # convert utf-8 str to bytes
+        else:
+            b = <bytes>button # keep the oldschool python 2 button strings
+
+        return (xl_mouse_get_last_button_pressed_time(self.mouse,
+                xl_mouse_button_index_from_short_name(<char*>b)))
+
+    def last_button_released_time(self, str button):
+        """
+        Get the last absolute time the user let go of a given mouse button.
+        """
+        cdef bytes b
+
+        if sys.version_info.major > 2:
+            b = <bytes>button.encode('utf-8') # convert utf-8 str to bytes
+        else:
+            b = <bytes>button # keep the oldschool python 2 button strings
+
+        return (xl_mouse_get_last_button_released_time(self.mouse,
+                xl_mouse_button_index_from_short_name(<char *>b)))
+
+    def clear_history(self):
+        """
+        Reset input tracking so a cheat code doesn't register an effect many times.
+        """
+        xl_mouse_clear_history(self.mouse); return self
+
+    cdef int _button_mask(self, object button):
+        """
+        Internal method to convert a button list (or a single button) to a bitmask.
+        """
+        cdef int mask = 0
+
+        # button names have to be converted to ascii before they can be used
+        cdef bytes s
+
+        if isinstance(button, list):
+            for bn in button:
+                if sys.version_info.major > 2:
+                    s = <bytes>bn.encode('utf-8') # convert utf-8 to ascii str
+                else:
+                    s = <bytes>bn # keep oldschool python 2 ascii bytes string
+
+                mask |= <int>xl_mouse_button_bit_from_short_name(<char*>s)
+        else:
+            if sys.version_info.major > 2:
+                s = <bytes>button.encode('utf-8') # convert utf-8 to ascii str
+            else:
+                s = <bytes>button # keep oldschool python 2 ascii bytes string
+
+            mask |= <int>xl_mouse_button_bit_from_short_name(<char*>s)
+
+        return mask
+
+    def check_history(self, list buttons):
+        """
+        Returns True if the last N mouse button hits match a list. This can be used
+        for cheat code and fighting game combo systems. List items can either be
+        button names as strings, or another list of buttons for (A + B, C) combos.
+        """
+        cdef int m[1024]
+        cdef int i
+
+        if len(buttons) > 1024: raise MemoryError("too many buttons for temp!")
+        for i, button in enumerate(buttons): m[i] = self._button_mask(button)
+
+        return bool(xl_mouse_check_history(self.mouse, m, len(buttons)))
 
 # ==============================================================================
 # ~ [ controller input ]
@@ -3273,6 +3639,14 @@ cdef class Controller:
                                     XL_CONTROLLER_PROPERTY_NAME)
 
             return s.decode() if sys.version_info.major > 2 else s
+
+    property primary:
+        """
+        Returns True if the controller is the first one the user plugged in, or
+        if it's in the first controller slot on game consoles (user index one).
+        """
+        def __get__(self): return xl_controller_get_int(self.controller,
+                                        XL_CONTROLLER_PROPERTY_PRIMARY)
 
     property open:
         """
@@ -3773,6 +4147,7 @@ class event(object):
         cdef bytes name
 
         cdef Controller controller = Controller(reference=0)
+        cdef Mouse mouse = Mouse(reference=0)
         cdef Keyboard keyboard = Keyboard(reference=0)
         cdef Sound sound = Sound(reference=0)
         cdef Window window = Window(reference=0)
@@ -3832,13 +4207,15 @@ class event(object):
 
         elif c_type == XL_EVENT_WINDOW_MOUSE_ENTER:
             window.window = c_event.as_window_mouse_enter.window
+            mouse.mouse = c_event.as_window_mouse_enter.mouse
 
-            return ('window_mouse_enter', window)
+            return ('window_mouse_enter', window, mouse)
 
         elif c_type == XL_EVENT_WINDOW_MOUSE_LEAVE:
             window.window = c_event.as_window_mouse_leave.window
+            mouse.mouse = c_event.as_window_mouse_leave.mouse
 
-            return ('window_mouse_leave', window)
+            return ('window_mouse_leave', window, mouse)
 
         elif c_type == XL_EVENT_MUSIC_FINISHED:
             return ('music_finished',)
@@ -3871,6 +4248,38 @@ class event(object):
                     Keyboard._mod_list(c_event.as_keyboard_key.mods),
                     name.decode() if sys.version_info.major > 2 else name,
                     bool(c_event.as_keyboard_key.pressed))
+
+        elif c_type == XL_EVENT_MOUSE_INSERT:
+            mouse.mouse = c_event.as_mouse_insert.mouse
+
+            return ('mouse_insert', mouse)
+
+        elif c_type == XL_EVENT_MOUSE_REMOVE:
+            mouse.mouse = c_event.as_mouse_remove.mouse
+
+            return ('mouse_remove', mouse)
+
+        elif c_type == XL_EVENT_MOUSE_BUTTON:
+            name = xl_mouse_button_short_name[<size_t>c_event.as_mouse_button.button]
+            mouse.mouse = c_event.as_mouse_button.mouse
+
+            return ('mouse_button', mouse,
+                    name.decode() if sys.version_info.major > 2 else name,
+                    bool(c_event.as_mouse_button.pressed))
+
+        elif c_type == XL_EVENT_MOUSE_WHEEL:
+            mouse.mouse = c_event.as_mouse_wheel.mouse
+
+            return ('mouse_wheel', mouse, c_event.as_mouse_wheel.x, c_event.as_mouse_wheel.y)
+
+        elif c_type == XL_EVENT_MOUSE_MOTION:
+            mouse.mouse = c_event.as_mouse_motion.mouse
+            window.window = c_event.as_mouse_motion.window
+
+            return ('mouse_motion', mouse, window,
+                    Mouse._button_list( c_event.as_mouse_motion.buttons ),
+                    c_event.as_mouse_motion.x, c_event.as_mouse_motion.y,
+                    c_event.as_mouse_motion.dx, c_event.as_mouse_motion.dy)
 
         elif c_type == XL_EVENT_CONTROLLER_INSERT:
             controller.controller = c_event.as_controller_insert.controller

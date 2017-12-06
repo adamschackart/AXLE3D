@@ -83,6 +83,7 @@ XL_DECL const char* XL_CALL xl_audio_implementation(void);
     N(SOUND, sound)             \
     N(ANIMATION, animation)     \
     N(KEYBOARD, keyboard)       \
+    N(MOUSE, mouse)             \
 
 #if 0
 #define N(cap, low) typedef struct xl_internal_ ## low ## _t xl_ ## low ## _t;
@@ -192,6 +193,7 @@ XL_DECL xl_window_t* XL_CALL xl_window_create(int initially_visible);
     N(XL_WINDOW_PROPERTY_GRABBED, int, int, grabbed)                \
     N(XL_WINDOW_PROPERTY_OPENGL, int, int, opengl)                  \
     N(XL_WINDOW_PROPERTY_VSYNC, int, int, vsync)                    \
+    N(XL_WINDOW_PROPERTY_PRIMARY, int, int, primary)                \
     N(XL_WINDOW_PROPERTY_OPEN, int, int, open)                      \
                                                                     \
     /* miscellaneous properties */                                  \
@@ -989,6 +991,9 @@ XL_DECL void XL_CALL xl_sound_close_all(void);
     /* the keyboard's string identifier */                                      \
     N(XL_KEYBOARD_PROPERTY_NAME, const char*, str, name)                        \
                                                                                 \
+    /* this keyboard is the first one plugged in */                             \
+    N(XL_KEYBOARD_PROPERTY_PRIMARY, int, int, primary)                          \
+                                                                                \
     /* whether or not the keyboard is plugged in */                             \
     N(XL_KEYBOARD_PROPERTY_OPEN, int, int, open)                                \
                                                                                 \
@@ -1334,6 +1339,21 @@ xl_keyboard_key_is_up(xl_keyboard_t* k, xl_keyboard_key_index_t i)
     return !xl_keyboard_key_is_down(k, i);
 }
 
+#define N(cap, low)                                                         \
+                                                                            \
+    static c_inline int xl_keyboard_ ## low ## _is_down (xl_keyboard_t* k)  \
+    {                                                                       \
+        return xl_keyboard_key_is_down(k, XL_KEYBOARD_KEY_INDEX_ ## cap);   \
+    }                                                                       \
+                                                                            \
+    static c_inline int xl_keyboard_ ## low ## _is_up (xl_keyboard_t* k)    \
+    {                                                                       \
+        return xl_keyboard_key_is_up(k, XL_KEYBOARD_KEY_INDEX_ ## cap);     \
+    }                                                                       \
+
+XL_KEYBOARD_KEY_N
+#undef N
+
 XL_DECL double XL_CALL // get last time a given key was pressed
 xl_keyboard_get_last_key_pressed_time (xl_keyboard_t * keyboard,
                                     xl_keyboard_key_index_t key);
@@ -1341,6 +1361,25 @@ xl_keyboard_get_last_key_pressed_time (xl_keyboard_t * keyboard,
 XL_DECL double XL_CALL // get last time a given key was released
 xl_keyboard_get_last_key_released_time(xl_keyboard_t * keyboard,
                                     xl_keyboard_key_index_t key);
+
+#define N(cap, low)                                                         \
+                                                                            \
+    static c_inline double                                                  \
+    xl_keyboard_get_last_ ## low ## _pressed_time(xl_keyboard_t* keyboard)  \
+    {                                                                       \
+        const  xl_keyboard_key_index_t v = XL_KEYBOARD_KEY_INDEX_ ## cap;   \
+        return xl_keyboard_get_last_key_pressed_time(keyboard, v);          \
+    }                                                                       \
+                                                                            \
+    static c_inline double                                                  \
+    xl_keyboard_get_last_ ## low ## _released_time(xl_keyboard_t* keyboard) \
+    {                                                                       \
+        const  xl_keyboard_key_index_t v = XL_KEYBOARD_KEY_INDEX_ ## cap;   \
+        return xl_keyboard_get_last_key_released_time(keyboard, v);         \
+    }                                                                       \
+
+XL_KEYBOARD_KEY_N
+#undef N
 
 /* The input history system is used for things like cheat codes, fighting
  * game key combos, etc. This function clears the input history, which
@@ -1359,7 +1398,195 @@ XL_DECL int XL_CALL xl_keyboard_check_history( xl_keyboard_t* keyboard,
 --------------------------------------------------------------------------------
 */
 
-// TODO
+#define XL_MOUSE_PROPERTY_N                                                     \
+                                                                                \
+    N(XL_MOUSE_PROPERTY_TOTAL, int, int, total)                                 \
+    N(XL_MOUSE_PROPERTY_ID, int, int, id)                                       \
+    N(XL_MOUSE_PROPERTY_DOWN_BUTTONS, int, int, down_buttons)                   \
+    N(XL_MOUSE_PROPERTY_UP_BUTTONS, int, int, up_buttons)                       \
+    N(XL_MOUSE_PROPERTY_TRIBOOL, int, int, tribool)                             \
+    N(XL_MOUSE_PROPERTY_LAST_PRESSED_BUTTON, int, int, last_pressed_button)     \
+    N(XL_MOUSE_PROPERTY_LAST_RELEASED_BUTTON, int, int, last_released_button)   \
+    N(XL_MOUSE_PROPERTY_LAST_PRESSED_TIME, double, dbl, last_pressed_time)      \
+    N(XL_MOUSE_PROPERTY_LAST_RELEASED_TIME, double, dbl, last_released_time)    \
+    N(XL_MOUSE_PROPERTY_RELATIVE, int, int, relative)                           \
+    N(XL_MOUSE_PROPERTY_VISIBLE, int, int, visible)                             \
+    N(XL_MOUSE_PROPERTY_STATUS, const char*, str, status)                       \
+    N(XL_MOUSE_PROPERTY_NAME, const char*, str, name)                           \
+    N(XL_MOUSE_PROPERTY_PRIMARY, int, int, primary)                             \
+    N(XL_MOUSE_PROPERTY_OPEN, int, int, open)                                   \
+    N(XL_MOUSE_PROPERTY_COUNT, int, int, _)                                     \
+
+typedef enum xl_mouse_property_t
+{
+    #define N(x, t, s, n) x,
+    XL_MOUSE_PROPERTY_N
+    #undef N
+} \
+    xl_mouse_property_t;
+
+static const char* xl_mouse_property_name[] =
+{
+    #define N(x, t, s, n) #x,
+    XL_MOUSE_PROPERTY_N
+    #undef N
+};
+
+static const char* xl_mouse_property_type[] =
+{
+    #define N(x, t, s, n) #s,
+    XL_MOUSE_PROPERTY_N
+    #undef N
+};
+
+XL_DECL void XL_CALL
+xl_mouse_set_int(xl_mouse_t* mouse, xl_mouse_property_t prop, int value);
+
+XL_DECL int XL_CALL
+xl_mouse_get_int(xl_mouse_t* mouse, xl_mouse_property_t prop);
+
+XL_DECL void XL_CALL
+xl_mouse_set_dbl(xl_mouse_t* mouse, xl_mouse_property_t prop, double value);
+
+XL_DECL double XL_CALL
+xl_mouse_get_dbl(xl_mouse_t* mouse, xl_mouse_property_t prop);
+
+XL_DECL void XL_CALL
+xl_mouse_set_str(xl_mouse_t* mouse, xl_mouse_property_t prop, const char* value);
+
+XL_DECL const char* XL_CALL
+xl_mouse_get_str(xl_mouse_t* mouse, xl_mouse_property_t prop);
+
+/* Make shorthand wrappers so we don't have to type SUPER_GIGANTIC_ENUM_NAMES in C.
+ * xl_mouse_get_str(mouse, XL_MOUSE_PROPERTY_STATUS) = xl_mouse_get_status(mouse).
+ */
+#define N(x, type, short_type, name)                                        \
+                                                                            \
+    static c_inline void xl_mouse_set_ ## name (xl_mouse_t* mouse, type v)  \
+    {                                                                       \
+        xl_mouse_set_ ## short_type (mouse, x, v);                          \
+    }                                                                       \
+                                                                            \
+    static c_inline type xl_mouse_get_ ## name (xl_mouse_t* mouse)          \
+    {                                                                       \
+        return xl_mouse_get_ ## short_type (mouse, x);                      \
+    }                                                                       \
+
+XL_MOUSE_PROPERTY_N
+#undef N
+
+static c_inline size_t xl_mouse_count_all(void)
+{
+    return (size_t)xl_mouse_get_total(NULL);
+}
+
+XL_DECL void XL_CALL xl_mouse_list_all(xl_mouse_t** mice);
+
+/* ===== [ mouse buttons ] ================================================== */
+
+#define XL_MOUSE_BUTTON_N   \
+                            \
+    N(LEFT,     left,   0)  \
+    N(MIDDLE,   middle, 1)  \
+    N(RIGHT,    right,  2)  \
+    N(COUNT,    _,      3)  \
+
+typedef enum xl_mouse_button_index_t
+{
+    #define N(cap, low, val) XL_MOUSE_BUTTON_INDEX_ ## cap,
+    XL_MOUSE_BUTTON_N
+    #undef N
+} \
+    xl_mouse_button_index_t;
+
+static const char* xl_mouse_button_index_name[] =
+{
+    #define N(cap, low, val) AE_STRINGIFY(XL_MOUSE_BUTTON_INDEX_ ## cap),
+    XL_MOUSE_BUTTON_N
+    #undef N
+};
+
+static const char* xl_mouse_button_short_name[] =
+{
+    #define N(cap, low, val) #low,
+    XL_MOUSE_BUTTON_N
+    #undef N
+};
+
+typedef enum xl_mouse_button_bit_t
+{
+    #define N(cap, low, val) XL_MOUSE_BUTTON_BIT_ ## cap = AE_IDX2BIT(val),
+    XL_MOUSE_BUTTON_N
+    #undef N
+} \
+    xl_mouse_button_bit_t;
+
+XL_DECL xl_mouse_button_index_t XL_CALL // get button index from name
+        xl_mouse_button_index_from_short_name(const char* name);
+
+static c_inline xl_mouse_button_bit_t // get button bitmask from name
+                xl_mouse_button_bit_from_short_name(const char* name)
+{
+    return ((xl_mouse_button_bit_t)
+            AE_IDX2BIT(xl_mouse_button_index_from_short_name(name)));
+}
+
+static c_inline int
+xl_mouse_button_is_down(xl_mouse_t* c, xl_mouse_button_index_t b)
+{
+    return (xl_mouse_get_down_buttons(c) & AE_IDX2BIT(b)) != 0;
+}
+
+static c_inline int
+xl_mouse_button_is_up(xl_mouse_t* c, xl_mouse_button_index_t b)
+{
+    return !xl_mouse_button_is_down(c, b);
+}
+
+#define N(cap, low, val)                                                    \
+                                                                            \
+    static c_inline int xl_mouse_ ## low ## _is_down (xl_mouse_t* c)        \
+    {                                                                       \
+        return xl_mouse_button_is_down(c, XL_MOUSE_BUTTON_INDEX_ ## cap);   \
+    }                                                                       \
+                                                                            \
+    static c_inline int xl_mouse_ ## low ## _is_up (xl_mouse_t* c)          \
+    {                                                                       \
+        return xl_mouse_button_is_up(c, XL_MOUSE_BUTTON_INDEX_ ## cap);     \
+    }                                                                       \
+
+XL_MOUSE_BUTTON_N
+#undef N
+
+XL_DECL double XL_CALL xl_mouse_get_last_button_pressed_time(xl_mouse_t * mouse,
+                                                xl_mouse_button_index_t button);
+
+XL_DECL double XL_CALL xl_mouse_get_last_button_released_time(xl_mouse_t* mouse,
+                                                xl_mouse_button_index_t button);
+
+#define N(cap, low, val)                                                    \
+                                                                            \
+    static c_inline double                                                  \
+    xl_mouse_get_last_ ## low ## _pressed_time(xl_mouse_t* mouse)           \
+    {                                                                       \
+        const xl_mouse_button_index_t v = XL_MOUSE_BUTTON_INDEX_ ## cap;    \
+        return xl_mouse_get_last_button_pressed_time(mouse, v);             \
+    }                                                                       \
+                                                                            \
+    static c_inline double                                                  \
+    xl_mouse_get_last_ ## low ## _released_time(xl_mouse_t* mouse)          \
+    {                                                                       \
+        const xl_mouse_button_index_t v = XL_MOUSE_BUTTON_INDEX_ ## cap;    \
+        return xl_mouse_get_last_button_released_time(mouse, v);            \
+    }                                                                       \
+
+XL_MOUSE_BUTTON_N
+#undef N
+
+XL_DECL void XL_CALL xl_mouse_clear_history(xl_mouse_t* mouse);
+
+XL_DECL int XL_CALL xl_mouse_check_history(xl_mouse_t* mouse,
+                        const int* const masks, size_t count);
 
 /*
 ================================================================================
@@ -1412,6 +1639,7 @@ XL_DECL int XL_CALL xl_keyboard_check_history( xl_keyboard_t* keyboard,
     N(XL_CONTROLLER_PROPERTY_LEFT_STICK_Y, double, dbl, left_stick_y)                       \
                                                                                             \
     /* miscellaneous properties */                                                          \
+    N(XL_CONTROLLER_PROPERTY_PRIMARY, int, int, primary)                                    \
     N(XL_CONTROLLER_PROPERTY_OPEN, int, int, open)                                          \
     N(XL_CONTROLLER_PROPERTY_STATUS, const char*, str, status)                              \
     N(XL_CONTROLLER_PROPERTY_NAME, const char*, str, name)                                  \
@@ -1908,11 +2136,12 @@ XL_DECL void XL_CALL xl_animation_close_all(void);
     N(XL_EVENT_WINDOW_GAIN_FOCUS, window_gain_focus, xl_window_t* window;)          \
     N(XL_EVENT_WINDOW_LOSE_FOCUS, window_lose_focus, xl_window_t* window;)          \
                                                                                     \
-    /* the mouse cursor entered or left the window (TODO: same change as above -    \
-     * this will also have to be updated to contain a mouse device argument...)     \
-     */                                                                             \
-    N(XL_EVENT_WINDOW_MOUSE_ENTER, window_mouse_enter, xl_window_t* window;)        \
-    N(XL_EVENT_WINDOW_MOUSE_LEAVE, window_mouse_leave, xl_window_t* window;)        \
+    /* the mouse cursor entered or left the window (TODO: same change as above!) */ \
+    N(XL_EVENT_WINDOW_MOUSE_ENTER, window_mouse_enter, xl_window_t* window;         \
+                                                        xl_mouse_t* mouse;)         \
+                                                                                    \
+    N(XL_EVENT_WINDOW_MOUSE_LEAVE, window_mouse_leave, xl_window_t* window;         \
+                                                        xl_mouse_t* mouse;)         \
                                                                                     \
     /* music has finished playing and is now stopped */                             \
     N(XL_EVENT_MUSIC_FINISHED, music_finished, char _pad;)                          \
@@ -1930,6 +2159,21 @@ XL_DECL void XL_CALL xl_animation_close_all(void);
     /* the user hit a key on an active plugged-in keyboard device or released it */ \
     N(XL_EVENT_KEYBOARD_KEY, keyboard_key, xl_keyboard_t * keyboard;                \
             xl_keyboard_mod_bit_t mods; xl_keyboard_key_index_t key; int pressed;)  \
+                                                                                    \
+    /* the user plugged in or unplugged a valid mouse device */                     \
+    N(XL_EVENT_MOUSE_INSERT, mouse_insert, xl_mouse_t* mouse;)                      \
+    N(XL_EVENT_MOUSE_REMOVE, mouse_remove, xl_mouse_t* mouse;)                      \
+                                                                                    \
+    /* the user pressed or released a button on the mouse */                        \
+    N(XL_EVENT_MOUSE_BUTTON, mouse_button, xl_mouse_t* mouse;                       \
+                xl_mouse_button_index_t button; int pressed;)                       \
+                                                                                    \
+    /* the user moved the scroll wheel on the mouse, in one of four directions */   \
+    N(XL_EVENT_MOUSE_WHEEL, mouse_wheel, xl_mouse_t* mouse; int x; int y;)          \
+                                                                                    \
+    /* the user moved or dragged the mouse cursor */                                \
+    N(XL_EVENT_MOUSE_MOTION, mouse_motion, xl_mouse_t* mouse; xl_window_t* window;  \
+        xl_mouse_button_bit_t buttons; double x; double y; double dx; double dy;)   \
                                                                                     \
     /* the user plugged in or unplugged a recognized and valid game controller */   \
     N(XL_EVENT_CONTROLLER_INSERT, controller_insert, xl_controller_t* controller;)  \

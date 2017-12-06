@@ -711,7 +711,74 @@ int xl_keyboard_check_history(xl_keyboard_t* keyboard, // cheat check!!!
 --------------------------------------------------------------------------------
 */
 
-// TODO
+void
+xl_mouse_set_int(xl_mouse_t* mouse, xl_mouse_property_t prop, int value)
+{
+    AE_STUB();
+}
+
+int
+xl_mouse_get_int(xl_mouse_t* mouse, xl_mouse_property_t prop)
+{
+    AE_STUB(); return 0;
+}
+
+void
+xl_mouse_set_dbl(xl_mouse_t* mouse, xl_mouse_property_t prop, double value)
+{
+    AE_STUB();
+}
+
+double
+xl_mouse_get_dbl(xl_mouse_t* mouse, xl_mouse_property_t prop)
+{
+    AE_STUB(); return 0.0;
+}
+
+void
+xl_mouse_set_str(xl_mouse_t* mouse, xl_mouse_property_t prop, const char* value)
+{
+    AE_STUB();
+}
+
+const char*
+xl_mouse_get_str(xl_mouse_t* mouse, xl_mouse_property_t prop)
+{
+    AE_STUB(); return "";
+}
+
+void xl_mouse_list_all(xl_mouse_t** mice)
+{
+    AE_STUB();
+}
+
+xl_mouse_button_index_t xl_mouse_button_index_from_short_name(const char* name)
+{
+    AE_STUB(); return XL_MOUSE_BUTTON_INDEX_LEFT;
+}
+
+double xl_mouse_get_last_button_pressed_time(xl_mouse_t * mouse,
+                                xl_mouse_button_index_t button)
+{
+    AE_STUB(); return 0.0;
+}
+
+double xl_mouse_get_last_button_released_time(xl_mouse_t* mouse,
+                                xl_mouse_button_index_t button)
+{
+    AE_STUB(); return 0.0;
+}
+
+void xl_mouse_clear_history(xl_mouse_t* mouse)
+{
+    AE_STUB();
+}
+
+int
+xl_mouse_check_history(xl_mouse_t* mouse, const int* const masks, size_t count)
+{
+    AE_STUB(); return 0;
+}
 
 /*
 ================================================================================

@@ -90,7 +90,7 @@ void xl_object_list_all(void ** objects)
 
 void xl_object_close_all(void)
 {
-    AE_STATIC_ASSERT(all_objects_covered, XL_OBJECT_TYPE_COUNT == 8);
+    AE_STATIC_ASSERT(all_objects_covered, XL_OBJECT_TYPE_COUNT == 9);
     AE_PROFILE_ENTER();
 
     // window closes textures and fonts. controllers can't be closed,
@@ -106,10 +106,10 @@ void xl_object_close_all(void)
 ================================================================================
  * ~~ [ window management ] ~~ *
 --------------------------------------------------------------------------------
-TODO: in future mouse code, get and set cursor visibility on a per-device basis
 TODO: get currently grabbed window, mouse focused window, & input focused window
 TODO: function that applies argv to window properties (e.g. -window-width=1920)
 TODO: log more window information (monitor name?) on window creation and closing
+TODO: refresh_rate property (hertz) that calls SDL_DisplayMode to cap framerate
 --------------------------------------------------------------------------------
 */
 
@@ -563,6 +563,18 @@ int xl_window_get_int(xl_window_t* window, xl_window_property_t property)
             if (xl_is_init())
             {
                 value = ae_ptrset_contains(&xl_window_set, window);
+            }
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_PRIMARY:
+        {
+            if (xl_window_get_open(window))
+            {
+                xl_window_t* first;
+                xl_window_list_all(&first);
+
+                value = window == first;
             }
         }
         break;
@@ -4147,6 +4159,18 @@ xl_keyboard_get_int(xl_keyboard_t* keyboard, xl_keyboard_property_t property)
         }
         break;
 
+        case XL_KEYBOARD_PROPERTY_PRIMARY:
+        {
+            if (xl_keyboard_get_open(keyboard))
+            {
+                xl_keyboard_t* first;
+                xl_keyboard_list_all(&first);
+
+                return keyboard == first;
+            }
+        }
+        break;
+
         case XL_KEYBOARD_PROPERTY_OPEN:
         {
             return xl_is_init() && ae_ptrset_contains(&xl_keyboard_set, keyboard);
@@ -4385,6 +4409,11 @@ xl_keyboard_key_index_from_short_name(const char * name)
 {
     size_t i = 0, n = XL_KEYBOARD_KEY_INDEX_COUNT;
 
+    if (!strcmp(name, "enter"))
+    {
+        return XL_KEYBOARD_KEY_INDEX_RETURN;
+    }
+
     for (; i < n; i++)
     {
         if (!strcmp(xl_keyboard_key_short_name[i], name))
@@ -4601,9 +4630,435 @@ static xl_keyboard_key_index_t xl_keyboard_key_index_from_sdl(SDL_Scancode code)
 ================================================================================
  * ~~ [ mouse input ] ~~ *
 --------------------------------------------------------------------------------
+TODO: set the cursor shape (system defaults, monochrome bitmap, and color image)
+--------------------------------------------------------------------------------
+TODO: get the window-relative and global mouse position as x/y double properties
+(we have to remap the window-relative x/y to window logical renderer dimensions,
+like SDL does for motion events; check out the SDL code to see how this is done)
+--------------------------------------------------------------------------------
 */
 
-// TODO
+typedef struct xl_internal_mouse_t
+{
+    double last_released_button_time;
+    double last_pressed_button_time;
+
+    double last_button_released_time[XL_MOUSE_BUTTON_INDEX_COUNT];
+    double last_button_pressed_time [XL_MOUSE_BUTTON_INDEX_COUNT];
+
+    xl_mouse_button_index_t last_released_button;
+    xl_mouse_button_index_t last_pressed_button;
+
+    xl_mouse_button_bit_t history[64];
+    size_t next_history_write_index;
+
+    int id; // random int
+    double time_inserted;
+} \
+    xl_internal_mouse_t;
+
+// there's only one global mouse on PC, so we create a fake connection event
+// and push it to SDL's queue on init. thus, using the mouse requires events.
+static u32 xl_mouse_insert_event_type;
+
+static void xl_mouse_close_all(void) // delete the global mouse object
+{
+    size_t i = 0, n = xl_mouse_count_all();
+
+    xl_mouse_t** mice = (xl_mouse_t**)alloca(n * sizeof(xl_mouse_t*));
+    ae_ptrset_list(&xl_mouse_set, (void**)mice);
+
+    for (; i < n; i++)
+    {
+        ae_ptrset_remove(&xl_mouse_set, mice[i]);
+        ae_free(mice[i]);
+    }
+}
+
+void
+xl_mouse_set_int(xl_mouse_t* mouse, xl_mouse_property_t property, int value)
+{
+    xl_internal_mouse_t* data = (xl_internal_mouse_t*)mouse; // private data
+
+    ae_switch (property, xl_mouse_property, XL_MOUSE_PROPERTY, suffix)
+    {
+        case XL_MOUSE_PROPERTY_RELATIVE:
+        {
+            if (xl_mouse_get_open(mouse))
+            {
+                if (SDL_SetRelativeMouseMode((SDL_bool)ae_branch(value)) < 0)
+                {
+                    ae_error("failed to set mouse mode: %s", SDL_GetError());
+                }
+            }
+        }
+        break;
+
+        case XL_MOUSE_PROPERTY_VISIBLE:
+        {
+            if (xl_mouse_get_open(mouse))
+            {
+                ae_if (value)
+                {
+                    if (SDL_ShowCursor(SDL_ENABLE) < 0)
+                    {
+                        ae_error("failed to show cursor: %s", SDL_GetError());
+                    }
+                }
+                else
+                {
+                    if (SDL_ShowCursor(SDL_DISABLE) < 0)
+                    {
+                        ae_error("failed to hide cursor: %s", SDL_GetError());
+                    }
+                }
+            }
+        }
+        break;
+
+        default:
+        {
+            AE_WARN("%s in %s", xl_mouse_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
+}
+
+int
+xl_mouse_get_int(xl_mouse_t* mouse, xl_mouse_property_t property)
+{
+    xl_internal_mouse_t* data = (xl_internal_mouse_t*)mouse; // private data
+
+    ae_switch (property, xl_mouse_property, XL_MOUSE_PROPERTY, suffix)
+    {
+        case XL_MOUSE_PROPERTY_TOTAL:
+        {
+            return xl_mouse_set.count;
+        }
+        break;
+
+        case XL_MOUSE_PROPERTY_ID:
+        {
+            if (xl_mouse_get_open(mouse)) return data->id;
+        }
+        break;
+
+        case XL_MOUSE_PROPERTY_DOWN_BUTTONS:
+        {
+            if (xl_mouse_get_open(mouse))
+            {
+                u32 sdl_mouse_state = SDL_GetMouseState(NULL, NULL);
+                int mask = 0;
+
+                if (sdl_mouse_state & SDL_BUTTON(SDL_BUTTON_LEFT))
+                {
+                    mask |= (int)XL_MOUSE_BUTTON_BIT_LEFT;
+                }
+
+                if (sdl_mouse_state & SDL_BUTTON(SDL_BUTTON_MIDDLE))
+                {
+                    mask |= (int)XL_MOUSE_BUTTON_BIT_MIDDLE;
+                }
+
+                if (sdl_mouse_state & SDL_BUTTON(SDL_BUTTON_RIGHT))
+                {
+                    mask |= (int)XL_MOUSE_BUTTON_BIT_RIGHT;
+                }
+
+                return mask;
+            }
+        }
+        break;
+
+        case XL_MOUSE_PROPERTY_UP_BUTTONS:
+        {
+            return ~xl_mouse_get_down_buttons(mouse) &
+                (~(~0 << XL_MOUSE_BUTTON_INDEX_COUNT));
+        }
+        break;
+
+        case XL_MOUSE_PROPERTY_TRIBOOL:
+        {
+            return ae_tribool(xl_mouse_get_down_buttons(mouse),
+                                XL_MOUSE_BUTTON_INDEX_LEFT,
+                                XL_MOUSE_BUTTON_INDEX_RIGHT);
+        }
+        break;
+
+        case XL_MOUSE_PROPERTY_LAST_PRESSED_BUTTON:
+        {
+            if (xl_mouse_get_open(mouse)) return (int)data->last_pressed_button;
+        }
+        break;
+
+        case XL_MOUSE_PROPERTY_LAST_RELEASED_BUTTON:
+        {
+            if (xl_mouse_get_open(mouse)) return (int)data->last_released_button;
+        }
+        break;
+
+        case XL_MOUSE_PROPERTY_RELATIVE:
+        {
+            if (xl_mouse_get_open(mouse)) return SDL_GetRelativeMouseMode();
+        }
+        break;
+
+        case XL_MOUSE_PROPERTY_VISIBLE:
+        {
+            if (xl_mouse_get_open(mouse))
+            {
+                int visible = SDL_ShowCursor(SDL_QUERY);
+
+                if (visible < 0)
+                {
+                    ae_error("failed to query mouse cursor: %s", SDL_GetError());
+                }
+
+                return visible;
+            }
+        }
+        break;
+
+        case XL_MOUSE_PROPERTY_PRIMARY:
+        {
+            if (xl_mouse_get_open(mouse))
+            {
+                xl_mouse_t* first;
+                xl_mouse_list_all(&first);
+
+                return mouse == first;
+            }
+        }
+        break;
+
+        case XL_MOUSE_PROPERTY_OPEN:
+        {
+            return xl_is_init() && ae_ptrset_contains(&xl_mouse_set, mouse);
+        }
+        break;
+
+        default:
+        {
+            AE_WARN("%s in %s", xl_mouse_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
+
+    return 0;
+}
+
+void
+xl_mouse_set_dbl(xl_mouse_t* mouse, xl_mouse_property_t property, double value)
+{
+    xl_internal_mouse_t* data = (xl_internal_mouse_t*)mouse; // private data
+
+    ae_switch (property, xl_mouse_property, XL_MOUSE_PROPERTY, suffix)
+    {
+        default:
+        {
+            AE_WARN("%s in %s", xl_mouse_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
+}
+
+double
+xl_mouse_get_dbl(xl_mouse_t* mouse, xl_mouse_property_t property)
+{
+    xl_internal_mouse_t* data = (xl_internal_mouse_t*)mouse; // private data
+
+    ae_switch (property, xl_mouse_property, XL_MOUSE_PROPERTY, suffix)
+    {
+        case XL_MOUSE_PROPERTY_TRIBOOL:
+        {
+            return (double)xl_mouse_get_tribool(mouse);
+        }
+        break;
+
+        case XL_MOUSE_PROPERTY_LAST_PRESSED_TIME:
+        {
+            if (xl_mouse_get_open(mouse)) return data->last_pressed_button_time;
+        }
+        break;
+
+        case XL_MOUSE_PROPERTY_LAST_RELEASED_TIME:
+        {
+            if (xl_mouse_get_open(mouse)) return data->last_released_button_time;
+        }
+        break;
+
+        default:
+        {
+            AE_WARN("%s in %s", xl_mouse_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
+
+    return 0.0;
+}
+
+void
+xl_mouse_set_str(xl_mouse_t* mouse, xl_mouse_property_t property, const char* value)
+{
+    xl_internal_mouse_t* data = (xl_internal_mouse_t*)mouse; // private data
+
+    ae_switch (property, xl_mouse_property, XL_MOUSE_PROPERTY, suffix)
+    {
+        default:
+        {
+            AE_WARN("%s in %s", xl_mouse_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
+}
+
+const char*
+xl_mouse_get_str(xl_mouse_t* mouse, xl_mouse_property_t property)
+{
+    xl_internal_mouse_t* data = (xl_internal_mouse_t*)mouse; // private data
+
+    ae_switch (property, xl_mouse_property, XL_MOUSE_PROPERTY, suffix)
+    {
+        case XL_MOUSE_PROPERTY_LAST_PRESSED_BUTTON:
+        {
+            return xl_mouse_button_short_name[xl_mouse_get_last_pressed_button(mouse)];
+        }
+        break;
+
+        case XL_MOUSE_PROPERTY_LAST_RELEASED_BUTTON:
+        {
+            return xl_mouse_button_short_name[xl_mouse_get_last_released_button(mouse)];
+        }
+        break;
+
+        case XL_MOUSE_PROPERTY_STATUS:
+        {
+            return xl_mouse_get_open(mouse) ? "open" : "closed"; // TODO: detail
+        }
+        break;
+
+        case XL_MOUSE_PROPERTY_NAME:
+        {
+            // TODO: find a way to query for the name of the mouse (not in SDL)
+        }
+        break;
+
+        default:
+        {
+            AE_WARN("%s in %s", xl_mouse_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
+
+    return "";
+}
+
+static int xl_mouse_compare_time_inserted(const void* av, const void* bv)
+{
+    xl_internal_mouse_t* a = *(xl_internal_mouse_t**)av;
+    xl_internal_mouse_t* b = *(xl_internal_mouse_t**)bv;
+
+    if (a->time_inserted < b->time_inserted) return -1;
+    if (a->time_inserted > b->time_inserted) return +1;
+
+    return 0;
+}
+
+void xl_mouse_list_all(xl_mouse_t** mice)
+{
+    // do this for consistency, even though theres one mouse
+    ae_ptrset_list(&xl_mouse_set, (void**)mice);
+
+    qsort(mice, xl_mouse_count_all(), // keep a stable order
+        sizeof(xl_mouse_t*), xl_mouse_compare_time_inserted);
+}
+
+/* ===== [ mouse buttons ] ================================================== */
+
+xl_mouse_button_index_t
+xl_mouse_button_index_from_short_name(const char * name)
+{
+    size_t i = 0, n = XL_MOUSE_BUTTON_INDEX_COUNT;
+
+    for (; i < n; i++)
+    {
+        if (!strcmp(xl_mouse_button_short_name[i], name))
+        {
+            return (xl_mouse_button_index_t)i;
+        }
+    }
+
+    ae_assert(0, "\"%s\" not a valid button name", name);
+    return XL_MOUSE_BUTTON_INDEX_COUNT;
+}
+
+double xl_mouse_get_last_button_pressed_time(xl_mouse_t * mouse,
+                                xl_mouse_button_index_t button)
+{
+    if (xl_mouse_get_open(mouse))
+    {
+        return ((xl_internal_mouse_t*)mouse)->last_button_pressed_time[button];
+    }
+    else
+    {
+        return 0.0;
+    }
+}
+
+double xl_mouse_get_last_button_released_time(xl_mouse_t* mouse,
+                                xl_mouse_button_index_t button)
+{
+    if (xl_mouse_get_open(mouse))
+    {
+        return ((xl_internal_mouse_t*)mouse)->last_button_released_time[button];
+    }
+    else
+    {
+        return 0.0;
+    }
+}
+
+void xl_mouse_clear_history(xl_mouse_t* mouse)
+{
+    if (xl_mouse_get_open(mouse))
+    {
+        xl_internal_mouse_t* data = (xl_internal_mouse_t*)mouse;
+
+        data->next_history_write_index = 0;
+        memset(data->history, 0, sizeof(data->history));
+    }
+}
+
+int
+xl_mouse_check_history(xl_mouse_t* mouse, const int* const masks, size_t count)
+{
+    if (xl_mouse_get_open(mouse))
+    {
+        /* Do a backwards comparison through the button history ring buffer.
+         * Count doesn't need to be range checked, the history index wraps.
+         */
+        xl_internal_mouse_t* data = (xl_internal_mouse_t*)mouse; // private
+        const size_t next = data->next_history_write_index;
+
+        size_t i = next ? next - 1 : AE_ARRAY_COUNT(data->history) - 1;
+
+        while (count)
+        {
+            if (data->history[i] != masks[--count])
+            {
+                return 0;
+            }
+
+            i = i ? i - 1 : AE_ARRAY_COUNT(data->history) - 1;
+        }
+
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
 
 /*
 ================================================================================
@@ -4618,6 +5073,7 @@ sticks, dance pads, rock band guitars / drumkits, and flight simulator throttles
 --------------------------------------------------------------------------------
 TODO: handle battery level and rumble effects (don't rumble if battery is < 30%)
 TODO: apply automatic easing to stick & shoulder inputs (default mode is linear)
+TODO: should we pass stick and trigger deltas with events? (tons of event data!)
 --------------------------------------------------------------------------------
 */
 
@@ -5069,6 +5525,18 @@ int xl_controller_get_int(xl_controller_t* controller,
             else
             {
                 return XL_CONTROLLER_DEADZONE_MODE_NONE;
+            }
+        }
+        break;
+
+        case XL_CONTROLLER_PROPERTY_PRIMARY:
+        {
+            if (xl_controller_get_open(controller))
+            {
+                xl_controller_t* first;
+                xl_controller_list_all(&first);
+
+                return controller == first;
             }
         }
         break;
@@ -6719,15 +7187,21 @@ xl_event_from_sdl_window(xl_event_t* dst, SDL_WindowEvent* src)
 
         case SDL_WINDOWEVENT_ENTER:
         {
-            dst->type = XL_EVENT_WINDOW_MOUSE_ENTER;
+            dst->type = XL_EVENT_WINDOW_MOUSE_ENTER; // mouse in
             dst->as_window_mouse_enter.window = window;
+
+            assert(xl_mouse_count_all() == 1); // get global mouse
+            xl_mouse_list_all(&dst->as_window_mouse_enter.mouse);
         }
         break;
 
         case SDL_WINDOWEVENT_LEAVE:
         {
-            dst->type = XL_EVENT_WINDOW_MOUSE_LEAVE;
+            dst->type = XL_EVENT_WINDOW_MOUSE_LEAVE; // mouse out
             dst->as_window_mouse_leave.window = window;
+
+            assert(xl_mouse_count_all() == 1); // get global mouse
+            xl_mouse_list_all(&dst->as_window_mouse_leave.mouse);
         }
         break;
 
@@ -6808,19 +7282,97 @@ xl_event_from_sdl_text_input(xl_event_t* dst, SDL_TextInputEvent* src)
 static void
 xl_event_from_sdl_mouse_motion(xl_event_t* dst, SDL_MouseMotionEvent* src)
 {
-    dst->type = XL_EVENT_NOTHING; // TODO
+    if (src->which != SDL_TOUCH_MOUSEID)
+    {
+        dst->type = XL_EVENT_MOUSE_MOTION;
+
+        assert(xl_mouse_count_all() == 1); /* global */
+        xl_mouse_list_all(&dst->as_mouse_motion.mouse);
+
+        dst->as_mouse_motion.window = xl_window_from_sdl_window_id(src->windowID);
+
+        // we have to build this mask as an int to satisfy C++'s bizarre type system
+        {
+            int buttons = 0;
+
+            if (src->state & SDL_BUTTON_LMASK) buttons |= XL_MOUSE_BUTTON_BIT_LEFT;
+            if (src->state & SDL_BUTTON_MMASK) buttons |= XL_MOUSE_BUTTON_BIT_MIDDLE;
+            if (src->state & SDL_BUTTON_RMASK) buttons |= XL_MOUSE_BUTTON_BIT_RIGHT;
+
+            dst->as_mouse_motion.buttons = (xl_mouse_button_bit_t)buttons;
+        }
+
+        dst->as_mouse_motion.x = (double)src->x; // invert so Y is up
+
+        dst->as_mouse_motion.y = (double)xl_window_get_render_height(
+                        dst->as_mouse_motion.window) - (double)src->y;
+
+        dst->as_mouse_motion.dx = +(double)src->xrel;
+        dst->as_mouse_motion.dy = -(double)src->yrel;
+    }
+    else
+    {
+        dst->type = XL_EVENT_NOTHING;
+    }
 }
 
 static void
 xl_event_from_sdl_mouse_button(xl_event_t* dst, SDL_MouseButtonEvent* src)
 {
-    dst->type = XL_EVENT_NOTHING; // TODO
+    if ( src->which != SDL_TOUCH_MOUSEID && // check for valid button press
+            src->button != SDL_BUTTON_X1 && src->button != SDL_BUTTON_X2 )
+    {
+        dst->type = XL_EVENT_MOUSE_BUTTON;
+
+        ae_assert(xl_mouse_count_all() == 1, // allocation check
+                "got mouse button event without active mouse!");
+
+        xl_mouse_list_all(&dst->as_mouse_button.mouse);
+
+        switch (src->button)
+        {
+            case SDL_BUTTON_LEFT:
+                dst->as_mouse_button.button = XL_MOUSE_BUTTON_INDEX_LEFT; break;
+
+            case SDL_BUTTON_MIDDLE:
+                dst->as_mouse_button.button = XL_MOUSE_BUTTON_INDEX_MIDDLE; break;
+
+            case SDL_BUTTON_RIGHT:
+                dst->as_mouse_button.button = XL_MOUSE_BUTTON_INDEX_RIGHT; break;
+
+            default: assert(0); break;
+        }
+
+        dst->as_mouse_button.pressed = src->type == SDL_MOUSEBUTTONDOWN;
+    }
+    else
+    {
+        dst->type = XL_EVENT_NOTHING;
+    }
 }
 
 static void
 xl_event_from_sdl_mouse_wheel(xl_event_t* dst, SDL_MouseWheelEvent* src)
 {
-    dst->type = XL_EVENT_NOTHING; // TODO
+    if (src->which != SDL_TOUCH_MOUSEID)
+    {
+        dst->type = XL_EVENT_MOUSE_WHEEL;
+
+        ae_assert(xl_mouse_count_all() == 1, // allocation check
+                "got mouse wheel event without active mouse!");
+
+        xl_mouse_list_all(&dst->as_mouse_wheel.mouse);
+
+        dst->as_mouse_wheel.x = src->direction == SDL_MOUSEWHEEL_NORMAL
+                                                    ? src->x : -src->x;
+
+        dst->as_mouse_wheel.y = src->direction == SDL_MOUSEWHEEL_NORMAL
+                                                    ? src->y : -src->y;
+    }
+    else
+    {
+        dst->type = XL_EVENT_NOTHING;
+    }
 }
 
 static void
@@ -7093,6 +7645,10 @@ static void xl_event_from_sdl(xl_event_t* dst, SDL_Event* src)
             {
                 dst->type = XL_EVENT_KEYBOARD_INSERT;
             }
+            else if (src->type == xl_mouse_insert_event_type)
+            {
+                dst->type = XL_EVENT_MOUSE_INSERT;
+            }
             else
             {
                 ae_log(SDL, "unhandled event %X", (int)src->type);
@@ -7355,6 +7911,45 @@ static void xl_event_internal(xl_event_t* dst, SDL_Event* src)
         break;
     #endif
 
+        case SDL_MOUSEBUTTONDOWN:
+        case SDL_MOUSEBUTTONUP:
+        {
+            if (dst->type == XL_EVENT_MOUSE_BUTTON)
+            {
+                double time = ae_seconds(); // when the action happened
+
+                xl_internal_mouse_t* data = (xl_internal_mouse_t *)
+                                        dst->as_mouse_button.mouse;
+
+                assert(xl_mouse_get_open(dst->as_mouse_button.mouse) &&
+                                            xl_mouse_count_all() == 1);
+
+                if (dst->as_mouse_button.pressed)
+                {
+                    data->last_pressed_button = dst->as_mouse_button.button; // pressed index
+
+                    data->last_button_pressed_time[dst->as_mouse_button.button] = time;
+                    data->last_pressed_button_time = time;
+
+                    data->history[data->next_history_write_index++] = (xl_mouse_button_bit_t)
+                                        xl_mouse_get_down_buttons(dst->as_mouse_button.mouse);
+
+                    if (data->next_history_write_index == AE_ARRAY_COUNT(data->history))
+                    {
+                        data->next_history_write_index = 0;
+                    }
+                }
+                else
+                {
+                    data->last_released_button = dst->as_mouse_button.button; // release
+
+                    data->last_button_released_time[dst->as_mouse_button.button] = time;
+                    data->last_released_button_time = time;
+                }
+            }
+        }
+        break;
+
         default:
         {
             if (src->type == xl_keyboard_insert_event_type) // allocate and setup
@@ -7369,6 +7964,21 @@ static void xl_event_internal(xl_event_t* dst, SDL_Event* src)
                 if (!ae_ptrset_add(&xl_keyboard_set, data))
                 {
                     AE_WARN("keyboard not new to the set (is set code stubbed?)");
+                }
+            }
+
+            if (src->type == xl_mouse_insert_event_type) // mouse initialization
+            {
+                xl_internal_mouse_t* data = (xl_internal_mouse_t *)
+                        ae_calloc( 1, sizeof(xl_internal_mouse_t) );
+
+                data->time_inserted = ae_seconds(); // random id and init time
+                data->id = (int)ae_random_xorshift32_ex(&xl_mouse_id_state);
+
+                dst->as_mouse_insert.mouse = (xl_mouse_t*)data;
+                if (!ae_ptrset_add(&xl_mouse_set, data))
+                {
+                    AE_WARN("mouse not new to the set (is set code stubbed?)");
                 }
             }
         }
@@ -7600,6 +8210,25 @@ void xl_init(void)
             }
         }
 
+        xl_mouse_insert_event_type = SDL_RegisterEvents(1);
+        if (xl_mouse_insert_event_type == (u32)-1)
+        {
+            ae_error("failed to allocate a custom event type (out of events)!");
+        }
+
+        if (1) // push the main PC mouse connection event to SDL on startup.
+        {
+            SDL_Event event = AE_ZERO_STRUCT;
+
+            event.user.type = xl_mouse_insert_event_type;
+            event.user.timestamp = SDL_GetTicks();
+
+            if (SDL_PushEvent(&event) < 0)
+            {
+                AE_WARN("failed to push mouse event: %s", SDL_GetError());
+            }
+        }
+
         xl_animation_finished_event_type = SDL_RegisterEvents(1);
         if (xl_animation_finished_event_type == (u32)-1)
         {
@@ -7644,6 +8273,7 @@ void xl_quit(void)
         SDL_GL_UnloadLibrary();
 
         xl_controller_close_all();
+        xl_mouse_close_all();
         xl_keyboard_close_all();
         xl_window_close_all();
         xl_animation_close_all();
