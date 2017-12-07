@@ -148,6 +148,11 @@ XL_DECL void   XL_CALL xl_object_close_all(void);
  */
 XL_DECL xl_window_t* XL_CALL xl_window_create(int initially_visible);
 
+/* Get the main application window (usually the first one opened), or NULL
+ * if no window has been opened yet - this value acts as a closed window.
+ */
+XL_DECL xl_window_t* XL_CALL xl_primary_window(void);
+
 /* Window attribute access is constrained to a set of common typed functions.
  * Windows are closed by setting the XL_WINDOW_PROPERTY_OPEN attribute to 0.
  */
@@ -963,6 +968,11 @@ XL_DECL void XL_CALL xl_sound_close_all(void);
 --------------------------------------------------------------------------------
 */
 
+/* Get the main application/system keyboard (usually the first one plugged in).
+ * If nothing is present, this returns NULL (which acts as a closed keyboard).
+ */
+XL_DECL xl_keyboard_t* XL_CALL xl_primary_keyboard(void);
+
 #define XL_KEYBOARD_PROPERTY_N                                                  \
                                                                                 \
     /* the total number of active keyboards */                                  \
@@ -1398,23 +1408,56 @@ XL_DECL int XL_CALL xl_keyboard_check_history( xl_keyboard_t* keyboard,
 --------------------------------------------------------------------------------
 */
 
+/* Get the main application/system mouse (usually the first one plugged in).
+ * If nothing is present, this returns NULL (which acts as a closed mouse).
+ */
+XL_DECL xl_mouse_t* XL_CALL xl_primary_mouse(void);
+
 #define XL_MOUSE_PROPERTY_N                                                     \
                                                                                 \
+    /* the total number of mice plugged in */                                   \
     N(XL_MOUSE_PROPERTY_TOTAL, int, int, total)                                 \
+                                                                                \
+    /* the mouse's unique integer identifier */                                 \
     N(XL_MOUSE_PROPERTY_ID, int, int, id)                                       \
+                                                                                \
+    /* the current mouse button mask (see xl_mouse_button_bit_t for bits) */    \
     N(XL_MOUSE_PROPERTY_DOWN_BUTTONS, int, int, down_buttons)                   \
     N(XL_MOUSE_PROPERTY_UP_BUTTONS, int, int, up_buttons)                       \
+                                                                                \
+    /* +1 if right mouse button is down, -1 if the left is down, otherwise 0 */ \
     N(XL_MOUSE_PROPERTY_TRIBOOL, int, int, tribool)                             \
+                                                                                \
+    /* the last button pressed or released on a given mouse */                  \
     N(XL_MOUSE_PROPERTY_LAST_PRESSED_BUTTON, int, int, last_pressed_button)     \
     N(XL_MOUSE_PROPERTY_LAST_RELEASED_BUTTON, int, int, last_released_button)   \
+                                                                                \
+    /* the last time any mouse button was pressed or released */                \
     N(XL_MOUSE_PROPERTY_LAST_PRESSED_TIME, double, dbl, last_pressed_time)      \
     N(XL_MOUSE_PROPERTY_LAST_RELEASED_TIME, double, dbl, last_released_time)    \
+                                                                                \
+    /* When the mouse is in relative mode, the cursor is hidden, and the driver \
+     * will report continuous motion within the current window. Only relative   \
+     * motion events will be delivered, and the mouse position will not change. \
+     */                                                                         \
     N(XL_MOUSE_PROPERTY_RELATIVE, int, int, relative)                           \
+                                                                                \
+    /* whether or not the cursor is hidden from view */                         \
     N(XL_MOUSE_PROPERTY_VISIBLE, int, int, visible)                             \
+                                                                                \
+    /* the current state of the mouse as a string */                            \
     N(XL_MOUSE_PROPERTY_STATUS, const char*, str, status)                       \
+                                                                                \
+    /* the mouse's string identifier */                                         \
     N(XL_MOUSE_PROPERTY_NAME, const char*, str, name)                           \
+                                                                                \
+    /* is this mouse the first one plugged in? */                               \
     N(XL_MOUSE_PROPERTY_PRIMARY, int, int, primary)                             \
+                                                                                \
+    /* is this mouse plugged in? */                                             \
     N(XL_MOUSE_PROPERTY_OPEN, int, int, open)                                   \
+                                                                                \
+    /* the total number of mouse properties */                                  \
     N(XL_MOUSE_PROPERTY_COUNT, int, int, _)                                     \
 
 typedef enum xl_mouse_property_t
@@ -1593,6 +1636,11 @@ XL_DECL int XL_CALL xl_mouse_check_history(xl_mouse_t* mouse,
  * ~~ [ controller input ] ~~ *
 --------------------------------------------------------------------------------
 */
+
+/* Get the main application/system controller (usually the first one plugged in).
+ * If nothing is present, this returns NULL (which acts as a closed controller).
+ */
+XL_DECL xl_controller_t* XL_CALL xl_primary_controller(void);
 
 #define XL_CONTROLLER_PROPERTY_N                                                            \
                                                                                             \

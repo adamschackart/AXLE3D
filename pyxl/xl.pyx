@@ -72,6 +72,7 @@ cdef extern from "xl_core.h":
     # ==========================================================================
 
     xl_window_t* xl_window_create(int initially_visible)
+    xl_window_t* xl_primary_window()
 
     ctypedef enum xl_window_property_t:
         XL_WINDOW_PROPERTY_TOTAL
@@ -390,6 +391,8 @@ cdef extern from "xl_core.h":
     # ~ [ keyboard input ]
     # ==========================================================================
 
+    xl_keyboard_t* xl_primary_keyboard()
+
     ctypedef enum xl_keyboard_property_t:
         XL_KEYBOARD_PROPERTY_TOTAL
         XL_KEYBOARD_PROPERTY_ID
@@ -601,6 +604,8 @@ cdef extern from "xl_core.h":
     # ~ [ mouse input ]
     # ==========================================================================
 
+    xl_mouse_t* xl_primary_mouse()
+
     ctypedef enum xl_mouse_property_t:
         XL_MOUSE_PROPERTY_TOTAL
         XL_MOUSE_PROPERTY_ID
@@ -671,6 +676,8 @@ cdef extern from "xl_core.h":
     # ==========================================================================
     # ~ [ controller input ]
     # ==========================================================================
+
+    xl_controller_t* xl_primary_controller()
 
     ctypedef enum xl_controller_property_t:
         XL_CONTROLLER_PROPERTY_TOTAL
@@ -1243,6 +1250,13 @@ cdef class Window:
 
     @staticmethod
     def close_all(): xl_window_close_all()
+
+    @classmethod
+    def get_primary(cls):
+        """
+        Get the main application window (usually the first one).
+        """
+        return cls(reference = <size_t>xl_primary_window())
 
     def count_textures(self):
         return xl_window_count_textures(self.window)
@@ -2891,6 +2905,13 @@ cdef class Keyboard:
 
         return objects
 
+    @classmethod
+    def get_primary(cls):
+        """
+        Get the main application keyboard (usually the first one).
+        """
+        return cls(reference = <size_t>xl_primary_keyboard())
+
     property id:
         def __get__(self):
             return xl_keyboard_get_int(self.keyboard, XL_KEYBOARD_PROPERTY_ID)
@@ -3186,6 +3207,13 @@ cdef class Mouse:
 
         return objects
 
+    @classmethod
+    def get_primary(cls):
+        """
+        Get the main application mouse (usually the first).
+        """
+        return cls(reference = <size_t>xl_primary_mouse())
+
     property id:
         def __get__(self):
             return xl_mouse_get_int(self.mouse, XL_MOUSE_PROPERTY_ID)
@@ -3454,6 +3482,13 @@ cdef class Controller:
             objects.append(cls(reference = <size_t>controllers[i]))
 
         return objects
+
+    @classmethod
+    def get_primary(cls):
+        """
+        Get the main application controller (usually the first one).
+        """
+        return cls(reference = <size_t>xl_primary_controller())
 
     property id:
         """

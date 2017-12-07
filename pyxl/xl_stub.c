@@ -89,6 +89,11 @@ xl_window_t* xl_window_create(int initially_visible)
     AE_STUB(); return NULL;
 }
 
+xl_window_t* xl_primary_window(void)
+{
+    AE_STUB(); return NULL;
+}
+
 void
 xl_window_set_int(xl_window_t* window, xl_window_property_t property, int value)
 {
@@ -619,6 +624,11 @@ void xl_sound_close_all(void)
 --------------------------------------------------------------------------------
 */
 
+xl_keyboard_t* xl_primary_keyboard(void)
+{
+    AE_STUB(); return NULL;
+}
+
 void
 xl_keyboard_set_int(xl_keyboard_t* keyboard, xl_keyboard_property_t prop, int value)
 {
@@ -711,6 +721,11 @@ int xl_keyboard_check_history(xl_keyboard_t* keyboard, // cheat check!!!
 --------------------------------------------------------------------------------
 */
 
+xl_mouse_t* xl_primary_mouse(void)
+{
+    AE_STUB(); return NULL;
+}
+
 void
 xl_mouse_set_int(xl_mouse_t* mouse, xl_mouse_property_t prop, int value)
 {
@@ -785,6 +800,11 @@ xl_mouse_check_history(xl_mouse_t* mouse, const int* const masks, size_t count)
  * ~~ [ controller input ] ~~ *
 --------------------------------------------------------------------------------
 */
+
+xl_controller_t* xl_primary_controller(void)
+{
+    AE_STUB(); return NULL;
+}
 
 void
 xl_controller_set_int(xl_controller_t* controller, xl_controller_property_t prop, int value)

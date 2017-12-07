@@ -309,6 +309,20 @@ xl_window_t* xl_window_create(int initially_visible)
     return (xl_window_t*)window;
 }
 
+xl_window_t* xl_primary_window(void)
+{
+    XL_BUILD_WINDOW_LIST();
+
+    if (ae_likely(n != 0))
+    {
+        return windows[0];
+    }
+    else
+    {
+        return NULL;
+    }
+}
+
 static int xl_window_get_display_index(xl_window_t* window)
 {
     if (xl_window_get_open(window))
@@ -569,13 +583,7 @@ int xl_window_get_int(xl_window_t* window, xl_window_property_t property)
 
         case XL_WINDOW_PROPERTY_PRIMARY:
         {
-            if (xl_window_get_open(window))
-            {
-                xl_window_t* first;
-                xl_window_list_all(&first);
-
-                value = window == first;
-            }
+            value = window == xl_primary_window(); // is window first?
         }
         break;
 
@@ -4046,6 +4054,7 @@ void xl_sound_close_all(void)
 --------------------------------------------------------------------------------
 TODO: onscreen keyboard support for mobile (open when onscreen, closed when off)
 TODO: handle SDL unicode text editing and input events, with the global keyboard
+TODO: key repeat event separate from press/release - check flag in SDL structure
 TODO: keyboard tribools: up+down, left+right, a+d, w+s, left and right modifiers
 --------------------------------------------------------------------------------
 */
@@ -4093,6 +4102,18 @@ static void xl_keyboard_close_all(void)
 
 static xl_keyboard_mod_bit_t xl_keyboard_mod_mask_from_sdl(SDL_Keymod sdl_state);
 static xl_keyboard_key_index_t xl_keyboard_key_index_from_sdl(SDL_Scancode code);
+
+xl_keyboard_t* xl_primary_keyboard(void)
+{
+    xl_keyboard_t* keyboard = NULL;
+
+    if (xl_keyboard_count_all() != 0)
+    {
+        xl_keyboard_list_all(&keyboard);
+    }
+
+    return keyboard;
+}
 
 void
 xl_keyboard_set_int(xl_keyboard_t* keyboard, xl_keyboard_property_t property, int value)
@@ -4673,6 +4694,18 @@ static void xl_mouse_close_all(void) // delete the global mouse object
         ae_ptrset_remove(&xl_mouse_set, mice[i]);
         ae_free(mice[i]);
     }
+}
+
+xl_mouse_t* xl_primary_mouse(void)
+{
+    xl_mouse_t* mouse = NULL;
+
+    if (xl_mouse_count_all() != 0)
+    {
+        xl_mouse_list_all(&mouse);
+    }
+
+    return mouse;
 }
 
 void
@@ -5340,6 +5373,20 @@ xl_controller_get_stick_coord(xl_controller_t* controller, char which)
     }
 }
 
+xl_controller_t* xl_primary_controller(void)
+{
+    XL_BUILD_CONTROLLER_LIST();
+
+    if (ae_likely(n != 0))
+    {
+        return controllers[0];
+    }
+    else
+    {
+        return NULL;
+    }
+}
+
 void xl_controller_set_int(xl_controller_t* controller,
         xl_controller_property_t property, int value)
 {
@@ -5531,13 +5578,7 @@ int xl_controller_get_int(xl_controller_t* controller,
 
         case XL_CONTROLLER_PROPERTY_PRIMARY:
         {
-            if (xl_controller_get_open(controller))
-            {
-                xl_controller_t* first;
-                xl_controller_list_all(&first);
-
-                return controller == first;
-            }
+            return controller == xl_primary_controller();
         }
         break;
 
