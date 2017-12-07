@@ -4105,12 +4105,8 @@ static xl_keyboard_key_index_t xl_keyboard_key_index_from_sdl(SDL_Scancode code)
 
 xl_keyboard_t* xl_primary_keyboard(void)
 {
-    xl_keyboard_t* keyboard = NULL;
-
-    if (xl_keyboard_count_all() != 0)
-    {
-        xl_keyboard_list_all(&keyboard);
-    }
+    xl_keyboard_t * keyboard = NULL;
+    xl_keyboard_list_all(&keyboard);
 
     return keyboard;
 }
@@ -4182,13 +4178,7 @@ xl_keyboard_get_int(xl_keyboard_t* keyboard, xl_keyboard_property_t property)
 
         case XL_KEYBOARD_PROPERTY_PRIMARY:
         {
-            if (xl_keyboard_get_open(keyboard))
-            {
-                xl_keyboard_t* first;
-                xl_keyboard_list_all(&first);
-
-                return keyboard == first;
-            }
+            return keyboard == xl_primary_keyboard(); // true on PC unless closed
         }
         break;
 
@@ -4698,12 +4688,8 @@ static void xl_mouse_close_all(void) // delete the global mouse object
 
 xl_mouse_t* xl_primary_mouse(void)
 {
-    xl_mouse_t* mouse = NULL;
-
-    if (xl_mouse_count_all() != 0)
-    {
-        xl_mouse_list_all(&mouse);
-    }
+    xl_mouse_t * mouse = NULL;
+    xl_mouse_list_all(&mouse);
 
     return mouse;
 }
@@ -4854,13 +4840,7 @@ xl_mouse_get_int(xl_mouse_t* mouse, xl_mouse_property_t property)
 
         case XL_MOUSE_PROPERTY_PRIMARY:
         {
-            if (xl_mouse_get_open(mouse))
-            {
-                xl_mouse_t* first;
-                xl_mouse_list_all(&first);
-
-                return mouse == first;
-            }
+            return mouse == xl_primary_mouse(); // true on PC unless closed
         }
         break;
 
