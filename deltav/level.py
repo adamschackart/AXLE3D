@@ -1,5 +1,3 @@
-from pyglet.gl import *
-
 from . import cutscene
 from . import fps
 from . import obj
@@ -57,11 +55,11 @@ class BaddieCharacter(fps.Character):
 
     @profile("level.py", "BaddieCharacter.draw")
     def draw(self):
-        glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_CURRENT_BIT)
-        glDepthMask(False)
+        gl.PushAttrib(gl.ENABLE_BIT | gl.LIGHTING_BIT | gl.CURRENT_BIT)
+        gl.DepthMask(False)
 
-        glEnable(GL_BLEND)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        gl.Enable(gl.BLEND)
+        gl.BlendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
         if self.pushed:
             meshes = self.pushed_meshes
@@ -81,8 +79,8 @@ class BaddieCharacter(fps.Character):
 
                 mesh.draw()
 
-        glDepthMask(True)
-        glPopAttrib()
+        gl.DepthMask(True)
+        gl.PopAttrib()
 
 class Level(object):
     objs = {}

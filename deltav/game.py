@@ -1,15 +1,8 @@
-from pyglet import clock
-from pyglet.gl import *
-
 from pyglet.window import Window
-from pyglet.window import key
+from pyglet import clock
 
-from aegame import Mat4x4, VertexArray, Vec3, Vec4, FloatRect, vec3gauss, profile
-from mash3D import gl, Emitter
-
-import random
-import ctypes
-import aegame
+from mash3D import *
+from aegame import *
 
 class GameWindow(Window):
     def __init__(self, **kwargs):
@@ -43,7 +36,7 @@ class GameWindow(Window):
             self.exit_handler.has_exit = True
 
     def on_resize(self, width, height):
-        gl.Viewport(0, 0, width, height)
+        pass # prevent pyglet from setting up an orthographic projection matrix
 
     def run(self, state=None):
         if state:
@@ -57,7 +50,7 @@ class GameWindow(Window):
 
             # Filter out insane spikes (e.g. due to another process, or loading)
             if dt > 0.1:
-                aegame.log("TIME", "long frame ({} seconds)".format(dt))
+                log("TIME", "long frame ({} seconds)".format(dt))
                 dt = 0.01
 
             self.dispatch_events()
@@ -73,28 +66,6 @@ class GameWindow(Window):
 
             if self.states and getattr(self.states[-1], 'queued_state', None):
                 self.push_state(self.states[-1].queued_state)
-
-            if aegame.profile_enabled() or aegame.branch_coverage.enabled() or aegame.switch_coverage.enabled():
-                aegame.log.clear_stdout()
-
-                profile_sort = aegame.PROFILE_SORT_TOTAL_TIME
-                branch_sort = aegame.branch_coverage.SORT_HALFWAYNESS
-                switch_sort = aegame.switch_coverage.SORT_SPREAD
-
-                if aegame.profile_enabled():
-                    aegame.profile_print(profile_sort, 12, dt)
-
-                if aegame.branch_coverage.enabled():
-                    __import__('sys').__stdout__.write('\n')
-
-                    aegame.branch_coverage.print_report(branch_sort, 12)
-                    aegame.branch_coverage.clear()
-
-                if aegame.switch_coverage.enabled():
-                    __import__('sys').__stdout__.write('\n')
-
-                    aegame.switch_coverage.print_report(switch_sort, 12)
-                    aegame.switch_coverage.clear()
 
 class ThreeD(object):
     FOV = 70.

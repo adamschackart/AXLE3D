@@ -1,6 +1,4 @@
-import ctypes
-import math
-from math import radians
+from math import sin, cos, radians
 
 from pyglet import clock
 from pyglet import font
@@ -181,10 +179,10 @@ class FPS(game.ThreeD):
         dz = (p.movement['backward'] - p.movement['forward'])
         dx = (p.movement['right'] - p.movement['left'])
 
-        cos = math.cos(-math.radians(p.heading))
-        sin = math.sin(-math.radians(p.heading))
+        cs = cos(-radians(p.heading))
+        sn = sin(-radians(p.heading))
 
-        dx, dz = dx * cos - dz * sin, dx * sin + dz * cos
+        dx, dz = dx * cs - dz * sn, dx * sn + dz * cs
 
         if p.freefall:
             dx /= 2
@@ -373,16 +371,9 @@ class FPS(game.ThreeD):
             self.queued_state = menu.GameMenu(self)
         elif symbol == key.T and key.MOD_CTRL & modifiers and key.MOD_SHIFT & modifiers and __debug__:
             self.queued_state = menu.CheatMenu(self)
-        elif symbol == key.P:
-            self.queued_state = Paused()
 
         return True
 
     def on_key_release(self, symbol, modifiers):
         if symbol in self.KEYMAP:
             self.player.movement[self.KEYMAP[symbol]] = False
-
-class Paused(object):
-    def on_key_press(self, symbol, modifiers):
-        self.has_exit = True
-        return True
