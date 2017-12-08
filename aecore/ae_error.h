@@ -58,6 +58,10 @@ AE_DECL void AE_CALL ae_assert_message( const char* conditional,
                                         const char* fmt, ...)
                                         AE_PRINTF_ARGS(4, 5);
 
+/* TODO: test the conditional in a while loop so we can implement abort, retry,
+ * break, & ignore (ae_assert_option_t enum return val from ae_assert_message).
+ * see SDL_enabled_assert for an example of this kind of assert implementation.
+ */
 #if defined(AE_DEBUG)
     #define ae_assert(cnd, ...) do { if (!(cnd))            \
     {                                                       \

@@ -29,9 +29,12 @@ void ae_error(const char* fmt, ...)
 
     MessageBoxA(NULL, msg, NULL, MB_OK | MB_ICONERROR);
 #else
+    fprintf(stderr, "ERROR: ");
+
     va_start(args, fmt);
     vfprintf(stderr, fmt, args);
     va_end(args);
+
     fprintf(stderr, "\n");
 #endif
 
