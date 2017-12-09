@@ -8,25 +8,26 @@
 
 static ae_strmap_t ae_color_index; /* TODO: use a statically-allocated table? */
 
-void ae_color_rgb_f(float* rgb, const char* string)
+void ae_color_rgb_flt(float* rgb, const char* string)
 {
     /* in the event of an invalid string key, this function will return black */
-    vec3copy(rgb, ae_color_f[(size_t)ae_strmap_get(&ae_color_index, string)]);
+    vec3copy(rgb, ae_color_flt[(size_t)ae_strmap_get(&ae_color_index, string)]);
 }
 
-void ae_color_rgba_f(float* rgba, const char* string)
+void ae_color_rgba_flt(float* rgba, const char* string)
 {
-    ae_color_rgb_f(rgba, string); rgba[3] = 1.0f;
+    ae_color_rgb_flt(rgba, string); rgba[3] = 1.0f;
 }
 
-void ae_color_rgb_b(u8* rgb, const char* string)
+void ae_color_rgb_u8(u8* rgb, const char* string)
 {
-    memcpy(rgb, ae_color_b[(size_t)ae_strmap_get(&ae_color_index, string)], 3);
+    /* in the event of an invalid string key, this function will return black */
+    memcpy(rgb, ae_color_u8[(size_t)ae_strmap_get(&ae_color_index, string)], 3);
 }
 
-void ae_color_rgba_b(u8* rgba, const char* string)
+void ae_color_rgba_u8(u8* rgba, const char* string)
 {
-    ae_color_rgb_b(rgba, string); rgba[3] = 255;
+    ae_color_rgb_u8(rgba, string); rgba[3] = 255;
 }
 
 void ae_color_init(int argc, char** argv)

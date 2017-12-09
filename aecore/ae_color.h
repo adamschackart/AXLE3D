@@ -19,6 +19,12 @@
 void ae_color_init(int argc, char** argv);
 void ae_color_quit(void); // private init
 
+/*
+================================================================================
+ * ~~ [ named colors ] ~~ *
+--------------------------------------------------------------------------------
+*/
+
 #define AE_COLOR_N                                                                                      \
                                                                                                         \
     N(BLACK,            0.000, 0.000, 0.000,   0,   0,   0, "black"             ),                      \
@@ -95,25 +101,25 @@ static const char* ae_color_string[] =
     #undef N
 };
 
-static const float ae_color_f[][4] =
+static const float ae_color_flt[][4] =
 {
     #define N(name, rf, gf, bf, rb, gb, bb, string) { rf ## f, gf ## f, bf ## f, 1.0f }
     AE_COLOR_N
     #undef N
 };
 
-static const u8 ae_color_b[][4] =
+static const u8 ae_color_u8[][4] =
 {
     #define N(name, rf, gf, bf, rb, gb, bb, string) { rb, gb, bb, 255 }
     AE_COLOR_N
     #undef N
 };
 
-AE_DECL void AE_CALL ae_color_rgb_f (float* rgb , const char* string);
-AE_DECL void AE_CALL ae_color_rgba_f(float* rgba, const char* string);
+AE_DECL void AE_CALL ae_color_rgb_flt (float* rgb , const char* string);
+AE_DECL void AE_CALL ae_color_rgba_flt(float* rgba, const char* string);
 
-AE_DECL void AE_CALL ae_color_rgb_b (u8* rgb , const char* string);
-AE_DECL void AE_CALL ae_color_rgba_b(u8* rgba, const char* string);
+AE_DECL void AE_CALL ae_color_rgb_u8 (u8* rgb , const char* string);
+AE_DECL void AE_CALL ae_color_rgba_u8(u8* rgba, const char* string);
 
 #ifdef __cplusplus
 } /* extern "C" */

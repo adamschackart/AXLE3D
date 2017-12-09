@@ -7337,7 +7337,7 @@ xl_event_from_sdl_window(xl_event_t* dst, SDL_WindowEvent* src)
 static void
 xl_event_from_sdl_keyboard(xl_event_t* dst, SDL_KeyboardEvent* src)
 {
-    if (src->repeat == 0)
+    if (src->repeat == 0) // NOTE: repeat is disabled until we can reliably set delay and rate
     {
         dst->type = XL_EVENT_KEYBOARD_KEY;
 
@@ -7360,6 +7360,7 @@ xl_event_from_sdl_keyboard(xl_event_t* dst, SDL_KeyboardEvent* src)
     }
     else
     {
+        // see the TODO in the keyboard section regarding the future XL_EVENT_KEYBOARD_REPEAT
         dst->type = XL_EVENT_NOTHING;
     }
 }

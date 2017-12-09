@@ -6,22 +6,22 @@
 #include <ae_core.h>
 #endif
 
-void ae_color_rgb_f(float* rgb, const char* string)
+void ae_color_rgb_flt(float* rgb, const char* string)
 {
     AE_STUB();
 }
 
-void ae_color_rgba_f(float* rgba, const char* string)
+void ae_color_rgba_flt(float* rgba, const char* string)
 {
     AE_STUB();
 }
 
-void ae_color_rgb_b(u8* rgb, const char* string)
+void ae_color_rgb_u8(u8* rgb, const char* string)
 {
     AE_STUB();
 }
 
-void ae_color_rgba_b(u8* rgba, const char* string)
+void ae_color_rgba_u8(u8* rgba, const char* string)
 {
     AE_STUB();
 }

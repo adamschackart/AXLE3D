@@ -55,14 +55,17 @@ cdef extern from "ae_color.h":
     const char* ae_color_name[] # full enum name table
     const char* ae_color_string[] # shorter name table
 
-    const float ae_color_f[][4]
-    const u8 ae_color_b[][4]
+    const float ae_color_flt[][4]
+    const u8 ae_color_u8[][4]
 
-    void ae_color_rgb_f (float* rgb , const char* string)
-    void ae_color_rgba_f(float* rgba, const char* string)
+    void ae_color_rgb_flt (float* rgb , const char* string)
+    void ae_color_rgba_flt(float* rgba, const char* string)
 
-    void ae_color_rgb_b (u8* rgb , const char* string)
-    void ae_color_rgba_b(u8* rgba, const char* string)
+    void ae_color_rgb_u8 (u8* rgb , const char* string)
+    void ae_color_rgba_u8(u8* rgba, const char* string)
+
+# TODO: list functions should avoid calling ae_color_rgb(a)_flt, not only for
+# efficiency reasons, but also to avoid log spamming if ae_color is stubbed.
 
 def get_rgb_list():
     cdef list values = [] # TODO: optimize this function!
@@ -116,7 +119,7 @@ def rgb(str name):
     else:
         s = <bytes>name
 
-    ae_color_rgb_f(v.v, <char *>s)
+    ae_color_rgb_flt(v.v, <char*>s)
     return v
 
 def rgba(str name):
@@ -131,10 +134,10 @@ def rgba(str name):
     else:
         s = <bytes>name
 
-    ae_color_rgba_f(v.v, <char*>s)
+    ae_color_rgba_flt(v.v, <char*>s)
     return v
 
 rgb_list = get_rgb_list()
 rgba_list = get_rgba_list()
-rgb_dict = get_rgb_dict()
-rgba_dict = get_rgba_dict()
+rgb_dict = dict(rgb_list)
+rgba_dict = dict(rgba_list)
