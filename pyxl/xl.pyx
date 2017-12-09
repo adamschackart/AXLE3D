@@ -3587,6 +3587,7 @@ cdef class Controller:
             cdef bytes s = xl_controller_button_short_name[xl_controller_get_int(
                     self.controller, XL_CONTROLLER_PROPERTY_LAST_PRESSED_BUTTON)]
 
+            # TODO do name table read through xl_controller_get_str
             return s.decode() if sys.version_info.major > 2 else s
 
     property last_released_button:
@@ -3597,6 +3598,7 @@ cdef class Controller:
             cdef bytes s = xl_controller_button_short_name[xl_controller_get_int(
                     self.controller, XL_CONTROLLER_PROPERTY_LAST_RELEASED_BUTTON)]
 
+            # TODO do name table read through xl_controller_get_str
             return s.decode() if sys.version_info.major > 2 else s
 
     property last_pressed_time:

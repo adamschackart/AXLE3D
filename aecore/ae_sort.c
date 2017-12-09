@@ -7,6 +7,7 @@
 #endif
 
 /* TODO:
+    - ae_sorted (out-of-place)
     - ae_heapsort
     - ae_insertionsort
     - ae_mergesort
@@ -15,6 +16,7 @@
     - ae_shellsort
     - ae_smoothsort
     - ae_timsort
+    - ae_bogosort
  */
 void ae_sort_init(int argc, char** argv) {}
 void ae_sort_quit(void) {}
@@ -106,4 +108,22 @@ void ae_combsort(void *base, size_t num, size_t size, // a simple O(n log n) sor
     while (gap > 1 || swapped);
 
     ae_assert(ae_is_sorted(base, num, size, compare, context), "bad sort");
+}
+
+static void *ae_sort_comparator_c = NULL; // HACK to use qsort with a context ptr
+static int (*ae_sort_comparator_f)(const void*, const void*, const void*) = NULL;
+
+static int ae_qsort_comparator(const void* a, const void* b)
+{
+    return ae_sort_comparator_f(a, b, ae_sort_comparator_c);
+}
+
+void ae_sort(void* base, size_t num, size_t size, // the fastest available method
+            int (*compare)(const void*, const void*, const void*), void* context)
+{
+    // XXX this is totally not threadsafe at all!
+    ae_sort_comparator_f = compare;
+    ae_sort_comparator_c = context;
+
+    qsort(base, num, size, ae_qsort_comparator);
 }

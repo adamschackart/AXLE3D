@@ -37,6 +37,9 @@ AE_DECL void AE_CALL ae_bubblesort(void *e_base, size_t e_num, size_t e_size,
 AE_DECL void AE_CALL ae_combsort(void* e_base, size_t e_count, size_t e_size,
         int (*compare)(const void*, const void*, const void*), void* context);
 
+AE_DECL void AE_CALL ae_sort(void* base, size_t count, size_t size, // fastest
+        int (*compare)(const void*, const void*, const void*), void* context);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

@@ -18,6 +18,7 @@
 --- TODO: xl_log(CONTROLLER, ...) etc. for logging events and other information
 --- TODO: (xl/gl/al)_language_name, linkage_mode for logging misc build configs
 --- TODO: handle the system clipboard (through keyboard?) - events, get buffer
+--- TODO: track last time any input action was taken (max of press and release)
 ----------------------------------------------------------------------------- */
 #ifndef __XL_CORE_H__
 #include <xl_core.h>
@@ -4647,6 +4648,7 @@ static xl_keyboard_key_index_t xl_keyboard_key_index_from_sdl(SDL_Scancode code)
  * ~~ [ mouse input ] ~~ *
 --------------------------------------------------------------------------------
 TODO: get the global mouse position (display/monitor coordinates) as double prop
+TODO: should we add window and position to mouse button and maybe scroll events?
 TODO: set the cursor shape (system defaults, monochrome bitmap, and color image)
 --------------------------------------------------------------------------------
 */

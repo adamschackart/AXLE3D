@@ -30,6 +30,12 @@ void ae_combsort(void *base, size_t num, size_t size, // a simple O(n log n) sor
     AE_STUB();
 }
 
+void ae_sort(void* base, size_t count, size_t size, // fastest available function
+            int (*compare)(const void*, const void*, const void*), void* context)
+{
+    AE_STUB();
+}
+
 void ae_sort_init(int argc, char** argv)
 {
     // AE_STUB();

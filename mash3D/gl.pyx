@@ -1727,6 +1727,10 @@ class util(object):
 # ------------------------------------------------------------------------------
 
 cdef class Coord3D:
+    """
+    GL transform coordinate with position, euler rotation angles, and scale.
+    If a transform is absolute, it starts from the origin (identity matrix).
+    """
     cdef gl_coord3D_t coord
 
     def __init__(self):
@@ -2142,6 +2146,9 @@ def AutoObject(object obj):
 # ==============================================================================
 
 cdef class Texture:
+    """
+    An image resident in server-side (GPU) memory for fast hardware rendering.
+    """
     cdef gl_texture_t* texture
 
     def __init__(self, size_t reference=0):
@@ -2430,6 +2437,9 @@ cdef class Texture:
 # ==============================================================================
 
 cdef class Material:
+    """
+    Defines the interaction between light and a surface (including texturing).
+    """
     cdef gl_material_t* material
 
     def __init__(self, *args, **kwargs):
@@ -2656,6 +2666,9 @@ cdef class Material:
 # ==============================================================================
 
 cdef class Light:
+    """
+    An ambient per-vertex light in the scene - can also be used as a spotlight.
+    """
     cdef gl_light_t* light
 
     def __init__(self, **kwargs):
@@ -2875,6 +2888,9 @@ cdef class Light:
 # ==============================================================================
 
 cdef class Buffer:
+    """
+    Triangle mesh for rendering and other tasks - optionally hardware-resident.
+    """
     cdef gl_buffer_t* buffer
 
     def __init__(self, size_t reference=0):
@@ -3459,6 +3475,9 @@ def Emitter(*args, **kwargs):
     return AutoObject(ParticleEmitter(*args, **kwargs))
 
 cdef class ParticleEmitter:
+    """
+    Particle system for smoke, fire, snow, water spray, volumetric effects, etc.
+    """
     cdef gl_particle_emitter_t* emitter
 
     def __init__(self, *args, **kwargs):

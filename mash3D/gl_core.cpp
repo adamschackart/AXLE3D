@@ -15,6 +15,7 @@
 --- TODO: values aren't clamped when setting properties for lights or materials
 --- TODO: lights and particle emitters should probably have path str properties
 --- TODO: test buffer against ellipsoid/line - check aabbox, then convex polys
+--- TODO: "burn barrel" particle effect - sphere clamp x, aabbox clamp bottom y
 --------------------------------------------------------------------------------
 
 --- TODO: put all internal object structures into a union and block-allocate it.
