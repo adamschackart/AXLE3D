@@ -1436,6 +1436,13 @@ XL_DECL xl_mouse_t* XL_CALL xl_primary_mouse(void);
     N(XL_MOUSE_PROPERTY_LAST_PRESSED_TIME, double, dbl, last_pressed_time)      \
     N(XL_MOUSE_PROPERTY_LAST_RELEASED_TIME, double, dbl, last_released_time)    \
                                                                                 \
+    /* the current location of the mouse cursor */                              \
+    N(XL_MOUSE_PROPERTY_WINDOW, void*, ptr, window)                             \
+    N(XL_MOUSE_PROPERTY_X, double, dbl, x)                                      \
+    N(XL_MOUSE_PROPERTY_Y, double, dbl, y)                                      \
+    N(XL_MOUSE_PROPERTY_DX, double, dbl, dx)                                    \
+    N(XL_MOUSE_PROPERTY_DY, double, dbl, dy)                                    \
+                                                                                \
     /* When the mouse is in relative mode, the cursor is hidden, and the driver \
      * will report continuous motion within the current window. Only relative   \
      * motion events will be delivered, and the mouse position will not change. \
@@ -1499,6 +1506,12 @@ xl_mouse_set_str(xl_mouse_t* mouse, xl_mouse_property_t prop, const char* value)
 
 XL_DECL const char* XL_CALL
 xl_mouse_get_str(xl_mouse_t* mouse, xl_mouse_property_t prop);
+
+XL_DECL void XL_CALL
+xl_mouse_set_ptr(xl_mouse_t* mouse, xl_mouse_property_t prop, void* value);
+
+XL_DECL void* XL_CALL
+xl_mouse_get_ptr(xl_mouse_t* mouse, xl_mouse_property_t prop);
 
 /* Make shorthand wrappers so we don't have to type SUPER_GIGANTIC_ENUM_NAMES in C.
  * xl_mouse_get_str(mouse, XL_MOUSE_PROPERTY_STATUS) = xl_mouse_get_status(mouse).
@@ -2275,6 +2288,12 @@ typedef struct xl_event_t
 #endif
 } \
     xl_event_t;
+
+// Get and set a callback to be run on all events before poll returns.
+typedef void (*xl_event_handler_t)(xl_event_t* event);
+
+XL_DECL void XL_CALL xl_event_set_handler(xl_event_handler_t handler);
+XL_DECL xl_event_handler_t XL_CALL xl_event_get_handler(void);
 
 // Get the number of events in the queue waiting to be processed.
 XL_DECL size_t XL_CALL xl_event_count_pending(void);

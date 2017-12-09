@@ -616,6 +616,11 @@ cdef extern from "xl_core.h":
         XL_MOUSE_PROPERTY_LAST_RELEASED_BUTTON
         XL_MOUSE_PROPERTY_LAST_PRESSED_TIME
         XL_MOUSE_PROPERTY_LAST_RELEASED_TIME
+        XL_MOUSE_PROPERTY_WINDOW
+        XL_MOUSE_PROPERTY_X
+        XL_MOUSE_PROPERTY_Y
+        XL_MOUSE_PROPERTY_DX
+        XL_MOUSE_PROPERTY_DY
         XL_MOUSE_PROPERTY_RELATIVE
         XL_MOUSE_PROPERTY_VISIBLE
         XL_MOUSE_PROPERTY_STATUS
@@ -635,6 +640,9 @@ cdef extern from "xl_core.h":
 
     void xl_mouse_set_str(xl_mouse_t* mouse, xl_mouse_property_t prop, const char* val)
     const char* xl_mouse_get_str(xl_mouse_t* mouse, xl_mouse_property_t prop) # string
+
+    void xl_mouse_set_ptr(xl_mouse_t* mouse, xl_mouse_property_t prop, void* val)
+    void* xl_mouse_get_ptr(xl_mouse_t* mouse, xl_mouse_property_t prop) # pointer
 
     size_t xl_mouse_count_all()
     void xl_mouse_list_all(xl_mouse_t** mice)
@@ -1015,6 +1023,11 @@ cdef extern from "xl_core.h":
         _xl_controller_button_event_t           as_controller_button
         _xl_controller_trigger_event_t          as_controller_trigger
         _xl_controller_stick_event_t            as_controller_stick
+
+    ctypedef void (*xl_event_handler_t)(xl_event_t* event)
+
+    void xl_event_set_handler(xl_event_handler_t handler)
+    xl_event_handler_t xl_event_get_handler() # callbacks
 
     size_t xl_event_count_pending() # num unprocessed
     int xl_event_poll(xl_event_t * event, int wait)
@@ -3247,6 +3260,26 @@ cdef class Mouse:
     property last_released_time:
         def __get__(self):
             return xl_mouse_get_dbl(self.mouse, XL_MOUSE_PROPERTY_LAST_RELEASED_TIME)
+
+    property window:
+        def __get__(self):
+            return Window(reference=<size_t>xl_mouse_get_ptr(self.mouse, XL_MOUSE_PROPERTY_WINDOW))
+
+    property x:
+        def __get__(self):
+            return xl_mouse_get_dbl(self.mouse, XL_MOUSE_PROPERTY_X)
+
+    property y:
+        def __get__(self):
+            return xl_mouse_get_dbl(self.mouse, XL_MOUSE_PROPERTY_Y)
+
+    property dx:
+        def __get__(self):
+            return xl_mouse_get_dbl(self.mouse, XL_MOUSE_PROPERTY_DX)
+
+    property dy:
+        def __get__(self):
+            return xl_mouse_get_dbl(self.mouse, XL_MOUSE_PROPERTY_DY)
 
     property relative:
         """

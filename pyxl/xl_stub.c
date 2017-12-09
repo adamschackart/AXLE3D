@@ -762,6 +762,18 @@ xl_mouse_get_str(xl_mouse_t* mouse, xl_mouse_property_t prop)
     AE_STUB(); return "";
 }
 
+void
+xl_mouse_set_ptr(xl_mouse_t* mouse, xl_mouse_property_t prop, void* value)
+{
+    AE_STUB();
+}
+
+void*
+xl_mouse_get_ptr(xl_mouse_t* mouse, xl_mouse_property_t prop)
+{
+    AE_STUB(); return NULL;
+}
+
 void xl_mouse_list_all(xl_mouse_t** mice)
 {
     AE_STUB();
@@ -1059,6 +1071,16 @@ void xl_animation_close_all(void)
  * ~~ [ event handling ] ~~ *
 --------------------------------------------------------------------------------
 */
+
+void xl_event_set_handler(xl_event_handler_t handler)
+{
+    AE_STUB();
+}
+
+xl_event_handler_t xl_event_get_handler(void)
+{
+    AE_STUB(); return NULL;
+}
 
 size_t xl_event_count_pending(void)
 {

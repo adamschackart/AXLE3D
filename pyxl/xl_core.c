@@ -13,6 +13,11 @@
 --- TODO: renderer x/y (camera viewport) - subtracted from draw x/y coordinates
 --- TODO: animated particle emitter that fires events when fade effects finish
 --- TODO: a Unity-style game launcher that allows user configuration on startup
+--- TODO: implement XL_OBJECT_COUNT_LIMIT to make sure we're not leaking stuff
+--- TODO: ae_error implementation override - close all objects on fatal errors?
+--- TODO: xl_log(CONTROLLER, ...) etc. for logging events and other information
+--- TODO: (xl/gl/al)_language_name, linkage_mode for logging misc build configs
+--- TODO: handle the system clipboard (through keyboard?) - events, get buffer
 ----------------------------------------------------------------------------- */
 #ifndef __XL_CORE_H__
 #include <xl_core.h>
@@ -4641,11 +4646,8 @@ static xl_keyboard_key_index_t xl_keyboard_key_index_from_sdl(SDL_Scancode code)
 ================================================================================
  * ~~ [ mouse input ] ~~ *
 --------------------------------------------------------------------------------
+TODO: get the global mouse position (display/monitor coordinates) as double prop
 TODO: set the cursor shape (system defaults, monochrome bitmap, and color image)
---------------------------------------------------------------------------------
-TODO: get the window-relative and global mouse position as x/y double properties
-(we have to remap the window-relative x/y to window logical renderer dimensions,
-like SDL does for motion events; check out the SDL code to see how this is done)
 --------------------------------------------------------------------------------
 */
 
@@ -4665,6 +4667,16 @@ typedef struct xl_internal_mouse_t
 
     int id; // random int
     double time_inserted;
+
+    /* we have to keep the current mouse position after events (for queries).
+     * SDL remaps mouse motion events to the logical renderer dimensions,
+     * but not for window-relative queries (values from SDL_GetMouseState).
+     */
+    xl_window_t* current_window;
+    double current_x;
+    double current_y;
+    double current_dx;
+    double current_dy;
 } \
     xl_internal_mouse_t;
 
@@ -4900,6 +4912,30 @@ xl_mouse_get_dbl(xl_mouse_t* mouse, xl_mouse_property_t property)
         }
         break;
 
+        case XL_MOUSE_PROPERTY_X:
+        {
+            if (xl_mouse_get_open(mouse)) return data->current_x;
+        }
+        break;
+
+        case XL_MOUSE_PROPERTY_Y:
+        {
+            if (xl_mouse_get_open(mouse)) return data->current_y;
+        }
+        break;
+
+        case XL_MOUSE_PROPERTY_DX:
+        {
+            if (xl_mouse_get_open(mouse)) return data->current_dx;
+        }
+        break;
+
+        case XL_MOUSE_PROPERTY_DY:
+        {
+            if (xl_mouse_get_open(mouse)) return data->current_dy;
+        }
+        break;
+
         default:
         {
             AE_WARN("%s in %s", xl_mouse_property_name[property], __FUNCTION__);
@@ -4964,6 +5000,44 @@ xl_mouse_get_str(xl_mouse_t* mouse, xl_mouse_property_t property)
     }
 
     return "";
+}
+
+void
+xl_mouse_set_ptr(xl_mouse_t* mouse, xl_mouse_property_t property, void* value)
+{
+    xl_internal_mouse_t* data = (xl_internal_mouse_t*)mouse; // private data
+
+    ae_switch (property, xl_mouse_property, XL_MOUSE_PROPERTY, suffix)
+    {
+        default:
+        {
+            AE_WARN("%s in %s", xl_mouse_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
+}
+
+void*
+xl_mouse_get_ptr(xl_mouse_t* mouse, xl_mouse_property_t property)
+{
+    xl_internal_mouse_t* data = (xl_internal_mouse_t*)mouse; // private data
+
+    ae_switch (property, xl_mouse_property, XL_MOUSE_PROPERTY, suffix)
+    {
+        case XL_MOUSE_PROPERTY_WINDOW:
+        {
+            if (xl_mouse_get_open(mouse)) return (void*)data->current_window;
+        }
+        break;
+
+        default:
+        {
+            AE_WARN("%s in %s", xl_mouse_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
+
+    return NULL;
 }
 
 static int xl_mouse_compare_time_inserted(const void* av, const void* bv)
@@ -7971,6 +8045,26 @@ static void xl_event_internal(xl_event_t* dst, SDL_Event* src)
         }
         break;
 
+        case SDL_MOUSEMOTION:
+        {
+            /* we have to keep track of the mouse position and resident window, as SDL
+             * uses internal-only data to remap mouse pos to logical renderer coords.
+             * as of the time this was written, the code is in SDL_RendererEventWatch.
+             */
+            xl_internal_mouse_t* data = (xl_internal_mouse_t *)
+                                    dst->as_mouse_motion.mouse;
+
+            assert(xl_mouse_get_open(dst->as_mouse_motion.mouse) &&
+                                        xl_mouse_count_all() == 1);
+
+            data->current_window = dst->as_mouse_motion.window;
+            data->current_x = dst->as_mouse_motion.x;
+            data->current_y = dst->as_mouse_motion.y;
+            data->current_dx = dst->as_mouse_motion.dx;
+            data->current_dy = dst->as_mouse_motion.dy;
+        }
+        break;
+
         default:
         {
             if (src->type == xl_keyboard_insert_event_type) // allocate and setup
@@ -8005,6 +8099,18 @@ static void xl_event_internal(xl_event_t* dst, SDL_Event* src)
         }
         break;
     }
+}
+
+static xl_event_handler_t xl_event_handler_p = NULL;
+
+void xl_event_set_handler(xl_event_handler_t handler)
+{
+    xl_event_handler_p = handler;
+}
+
+xl_event_handler_t xl_event_get_handler(void)
+{
+    return xl_event_handler_p;
 }
 
 size_t xl_event_count_pending(void)
@@ -8073,6 +8179,12 @@ int xl_event_poll(xl_event_t* event, int wait)
             xl_event_from_sdl(event, &sdl_event);
             xl_event_internal(event, &sdl_event);
         }
+    }
+
+    /* dispatch the currently installed global event handling callback */
+    ae_if (event->type != XL_EVENT_NOTHING && xl_event_handler_p != NULL)
+    {
+        xl_event_handler_p(event);
     }
 
     AE_PROFILE_LEAVE();
@@ -8308,6 +8420,9 @@ void xl_quit(void)
 
         XL_OBJECT_TYPE_N
         #undef N
+
+        /* reset the global event handler callback to nothing */
+        xl_event_handler_p = NULL;
 
         TTF_Quit();
         SDL_Quit();
