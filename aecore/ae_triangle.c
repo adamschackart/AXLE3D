@@ -86,7 +86,7 @@ static void tri3_mesh_depthsort_idx(const float point[3],
     size_t tri_bytes;
 
     /* setup global variables for the qsort comparison function
-     * (TODO: custom qsort_r/qsort_s replacement with context).
+     * (TODO: this is older code, replace globals with ae_sort).
      */
     g_depthsort_point = (float*)point;
     g_depthsort_vertices = vertices;

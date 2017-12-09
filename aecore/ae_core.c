@@ -20,6 +20,14 @@
     #endif
 #endif
 
+#if !defined(AE_NOBUILD_COLOR)
+    #if defined(AE_STUB_COLOR)
+    #include <stub/ae_color.c>
+    #else
+    #include <ae_color.c>
+    #endif
+#endif
+
 #if !defined(AE_NOBUILD_CPUINFO)
     #if defined(AE_STUB_CPUINFO)
     #include <stub/ae_cpuinfo.c>
@@ -260,6 +268,7 @@ void ae_init(int argc, char** argv)
         ae_index_init(argc, argv);
         ae_vertex_init(argc, argv);
         ae_triangle_init(argc, argv);
+        ae_color_init(argc, argv);
         ae_image_init(argc, argv);
         ae_minifont_init(argc, argv);
         ae_polygon_init(argc, argv);
@@ -304,6 +313,7 @@ void ae_quit(void)
         ae_polygon_quit();
         ae_minifont_quit();
         ae_image_quit();
+        ae_color_quit();
         ae_triangle_quit();
         ae_vertex_quit();
         ae_index_quit();

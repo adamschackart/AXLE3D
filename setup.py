@@ -11,6 +11,7 @@ from setup_utils import *
 shared_libs = [
     SharedLibrary('aecore', ['aecore/ae_core.c',
             # 'aecore/ae_branch.c',
+            # 'aecore/ae_color.c',
             # 'aecore/ae_cpuinfo.c',
             # 'aecore/ae_easing.c',
             # 'aecore/ae_error.c',
@@ -42,6 +43,7 @@ shared_libs = [
             ('AE_NOQUIT_ATEXIT', '1'),
 
             # ('AE_NOBUILD_BRANCH', '1'),
+            # ('AE_NOBUILD_COLOR', '1'),
             # ('AE_NOBUILD_CPUINFO', '1'),
             # ('AE_NOBUILD_EASING', '1'),
             # ('AE_NOBUILD_ERROR', '1'),
@@ -64,6 +66,7 @@ shared_libs = [
             # ('AE_NOBUILD_VERTEX', '1'),
 
             # ('AE_STUB_BRANCH', '1'),
+            # ('AE_STUB_COLOR', '1'),
             # ('AE_STUB_CPUINFO', '1'),
             # ('AE_STUB_EASING', '1'),
             # ('AE_STUB_ERROR', '1'),
@@ -125,6 +128,7 @@ ext_modules = [
     Extension('aegame.idx', ['aegame/idx.pyx'], libraries=['aecore'], include_dirs=['aecore']),
     Extension('aegame.vtx', ['aegame/vtx.pyx'], libraries=['aecore'], include_dirs=['aecore']),
     Extension('aegame.tri', ['aegame/tri.pyx'], libraries=['aecore'], include_dirs=['aecore']),
+    Extension('aegame.clr', ['aegame/clr.pyx'], libraries=['aecore'], include_dirs=['aecore']),
     Extension('aegame.img', ['aegame/img.pyx'], libraries=['aecore'], include_dirs=['aecore']),
     Extension('aegame.fnt', ['aegame/fnt.pyx'], libraries=['aecore'], include_dirs=['aecore']),
 ]

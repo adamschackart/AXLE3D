@@ -72,6 +72,9 @@ from . import vtx
 from . tri import *
 from . import tri
 
+from . clr import *
+from . import clr
+
 from . img import *
 from . import img
 

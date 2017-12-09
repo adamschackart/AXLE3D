@@ -180,6 +180,9 @@ NOTE: disabling these for now, as their templates massively increase build time
 #ifndef __AE_BRANCH_H__
 #include <ae_branch.h>
 #endif
+#ifndef __AE_COLOR_H__
+#include <ae_color.h>
+#endif
 #ifndef __AE_CPUINFO_H__
 #include <ae_cpuinfo.h>
 #endif
