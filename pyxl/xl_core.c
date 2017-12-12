@@ -7009,18 +7009,19 @@ static xl_animation_t* xl_animation_load_archive(xl_window_t* window,
 
     *error = ae_image_archive_load(&images, filename);
 
-    switch (*error) // assume we're calling from load (file not found handled)
+    switch (*error) // assume we're calling from load (file-not-found handled)
     {
         case AE_IMAGE_SUCCESS:
         {
-            for (image = images; ae_image_bytes(image); image++)
+            for (image = images; ae_image_bytes(image); image++) // frame count
             {
-                assert(frame_width  ? frame_width  == image->width  : 1);
-                assert(frame_height ? frame_height == image->height : 1);
+                assert(frame_width  ? frame_width  == (int)image->width  : 1);
+                assert(frame_height ? frame_height == (int)image->height : 1);
             }
 
-            /* TODO: if the factors are prime and the image is too wide,
-             * try the next number up until there's a size that can fit.
+            /* TODO if the x and y factors are prime and the image is too wide,
+             * try the next number up until there's an atlas size that can fit
+             * reasonably within our maximum texture width (check width here?).
              */
             count = (int)(image - images);
             ae_closest_factors(&x_frames, &y_frames, count);

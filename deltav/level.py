@@ -99,7 +99,7 @@ class Level(object):
             self._get_material('weapon.obj', 'level4'),
             self._get_material('weapon.obj', 'level3'),
             self._get_material('weapon.obj', 'level2'),
-            self._get_material('weapon.obj', 'level1')
+            self._get_material('weapon.obj', 'level1'),
         ]
 
         self.visual_meshes = [

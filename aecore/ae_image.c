@@ -3542,8 +3542,8 @@ void ae_image_blit_rect(ae_image_t * image, int * rect, float * color,
 void ae_image_blit_line_horizontal_ex(ae_image_t* image,
                 int x, int y, int width, float * color)
 {
+    AE_PROFILE_ENTER(); // HACK: just blit a skinny rect
     int rect[] = { x, y, width, 1 };
-    AE_PROFILE_ENTER();
 
     ae_image_blit_rect(image, rect, color, 1, 1, 1, 1);
     AE_PROFILE_LEAVE();
@@ -3557,8 +3557,8 @@ void ae_image_blit_line_vertical_ex( ae_image_t* image,
      * The profiler, however, demonstrates to us the forgiving nature of x86.
      * This is only about 20% slower than the horizontal line drawing code!
      */
+    AE_PROFILE_ENTER(); // HACK: just blit a skinny rect
     int rect[] = { x, y, 1, height };
-    AE_PROFILE_ENTER();
 
     ae_image_blit_rect(image, rect, color, 1, 1, 1, 1);
     AE_PROFILE_LEAVE();
@@ -3578,10 +3578,9 @@ void ae_image_blit_line_vertical( ae_image_t* image,
 
 void ae_image_blit_rect_outline(ae_image_t* image, int* rect, float* color)
 {
-    int fixed_rect[] = { 0, 0, image->width, image->height };
-    AE_PROFILE_ENTER();
+    AE_PROFILE_ENTER(); // if the destination rect is NULL, draw a border around the entire image
 
-    // if the destination rect is NULL, draw a border around the entire image
+    int fixed_rect[] = { 0, 0, (int)image->width, (int)image->height };
     if (rect == NULL) rect = fixed_rect;
 
     // top
@@ -3602,10 +3601,10 @@ void ae_image_blit_rect_outline(ae_image_t* image, int* rect, float* color)
 void ae_image_blit_grid_outline(ae_image_t * image, int * origin,
             const size_t num_x, const size_t num_y, float* color)
 {
+    AE_PROFILE_ENTER(); // TODO: if origin is NULL, just outline
+
     int nx = (int)num_x, ny = (int)num_y, x, y, current[4];
     int iw = (int)image->width, ih = (int)image->height;
-
-    AE_PROFILE_ENTER();
 
     ae_assert(origin, "got NULL pointer for first rect in grid");
     memcpy(current + 2, origin + 2, sizeof(int[2]));

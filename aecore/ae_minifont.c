@@ -46,12 +46,12 @@ ae_minifont8x8_putc_rgba_flt_clipped(int x, int y, u8* glyph, float* color, floa
         {
             if (glyph_row & (1 << (cur_x - x)) && cur_x >= 0 && cur_x < dst_w)
             {
-                // FIXME: this slow hack highlights the need for a single pixel blit
+                // FIXME this super slow hack highlights the need for a single pixel blit function!!!
                 int rect[] = { cur_x, dst_h - cur_y - 1, 1, 1 };
 
                 ae_image_t temp =
                 {
-                    dst, dst_w, dst_h, AE_IMAGE_FORMAT_RGBA, AE_IMAGE_TYPE_FLT, NULL
+                    dst, (size_t)dst_w, (size_t)dst_h, AE_IMAGE_FORMAT_RGBA, AE_IMAGE_TYPE_FLT, NULL
                 };
 
                 ae_image_blit_rect(&temp, rect, color, 1, 1, 1, 1);
