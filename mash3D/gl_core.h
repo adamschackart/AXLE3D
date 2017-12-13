@@ -50,6 +50,7 @@ GL_DECL void GL_CALL gl_quit(void);
 --------------------------------------------------------------------------------
 NOTE: Production games should avoid calling these directly - they're not always
 guaranteed to be implemented. These are for bootstrapping and prototyping stuff.
+The enum constants these functions rely on are not exposed in this header file.
 --------------------------------------------------------------------------------
 */
 

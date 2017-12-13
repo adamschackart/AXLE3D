@@ -19,6 +19,7 @@
 --- TODO: (xl/gl/al)_language_name, linkage_mode for logging misc build configs
 --- TODO: handle the system clipboard (through keyboard?) - events, get buffer
 --- TODO: track last time any input action was taken (max of press and release)
+--- TODO: xl_touchscreen_t - handle touch input events similar to other devices
 ----------------------------------------------------------------------------- */
 #ifndef __XL_CORE_H__
 #include <xl_core.h>

@@ -231,6 +231,23 @@ using a lookup table for floor(lg(v)) and then evaluating 1<<(1+floor(lg(v))).
 */
 
 static c_inline int num_is_pow2(u32 n) { return (n & (n - 1)) == 0; }
+
+static c_inline u32 num_prev_pow2(u32 x)
+{
+    ae_assert(x != 0, "zero num_prev_pow2 val");
+
+    x |= x >> 0x00000001;
+    x |= x >> 0x00000002;
+    x |= x >> 0x00000004;
+    x |= x >> 0x00000008;
+    x |= x >> 0x00000010;
+
+    x -= (x >> 1);
+    ae_assert(num_is_pow2(x), "non-pow2 %u", x);
+
+    return x;
+}
+
 static c_inline u32 num_next_pow2(u32 x)
 {
     ae_assert(x != 0, "zero num_next_pow2 val");
@@ -264,6 +281,8 @@ static c_inline u32 num_next_pow2(u32 x)
 static c_inline size_t ae_idx2bit(const size_t X) { return AE_IDX2BIT(X); }
 static c_inline size_t ae_bit2idx(const size_t X)
 {
+    /* This function returns the shift value from a power-of-two integer.
+     */
     #if defined(_MSC_VER) && _MSC_VER >= 1300 && 0
         if (X)
         {

@@ -106,7 +106,9 @@ cdef extern from "ae_memory.h":
 
     # ===== [ powers of 2 ] ====================================================
 
-    int num_is_pow2  (u32 n)
+    int num_is_pow2(u32 num)
+
+    u32 num_prev_pow2(u32 x)
     u32 num_next_pow2(u32 x)
 
     # ===== [ bits ] ===========================================================
