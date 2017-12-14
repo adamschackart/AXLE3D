@@ -16,6 +16,7 @@
 --- TODO: lights and particle emitters should probably have path str properties
 --- TODO: test buffer against ellipsoid/line - check aabbox, then convex polys
 --- TODO: "burn barrel" particle effect - sphere clamp x, aabbox clamp bottom y
+--- TODO: function for checking if an extension is supported (internal strset?)
 --------------------------------------------------------------------------------
 
 --- TODO: put all internal object structures into a union and block-allocate it.
@@ -235,9 +236,35 @@ void GL_BindTexture(unsigned int target, unsigned int texture)
     X(); glBindTexture(target, texture);
 }
 
-// TODO: GL_BlendEquation
+void GL_BlendEquation(unsigned int mode)
+{
+    X(); glBlendEquation(mode);
+}
 
-// TODO: GL_BlendEquationSeparate
+void GL_BlendEquationSeparate(unsigned int modeRGB, unsigned int modeA)
+{
+    /* TODO: allow this ptr to be reset to NULL on gl_quit for safety */
+    static PFNGLBLENDEQUATIONSEPARATEPROC exBlendEquationSeparate = NULL;
+
+    X(); if (exBlendEquationSeparate)
+    {
+        exBlendEquationSeparate(modeRGB, modeA);
+    }
+    else
+    {
+        exBlendEquationSeparate = (PFNGLBLENDEQUATIONSEPARATEPROC)
+                                gl_func("glBlendEquationSeparate");
+
+        if (exBlendEquationSeparate)
+        {
+            exBlendEquationSeparate(modeRGB, modeA);
+        }
+        else
+        {
+            AE_WARN("glBlendEquationSeparate not found");
+        }
+    }
+}
 
 void GL_BlendFunc(unsigned int src, unsigned int dst)
 {
@@ -708,9 +735,15 @@ void GL_TexCoordPointer(int size, unsigned int type, int stride, const void* dat
     X(); glTexCoordPointer(size, type, stride, data);
 }
 
-// TODO: GL_TexEnvfv
+void GL_TexEnvfv(unsigned int target, unsigned int pname, const float *params)
+{
+    X(); glTexEnvfv(target, pname, params);
+}
 
-// TODO: GL_TexEnviv
+void GL_TexEnviv(unsigned int target, unsigned int pname, const int *params)
+{
+    X(); glTexEnviv(target, pname, params);
+}
 
 void GL_TexEnvf(unsigned int target, unsigned int pname, float param)
 {
@@ -6688,6 +6721,11 @@ void gl_particle_emitter_draw(gl_particle_emitter_t* emitter)
         /* FIXME: point sprites are rendered upside-down, so we'll need to push a
          * texture matrix to set the origin to the upper-left corner temporarily.
          * in future implementations, this will of course be done inside a shader.
+         *
+         * FIXME: on some drivers i've tested this on, particles look super wonky,
+         * growing and shrinking to ridiculous sizes in seemingly random ways...
+         * we should probably check for some missing extension and try a fallback.
+         * my initial suspicion is something involving PointParameter* functions.
          */
         GL_DepthMask(GL_FALSE);
         {

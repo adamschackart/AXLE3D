@@ -64,6 +64,12 @@ GL_DECL void GL_CALL
 GL_BindTexture(unsigned int target, unsigned int texture);
 
 GL_DECL void GL_CALL
+GL_BlendEquation(unsigned int mode);
+
+GL_DECL void GL_CALL
+GL_BlendEquationSeparate(unsigned int modeRGB, unsigned int modeA);
+
+GL_DECL void GL_CALL
 GL_BlendFunc(unsigned int src, unsigned int dst);
 
 GL_DECL void GL_CALL
@@ -294,6 +300,12 @@ GL_TexCoord4fv(const float* strq);
 
 GL_DECL void GL_CALL
 GL_TexCoordPointer(int size, unsigned int type, int stride, const void* data);
+
+GL_DECL void GL_CALL
+GL_TexEnvfv(unsigned int target, unsigned int pname, const float *params);
+
+GL_DECL void GL_CALL
+GL_TexEnviv(unsigned int target, unsigned int pname, const int *params);
 
 GL_DECL void GL_CALL
 GL_TexEnvf(unsigned int target, unsigned int pname, float param);

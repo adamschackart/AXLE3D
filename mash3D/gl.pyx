@@ -33,6 +33,8 @@ cdef extern from "gl_core.h":
     void GL_AlphaFunc(unsigned int func, float ref)
     void GL_Begin(unsigned int mode)
     void GL_BindTexture(unsigned int target, unsigned int texture)
+    void GL_BlendEquation(unsigned int mode)
+    void GL_BlendEquationSeparate(unsigned int modeRGB, unsigned int modeA)
     void GL_BlendFunc(unsigned int src, unsigned int dst)
 
     void GL_BlendFuncSeparate(unsigned int srcRGB, unsigned int dstRGB,
@@ -113,6 +115,8 @@ cdef extern from "gl_core.h":
     void GL_TexCoord3fv(const float* str)
     void GL_TexCoord4fv(const float* strq)
     void GL_TexCoordPointer(int size, unsigned int type, int stride, const void* data)
+    void GL_TexEnvfv(unsigned int target, unsigned int pname, const float *params)
+    void GL_TexEnviv(unsigned int target, unsigned int pname, const int *params)
     void GL_TexEnvf(unsigned int target, unsigned int pname, float param)
     void GL_TexEnvi(unsigned int target, unsigned int pname, int param)
 
@@ -901,6 +905,25 @@ if 1:
     TEXTURE     = 0x1702
 
     # --------------------------------------
+    # points
+    #
+    POINT_SMOOTH           = 0x0B10
+    POINT_SIZE             = 0x0B11
+    POINT_SIZE_GRANULARITY = 0x0B13
+    POINT_SIZE_RANGE       = 0x0B12
+
+    # --------------------------------------
+    # lines
+    #
+    LINE_SMOOTH            = 0x0B20
+    LINE_STIPPLE           = 0x0B24
+    LINE_STIPPLE_PATTERN   = 0x0B25
+    LINE_STIPPLE_REPEAT    = 0x0B26
+    LINE_WIDTH             = 0x0B21
+    LINE_WIDTH_GRANULARITY = 0x0B23
+    LINE_WIDTH_RANGE       = 0x0B22
+
+    # --------------------------------------
     # polygons
     #
     POINT                 = 0x1B00
@@ -922,6 +945,15 @@ if 1:
     POLYGON_OFFSET_POINT  = 0x2A01
     POLYGON_OFFSET_LINE   = 0x2A02
     POLYGON_OFFSET_FILL   = 0x8037
+
+    # --------------------------------------
+    # display lists
+    #
+    COMPILE             = 0x1300
+    COMPILE_AND_EXECUTE = 0x1301
+    LIST_BASE           = 0x0B32
+    LIST_INDEX          = 0x0B33
+    LIST_MODE           = 0x0B30
 
     # --------------------------------------
     # depth buffer
@@ -981,6 +1013,37 @@ if 1:
     NORMALIZE                = 0x0BA1
 
     # --------------------------------------
+    # user clipping planes
+    #
+    CLIP_PLANE0 = 0x3000
+    CLIP_PLANE1 = 0x3001
+    CLIP_PLANE2 = 0x3002
+    CLIP_PLANE3 = 0x3003
+    CLIP_PLANE4 = 0x3004
+    CLIP_PLANE5 = 0x3005
+
+    # --------------------------------------
+    # accumulation buffer
+    #
+    ACCUM_RED_BITS    = 0x0D58
+    ACCUM_GREEN_BITS  = 0x0D59
+    ACCUM_BLUE_BITS   = 0x0D5A
+    ACCUM_ALPHA_BITS  = 0x0D5B
+    ACCUM_CLEAR_VALUE = 0x0B80
+    ACCUM             = 0x0100
+    ADD               = 0x0104
+    LOAD              = 0x0101
+    MULT              = 0x0103
+    RETURN            = 0x0102
+
+    # --------------------------------------
+    # alpha testing
+    #
+    ALPHA_TEST      = 0x0BC0
+    ALPHA_TEST_REF  = 0x0BC2
+    ALPHA_TEST_FUNC = 0x0BC1
+
+    # --------------------------------------
     # blending
     #
     BLEND               = 0x0BE2
@@ -997,6 +1060,39 @@ if 1:
     DST_COLOR           = 0x0306
     ONE_MINUS_DST_COLOR = 0x0307
     SRC_ALPHA_SATURATE  = 0x0308
+
+    # --------------------------------------
+    # render mode
+    #
+    FEEDBACK = 0x1C01
+    RENDER   = 0x1C00
+    SELECT   = 0x1C02
+
+    # --------------------------------------
+    # feedback (underscores for numbers)
+    #
+    _2D                     = 0x0600
+    _3D                     = 0x0601
+    _3D_COLOR               = 0x0602
+    _3D_COLOR_TEXTURE       = 0x0603
+    _4D_COLOR_TEXTURE       = 0x0604
+    POINT_TOKEN             = 0x0701
+    LINE_TOKEN              = 0x0702
+    LINE_RESET_TOKEN        = 0x0707
+    POLYGON_TOKEN           = 0x0703
+    BITMAP_TOKEN            = 0x0704
+    DRAW_PIXEL_TOKEN        = 0x0705
+    COPY_PIXEL_TOKEN        = 0x0706
+    PASS_THROUGH_TOKEN      = 0x0700
+    FEEDBACK_BUFFER_POINTER = 0x0DF0
+    FEEDBACK_BUFFER_SIZE    = 0x0DF1
+    FEEDBACK_BUFFER_TYPE    = 0x0DF2
+
+    # --------------------------------------
+    # selection
+    #
+    SELECTION_BUFFER_POINTER = 0x0DF3
+    SELECTION_BUFFER_SIZE    = 0x0DF4
 
     # --------------------------------------
     # fog
@@ -1054,6 +1150,194 @@ if 1:
     REPLACE                 = 0x1E01
     INCR                    = 0x1E02
     DECR                    = 0x1E03
+
+    # --------------------------------------
+    # buffers, pixel drawing / reading
+    #
+    NONE            = 0x0000
+    LEFT            = 0x0406
+    RIGHT           = 0x0407
+    FRONT_LEFT      = 0x0400
+    FRONT_RIGHT     = 0x0401
+    BACK_LEFT       = 0x0402
+    BACK_RIGHT      = 0x0403
+    AUX0            = 0x0409
+    AUX1            = 0x040A
+    AUX2            = 0x040B
+    AUX3            = 0x040C
+    COLOR_INDEX     = 0x1900
+    RED             = 0x1903
+    GREEN           = 0x1904
+    BLUE            = 0x1905
+    ALPHA           = 0x1906
+    LUMINANCE       = 0x1909
+    LUMINANCE_ALPHA = 0x190A
+    ALPHA_BITS      = 0x0D55
+    RED_BITS        = 0x0D52
+    GREEN_BITS      = 0x0D53
+    BLUE_BITS       = 0x0D54
+    INDEX_BITS      = 0x0D51
+    SUBPIXEL_BITS   = 0x0D50
+    AUX_BUFFERS     = 0x0C00
+    READ_BUFFER     = 0x0C02
+    DRAW_BUFFER     = 0x0C01
+    DOUBLEBUFFER    = 0x0C32
+    STEREO          = 0x0C33
+    BITMAP          = 0x1A00
+    COLOR           = 0x1800
+    DEPTH           = 0x1801
+    STENCIL         = 0x1802
+    DITHER          = 0x0BD0
+    RGB             = 0x1907
+    RGBA            = 0x1908
+
+    # --------------------------------------
+    # implementation limits
+    #
+    MAX_LIST_NESTING              = 0x0B31
+    MAX_EVAL_ORDER                = 0x0D30
+    MAX_LIGHTS                    = 0x0D31
+    MAX_CLIP_PLANES               = 0x0D32
+    MAX_TEXTURE_SIZE              = 0x0D33
+    MAX_PIXEL_MAP_TABLE           = 0x0D34
+    MAX_ATTRIB_STACK_DEPTH        = 0x0D35
+    MAX_MODELVIEW_STACK_DEPTH     = 0x0D36
+    MAX_NAME_STACK_DEPTH          = 0x0D37
+    MAX_PROJECTION_STACK_DEPTH    = 0x0D38
+    MAX_TEXTURE_STACK_DEPTH       = 0x0D39
+    MAX_VIEWPORT_DIMS             = 0x0D3A
+    MAX_CLIENT_ATTRIB_STACK_DEPTH = 0x0D3B
+
+    # --------------------------------------
+    # gets
+    #
+    ATTRIB_STACK_DEPTH            = 0x0BB0
+    CLIENT_ATTRIB_STACK_DEPTH     = 0x0BB1
+    COLOR_CLEAR_VALUE             = 0x0C22
+    COLOR_WRITEMASK               = 0x0C23
+    CURRENT_INDEX                 = 0x0B01
+    CURRENT_COLOR                 = 0x0B00
+    CURRENT_NORMAL                = 0x0B02
+    CURRENT_RASTER_COLOR          = 0x0B04
+    CURRENT_RASTER_DISTANCE       = 0x0B09
+    CURRENT_RASTER_INDEX          = 0x0B05
+    CURRENT_RASTER_POSITION       = 0x0B07
+    CURRENT_RASTER_TEXTURE_COORDS = 0x0B06
+    CURRENT_RASTER_POSITION_VALID = 0x0B08
+    CURRENT_TEXTURE_COORDS        = 0x0B03
+    INDEX_CLEAR_VALUE             = 0x0C20
+    INDEX_MODE                    = 0x0C30
+    INDEX_WRITEMASK               = 0x0C21
+    MODELVIEW_MATRIX              = 0x0BA6
+    MODELVIEW_STACK_DEPTH         = 0x0BA3
+    NAME_STACK_DEPTH              = 0x0D70
+    PROJECTION_MATRIX             = 0x0BA7
+    PROJECTION_STACK_DEPTH        = 0x0BA4
+    RENDER_MODE                   = 0x0C40
+    RGBA_MODE                     = 0x0C31
+    TEXTURE_MATRIX                = 0x0BA8
+    TEXTURE_STACK_DEPTH           = 0x0BA5
+    VIEWPORT                      = 0x0BA2
+
+    # --------------------------------------
+    # evaluators
+    #
+    AUTO_NORMAL          = 0x0D80
+    MAP1_COLOR_4         = 0x0D90
+    MAP1_INDEX           = 0x0D91
+    MAP1_NORMAL          = 0x0D92
+    MAP1_TEXTURE_COORD_1 = 0x0D93
+    MAP1_TEXTURE_COORD_2 = 0x0D94
+    MAP1_TEXTURE_COORD_3 = 0x0D95
+    MAP1_TEXTURE_COORD_4 = 0x0D96
+    MAP1_VERTEX_3        = 0x0D97
+    MAP1_VERTEX_4        = 0x0D98
+    MAP2_COLOR_4         = 0x0DB0
+    MAP2_INDEX           = 0x0DB1
+    MAP2_NORMAL          = 0x0DB2
+    MAP2_TEXTURE_COORD_1 = 0x0DB3
+    MAP2_TEXTURE_COORD_2 = 0x0DB4
+    MAP2_TEXTURE_COORD_3 = 0x0DB5
+    MAP2_TEXTURE_COORD_4 = 0x0DB6
+    MAP2_VERTEX_3        = 0x0DB7
+    MAP2_VERTEX_4        = 0x0DB8
+    MAP1_GRID_DOMAIN     = 0x0DD0
+    MAP1_GRID_SEGMENTS   = 0x0DD1
+    MAP2_GRID_DOMAIN     = 0x0DD2
+    MAP2_GRID_SEGMENTS   = 0x0DD3
+    COEFF                = 0x0A00
+    ORDER                = 0x0A01
+    DOMAIN               = 0x0A02
+
+    # --------------------------------------
+    # hints
+    #
+    PERSPECTIVE_CORRECTION_HINT = 0x0C50
+    POINT_SMOOTH_HINT           = 0x0C51
+    LINE_SMOOTH_HINT            = 0x0C52
+    POLYGON_SMOOTH_HINT         = 0x0C53
+    FOG_HINT                    = 0x0C54
+    DONT_CARE                   = 0x1100
+    FASTEST                     = 0x1101
+    NICEST                      = 0x1102
+
+    # --------------------------------------
+    # scissor box
+    #
+    SCISSOR_BOX  = 0x0C10
+    SCISSOR_TEST = 0x0C11
+
+    # --------------------------------------
+    # pixel mode / transfer
+    #
+    MAP_COLOR             = 0x0D10
+    MAP_STENCIL           = 0x0D11
+    INDEX_SHIFT           = 0x0D12
+    INDEX_OFFSET          = 0x0D13
+    RED_SCALE             = 0x0D14
+    RED_BIAS              = 0x0D15
+    GREEN_SCALE           = 0x0D18
+    GREEN_BIAS            = 0x0D19
+    BLUE_SCALE            = 0x0D1A
+    BLUE_BIAS             = 0x0D1B
+    ALPHA_SCALE           = 0x0D1C
+    ALPHA_BIAS            = 0x0D1D
+    DEPTH_SCALE           = 0x0D1E
+    DEPTH_BIAS            = 0x0D1F
+    PIXEL_MAP_S_TO_S_SIZE = 0x0CB1
+    PIXEL_MAP_I_TO_I_SIZE = 0x0CB0
+    PIXEL_MAP_I_TO_R_SIZE = 0x0CB2
+    PIXEL_MAP_I_TO_G_SIZE = 0x0CB3
+    PIXEL_MAP_I_TO_B_SIZE = 0x0CB4
+    PIXEL_MAP_I_TO_A_SIZE = 0x0CB5
+    PIXEL_MAP_R_TO_R_SIZE = 0x0CB6
+    PIXEL_MAP_G_TO_G_SIZE = 0x0CB7
+    PIXEL_MAP_B_TO_B_SIZE = 0x0CB8
+    PIXEL_MAP_A_TO_A_SIZE = 0x0CB9
+    PIXEL_MAP_S_TO_S      = 0x0C71
+    PIXEL_MAP_I_TO_I      = 0x0C70
+    PIXEL_MAP_I_TO_R      = 0x0C72
+    PIXEL_MAP_I_TO_G      = 0x0C73
+    PIXEL_MAP_I_TO_B      = 0x0C74
+    PIXEL_MAP_I_TO_A      = 0x0C75
+    PIXEL_MAP_R_TO_R      = 0x0C76
+    PIXEL_MAP_G_TO_G      = 0x0C77
+    PIXEL_MAP_B_TO_B      = 0x0C78
+    PIXEL_MAP_A_TO_A      = 0x0C79
+    PACK_ALIGNMENT        = 0x0D05
+    PACK_LSB_FIRST        = 0x0D01
+    PACK_ROW_LENGTH       = 0x0D02
+    PACK_SKIP_PIXELS      = 0x0D04
+    PACK_SKIP_ROWS        = 0x0D03
+    PACK_SWAP_BYTES       = 0x0D00
+    UNPACK_ALIGNMENT      = 0x0CF5
+    UNPACK_LSB_FIRST      = 0x0CF1
+    UNPACK_ROW_LENGTH     = 0x0CF2
+    UNPACK_SKIP_PIXELS    = 0x0CF4
+    UNPACK_SKIP_ROWS      = 0x0CF3
+    UNPACK_SWAP_BYTES     = 0x0CF0
+    ZOOM_X                = 0x0D16
+    ZOOM_Y                = 0x0D17
 
     # --------------------------------------
     # texture mapping
@@ -1195,6 +1479,200 @@ if 1:
     CLIENT_ALL_ATTRIB_BITS  = 0xFFFFFFFF
 
     # --------------------------------------
+    # OpenGL 1.2
+    #
+    RESCALE_NORMAL                = 0x803A
+    CLAMP_TO_EDGE                 = 0x812F
+    MAX_ELEMENTS_VERTICES         = 0x80E8
+    MAX_ELEMENTS_INDICES          = 0x80E9
+    BGR                           = 0x80E0
+    BGRA                          = 0x80E1
+    UNSIGNED_BYTE_3_3_2           = 0x8032
+    UNSIGNED_BYTE_2_3_3_REV       = 0x8362
+    UNSIGNED_SHORT_5_6_5          = 0x8363
+    UNSIGNED_SHORT_5_6_5_REV      = 0x8364
+    UNSIGNED_SHORT_4_4_4_4        = 0x8033
+    UNSIGNED_SHORT_4_4_4_4_REV    = 0x8365
+    UNSIGNED_SHORT_5_5_5_1        = 0x8034
+    UNSIGNED_SHORT_1_5_5_5_REV    = 0x8366
+    UNSIGNED_INT_8_8_8_8          = 0x8035
+    UNSIGNED_INT_8_8_8_8_REV      = 0x8367
+    UNSIGNED_INT_10_10_10_2       = 0x8036
+    UNSIGNED_INT_2_10_10_10_REV   = 0x8368
+    LIGHT_MODEL_COLOR_CONTROL     = 0x81F8
+    SINGLE_COLOR                  = 0x81F9
+    SEPARATE_SPECULAR_COLOR       = 0x81FA
+    TEXTURE_MIN_LOD               = 0x813A
+    TEXTURE_MAX_LOD               = 0x813B
+    TEXTURE_BASE_LEVEL            = 0x813C
+    TEXTURE_MAX_LEVEL             = 0x813D
+    SMOOTH_POINT_SIZE_RANGE       = 0x0B12
+    SMOOTH_POINT_SIZE_GRANULARITY = 0x0B13
+    SMOOTH_LINE_WIDTH_RANGE       = 0x0B22
+    SMOOTH_LINE_WIDTH_GRANULARITY = 0x0B23
+    ALIASED_POINT_SIZE_RANGE      = 0x846D
+    ALIASED_LINE_WIDTH_RANGE      = 0x846E
+    PACK_SKIP_IMAGES              = 0x806B
+    PACK_IMAGE_HEIGHT             = 0x806C
+    UNPACK_SKIP_IMAGES            = 0x806D
+    UNPACK_IMAGE_HEIGHT           = 0x806E
+    TEXTURE_3D                    = 0x806F
+    PROXY_TEXTURE_3D              = 0x8070
+    TEXTURE_DEPTH                 = 0x8071
+    TEXTURE_WRAP_R                = 0x8072
+    MAX_3D_TEXTURE_SIZE           = 0x8073
+    TEXTURE_BINDING_3D            = 0x806A
+
+    # --------------------------------------
+    # GL_ARB_imaging
+    #
+    CONSTANT_COLOR                      = 0x8001
+    ONE_MINUS_CONSTANT_COLOR            = 0x8002
+    CONSTANT_ALPHA                      = 0x8003
+    ONE_MINUS_CONSTANT_ALPHA            = 0x8004
+    COLOR_TABLE                         = 0x80D0
+    POST_CONVOLUTION_COLOR_TABLE        = 0x80D1
+    POST_COLOR_MATRIX_COLOR_TABLE       = 0x80D2
+    PROXY_COLOR_TABLE                   = 0x80D3
+    PROXY_POST_CONVOLUTION_COLOR_TABLE  = 0x80D4
+    PROXY_POST_COLOR_MATRIX_COLOR_TABLE = 0x80D5
+    COLOR_TABLE_SCALE                   = 0x80D6
+    COLOR_TABLE_BIAS                    = 0x80D7
+    COLOR_TABLE_FORMAT                  = 0x80D8
+    COLOR_TABLE_WIDTH                   = 0x80D9
+    COLOR_TABLE_RED_SIZE                = 0x80DA
+    COLOR_TABLE_GREEN_SIZE              = 0x80DB
+    COLOR_TABLE_BLUE_SIZE               = 0x80DC
+    COLOR_TABLE_ALPHA_SIZE              = 0x80DD
+    COLOR_TABLE_LUMINANCE_SIZE          = 0x80DE
+    COLOR_TABLE_INTENSITY_SIZE          = 0x80DF
+    CONVOLUTION_1D                      = 0x8010
+    CONVOLUTION_2D                      = 0x8011
+    SEPARABLE_2D                        = 0x8012
+    CONVOLUTION_BORDER_MODE             = 0x8013
+    CONVOLUTION_FILTER_SCALE            = 0x8014
+    CONVOLUTION_FILTER_BIAS             = 0x8015
+    REDUCE                              = 0x8016
+    CONVOLUTION_FORMAT                  = 0x8017
+    CONVOLUTION_WIDTH                   = 0x8018
+    CONVOLUTION_HEIGHT                  = 0x8019
+    MAX_CONVOLUTION_WIDTH               = 0x801A
+    MAX_CONVOLUTION_HEIGHT              = 0x801B
+    POST_CONVOLUTION_RED_SCALE          = 0x801C
+    POST_CONVOLUTION_GREEN_SCALE        = 0x801D
+    POST_CONVOLUTION_BLUE_SCALE         = 0x801E
+    POST_CONVOLUTION_ALPHA_SCALE        = 0x801F
+    POST_CONVOLUTION_RED_BIAS           = 0x8020
+    POST_CONVOLUTION_GREEN_BIAS         = 0x8021
+    POST_CONVOLUTION_BLUE_BIAS          = 0x8022
+    POST_CONVOLUTION_ALPHA_BIAS         = 0x8023
+    CONSTANT_BORDER                     = 0x8151
+    REPLICATE_BORDER                    = 0x8153
+    CONVOLUTION_BORDER_COLOR            = 0x8154
+    COLOR_MATRIX                        = 0x80B1
+    COLOR_MATRIX_STACK_DEPTH            = 0x80B2
+    MAX_COLOR_MATRIX_STACK_DEPTH        = 0x80B3
+    POST_COLOR_MATRIX_RED_SCALE         = 0x80B4
+    POST_COLOR_MATRIX_GREEN_SCALE       = 0x80B5
+    POST_COLOR_MATRIX_BLUE_SCALE        = 0x80B6
+    POST_COLOR_MATRIX_ALPHA_SCALE       = 0x80B7
+    POST_COLOR_MATRIX_RED_BIAS          = 0x80B8
+    POST_COLOR_MATRIX_GREEN_BIAS        = 0x80B9
+    POST_COLOR_MATRIX_BLUE_BIAS         = 0x80BA
+    POST_COLOR_MATRIX_ALPHA_BIAS        = 0x80BB
+    HISTOGRAM                           = 0x8024
+    PROXY_HISTOGRAM                     = 0x8025
+    HISTOGRAM_WIDTH                     = 0x8026
+    HISTOGRAM_FORMAT                    = 0x8027
+    HISTOGRAM_RED_SIZE                  = 0x8028
+    HISTOGRAM_GREEN_SIZE                = 0x8029
+    HISTOGRAM_BLUE_SIZE                 = 0x802A
+    HISTOGRAM_ALPHA_SIZE                = 0x802B
+    HISTOGRAM_LUMINANCE_SIZE            = 0x802C
+    HISTOGRAM_SINK                      = 0x802D
+    MINMAX                              = 0x802E
+    MINMAX_FORMAT                       = 0x802F
+    MINMAX_SINK                         = 0x8030
+    TABLE_TOO_LARGE                     = 0x8031
+    BLEND_EQUATION                      = 0x8009
+    MIN                                 = 0x8007
+    MAX                                 = 0x8008
+    FUNC_ADD                            = 0x8006
+    FUNC_SUBTRACT                       = 0x800A
+    FUNC_REVERSE_SUBTRACT               = 0x800B
+    BLEND_COLOR                         = 0x8005
+
+    # --------------------------------------
+    # multitexture
+    #
+    TEXTURE0              = 0x84C0
+    TEXTURE1              = 0x84C1
+    TEXTURE2              = 0x84C2
+    TEXTURE3              = 0x84C3
+    TEXTURE4              = 0x84C4
+    TEXTURE5              = 0x84C5
+    TEXTURE6              = 0x84C6
+    TEXTURE7              = 0x84C7
+    TEXTURE8              = 0x84C8
+    TEXTURE9              = 0x84C9
+    TEXTURE10             = 0x84CA
+    TEXTURE11             = 0x84CB
+    TEXTURE12             = 0x84CC
+    TEXTURE13             = 0x84CD
+    TEXTURE14             = 0x84CE
+    TEXTURE15             = 0x84CF
+    TEXTURE16             = 0x84D0
+    TEXTURE17             = 0x84D1
+    TEXTURE18             = 0x84D2
+    TEXTURE19             = 0x84D3
+    TEXTURE20             = 0x84D4
+    TEXTURE21             = 0x84D5
+    TEXTURE22             = 0x84D6
+    TEXTURE23             = 0x84D7
+    TEXTURE24             = 0x84D8
+    TEXTURE25             = 0x84D9
+    TEXTURE26             = 0x84DA
+    TEXTURE27             = 0x84DB
+    TEXTURE28             = 0x84DC
+    TEXTURE29             = 0x84DD
+    TEXTURE30             = 0x84DE
+    TEXTURE31             = 0x84DF
+    ACTIVE_TEXTURE        = 0x84E0
+    CLIENT_ACTIVE_TEXTURE = 0x84E1
+    MAX_TEXTURE_UNITS     = 0x84E2
+
+    # --------------------------------------
+    # texture_cube_map
+    #
+    NORMAL_MAP                  = 0x8511
+    REFLECTION_MAP              = 0x8512
+    TEXTURE_CUBE_MAP            = 0x8513
+    TEXTURE_BINDING_CUBE_MAP    = 0x8514
+    TEXTURE_CUBE_MAP_POSITIVE_X = 0x8515
+    TEXTURE_CUBE_MAP_NEGATIVE_X = 0x8516
+    TEXTURE_CUBE_MAP_POSITIVE_Y = 0x8517
+    TEXTURE_CUBE_MAP_NEGATIVE_Y = 0x8518
+    TEXTURE_CUBE_MAP_POSITIVE_Z = 0x8519
+    TEXTURE_CUBE_MAP_NEGATIVE_Z = 0x851A
+    PROXY_TEXTURE_CUBE_MAP      = 0x851B
+    MAX_CUBE_MAP_TEXTURE_SIZE   = 0x851C
+
+    # --------------------------------------
+    # texture_compression
+    #
+    COMPRESSED_ALPHA               = 0x84E9
+    COMPRESSED_LUMINANCE           = 0x84EA
+    COMPRESSED_LUMINANCE_ALPHA     = 0x84EB
+    COMPRESSED_INTENSITY           = 0x84EC
+    COMPRESSED_RGB                 = 0x84ED
+    COMPRESSED_RGBA                = 0x84EE
+    TEXTURE_COMPRESSION_HINT       = 0x84EF
+    TEXTURE_COMPRESSED_IMAGE_SIZE  = 0x86A0
+    TEXTURE_COMPRESSED             = 0x86A1
+    NUM_COMPRESSED_TEXTURE_FORMATS = 0x86A2
+    COMPRESSED_TEXTURE_FORMATS     = 0x86A3
+
+    # --------------------------------------
     # multisample
     #
     MULTISAMPLE              = 0x809D
@@ -1207,6 +1685,116 @@ if 1:
     SAMPLE_COVERAGE_INVERT   = 0x80AB
     MULTISAMPLE_BIT          = 0x20000000
 
+    # --------------------------------------
+    # transpose_matrix
+    #
+    TRANSPOSE_MODELVIEW_MATRIX  = 0x84E3
+    TRANSPOSE_PROJECTION_MATRIX = 0x84E4
+    TRANSPOSE_TEXTURE_MATRIX    = 0x84E5
+    TRANSPOSE_COLOR_MATRIX      = 0x84E6
+
+    # --------------------------------------
+    # texture_env_combine
+    #
+    COMBINE        = 0x8570
+    COMBINE_RGB    = 0x8571
+    COMBINE_ALPHA  = 0x8572
+    SOURCE0_RGB    = 0x8580
+    SOURCE1_RGB    = 0x8581
+    SOURCE2_RGB    = 0x8582
+    SOURCE0_ALPHA  = 0x8588
+    SOURCE1_ALPHA  = 0x8589
+    SOURCE2_ALPHA  = 0x858A
+    OPERAND0_RGB   = 0x8590
+    OPERAND1_RGB   = 0x8591
+    OPERAND2_RGB   = 0x8592
+    OPERAND0_ALPHA = 0x8598
+    OPERAND1_ALPHA = 0x8599
+    OPERAND2_ALPHA = 0x859A
+    RGB_SCALE      = 0x8573
+    ADD_SIGNED     = 0x8574
+    INTERPOLATE    = 0x8575
+    SUBTRACT       = 0x84E7
+    CONSTANT       = 0x8576
+    PRIMARY_COLOR  = 0x8577
+    PREVIOUS       = 0x8578
+
+    # --------------------------------------
+    # texture_env_dot3
+    #
+    DOT3_RGB  = 0x86AE
+    DOT3_RGBA = 0x86AF
+
+    # --------------------------------------
+    # texture_border_clamp
+    #
+    CLAMP_TO_BORDER = 0x812D
+
+    # --------------------------------------
+    # OpenGL 1.4
+    #
+    # TODO
+
+    # --------------------------------------
+    # OpenGL 1.5
+    #
+    # TODO
+
+    # --------------------------------------
+    # OpenGL 2.0
+    #
+    # TODO
+
+    # --------------------------------------
+    # OpenGL 2.1
+    #
+    # TODO
+
+    # --------------------------------------
+    # OpenGL 3.0
+    #
+    # TODO
+
+    # --------------------------------------
+    # OpenGL 3.1
+    #
+    # TODO
+
+    # --------------------------------------
+    # OpenGL 3.2
+    #
+    # TODO
+
+    # --------------------------------------
+    # OpenGL 3.3
+    #
+    # TODO
+
+    # --------------------------------------
+    # OpenGL 4.0
+    #
+    # TODO
+
+    # --------------------------------------
+    # OpenGL 4.1
+    #
+    # TODO
+
+    # --------------------------------------
+    # OpenGL 4.2
+    #
+    # TODO
+
+    # --------------------------------------
+    # OpenGL 4.3
+    #
+    # TODO
+
+    # --------------------------------------
+    # OpenGL 4.4
+    #
+    # TODO
+
 def AlphaFunc(unsigned int func, float ref):
     GL_AlphaFunc(func, ref)
 
@@ -1215,6 +1803,12 @@ def Begin(unsigned int mode):
 
 def BindTexture(unsigned int target, unsigned int texture):
     GL_BindTexture(target, texture)
+
+def BlendEquation(unsigned int mode):
+    GL_BlendEquation(mode)
+
+def BlendEquationSeparate(unsigned int modeRGB, unsigned int modeA):
+    GL_BlendEquationSeparate(modeRGB, modeA)
 
 def BlendFunc(unsigned int src, unsigned int dst):
     GL_BlendFunc(src, dst)
@@ -1252,8 +1846,8 @@ def ColorPointer(int size, unsigned int type, int stride, size_t data):
 def CullFace(unsigned int face):
     GL_CullFace(face)
 
-def DeleteTextures(*a, **k):
-    raise NotImplementedError("TODO")
+def DeleteTextures(int n, size_t textures):
+    GL_DeleteTextures(n, <const unsigned int*>textures) # TODO: use Array here?
 
 def DepthFunc(unsigned int func):
     GL_DepthFunc(func)
@@ -1273,8 +1867,8 @@ def DisableClientState(unsigned int cap):
 def DrawArrays(unsigned int mode, int first, int count):
     GL_DrawArrays(mode, first, count)
 
-def DrawElements(*a, **k):
-    raise NotImplementedError("TODO")
+def DrawElements(unsigned int mode, int num, unsigned int itype, size_t inds):
+    GL_DrawElements(mode, num, itype, <const void*>inds) # TODO: use an Array?
 
 def Enable(unsigned int cap):
     GL_Enable(cap)
@@ -1315,23 +1909,24 @@ def GenTextures(int n, size_t textures):
 def GetError():
     return GL_GetError()
 
-def GetFloatv(*a, **k):
-    raise NotImplementedError("TODO")
+def GetFloatv(unsigned int pname, size_t data):
+    GL_GetFloatv(pname, <float*>data)
 
-def GetIntegerv(*a, **k):
-    raise NotImplementedError("TODO")
+def GetIntegerv(unsigned int pname, size_t data):
+    GL_GetIntegerv(pname, <int*>data)
 
-def GetLightfv(*a, **k):
-    raise NotImplementedError("TODO")
+def GetLightfv(unsigned int light, unsigned int pname, size_t params):
+    GL_GetLightfv(light, pname, <float*>params)
 
-def GetMaterialfv(*a, **k):
-    raise NotImplementedError("TODO")
+def GetMaterialfv(unsigned int face, unsigned int pname, size_t params):
+    GL_GetMaterialfv(face, pname, <float*>params)
 
 def GetString(unsigned int name):
-    return GL_GetString(name)
+    cdef bytes b = GL_GetString(name) # convert to unicode
+    return b.decode() if sys.version_info.major > 2 else b
 
-def GetTexParameteriv(*a, **k):
-    raise NotImplementedError("TODO")
+def GetTexParameteriv(unsigned int target, unsigned int pname, size_t params):
+    GL_GetTexParameteriv(target, pname, <int*>params)
 
 def InterleavedArrays(unsigned int format, int stride, size_t data):
     GL_InterleavedArrays(format, stride, <const void*>data)
@@ -1447,20 +2042,30 @@ def TexCoord4fv(Vec4 strq):
 def TexCoordPointer(int size, unsigned int type, int stride, size_t data):
     GL_TexCoordPointer(size, type, stride, <const void*>data)
 
+def TexEnvfv(unsigned int target, unsigned int pname, size_t params):
+    GL_TexEnvfv(target, pname, <const float*>params)
+
+def TexEnviv(unsigned int target, unsigned int pname, size_t params):
+    GL_TexEnviv(target, pname, <const int*>params)
+
 def TexEnvf(unsigned int target, unsigned int pname, float param):
     GL_TexEnvf(target, pname, param)
 
 def TexEnvi(unsigned int target, unsigned int pname, int param):
     GL_TexEnvi(target, pname, param)
 
-def TexImage2D(*a, **k):
-    raise NotImplementedError("TODO")
+def TexImage2D( unsigned int target, int level, int internal_format, int w, int h, int border,
+                                            unsigned int fmt, unsigned int ptype, size_t pix):
+    # TODO: take Image arg instead?
+    GL_TexImage2D(target, level, internal_format, w, h, border, fmt, ptype, <const void*>pix)
 
 def TexParameteri(unsigned int target, unsigned int pname, int param):
     GL_TexParameteri(target, pname, param)
 
-def TexSubImage2D(*a, **k):
-    raise NotImplementedError("TODO")
+def TexSubImage2D( unsigned int target, int level, int xoffset, int yoffset, int w, int h,
+                                        unsigned int fmt, unsigned int ptype, size_t pix):
+    # TODO: take Image arg instead?
+    GL_TexSubImage2D(target, level, xoffset, yoffset, w, h, fmt, ptype, <const void*>pix)
 
 def Translatef(float x, float y, float z):
     GL_Translatef(x, y, z)

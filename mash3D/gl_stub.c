@@ -53,6 +53,16 @@ void GL_BindTexture(unsigned int target, unsigned int texture)
     AE_STUB();
 }
 
+void GL_BlendEquation(unsigned int mode)
+{
+    AE_STUB();
+}
+
+void GL_BlendEquationSeparate(unsigned int modeRGB, unsigned int modeA)
+{
+    AE_STUB();
+}
+
 void GL_BlendFunc(unsigned int src, unsigned int dst)
 {
     AE_STUB();
@@ -435,6 +445,16 @@ void GL_TexCoord4fv(const float* strq)
 }
 
 void GL_TexCoordPointer(int size, unsigned int type, int stride, const void* data)
+{
+    AE_STUB();
+}
+
+void GL_TexEnvfv(unsigned int target, unsigned int pname, const float *params)
+{
+    AE_STUB();
+}
+
+void GL_TexEnviv(unsigned int target, unsigned int pname, const int *params)
 {
     AE_STUB();
 }

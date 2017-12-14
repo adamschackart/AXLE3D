@@ -1422,12 +1422,17 @@ static size_t vtx_weld_func_u32(float * vertices, ae_vertex_format_t vertex_form
     {
         float* vertex = vertices + i * vertex_size;
 
+        /* NOTE: we don't support replacing the vertex hash function like we do for
+         * the comparison function, as it's a unary operation that doesn't really
+         * impact how vertices are merged, only the performance of the hash table.
+         * for example, how would we hash differently for a distance-based welding?
+         */
         u32 v_hash = ae_hash_mem(vertex, vertex_bytes) & (hash_size - 1);
         u32 offset = hash_table[v_hash];
 
         while (offset != NIL && !func(vertices + offset * vertex_size, vertex, data))
         {
-            offset = next[offset]; // traverse list of visited verts
+            offset = next[offset]; // traverse list of visited vertices
         }
 
         indices[i] = offset;
