@@ -221,20 +221,84 @@ static void* gl_func(const char* name)
 
 #define X() AE_PROFILE_SCOPE()
 
+// TODO: GL_Accum
+
+// TODO: GL_ActiveShaderProgram
+
+// TODO: GL_ActiveTexture
+
 void GL_AlphaFunc(unsigned int func, float ref)
 {
     X(); glAlphaFunc(func, ref);
 }
+
+// TODO: GL_AreTexturesResident
+
+// TODO: GL_ArrayElement
+
+// TODO: GL_AttachShader
 
 void GL_Begin(unsigned int mode)
 {
     X(); glBegin(mode);
 }
 
+// TODO: GL_BeginConditionalRender
+
+// TODO: GL_BeginQuery
+
+// TODO: GL_BeginQueryIndexed
+
+// TODO: GL_BeginTransformFeedback
+
+// TODO: GL_BindAttribLocation
+
+// TODO: GL_BindBuffer
+
+// TODO: GL_BindBufferBase
+
+// TODO: GL_BindBufferRange
+
+// TODO: GL_BindBuffersBase
+
+// TODO: GL_BindBuffersRange
+
+// TODO: GL_BindFragDataLocation
+
+// TODO: GL_BindFragDataLocationIndexed
+
+// TODO: GL_BindFramebuffer
+
+// TODO: GL_BindImageTexture
+
+// TODO: GL_BindImageTextures
+
+// TODO: GL_BindProgramPipeline
+
+// TODO: GL_BindRenderbuffer
+
+// TODO: GL_BindSampler
+
+// TODO: GL_BindSamplers
+
 void GL_BindTexture(unsigned int target, unsigned int texture)
 {
     X(); glBindTexture(target, texture);
 }
+
+// TODO: GL_BindTextures
+
+// TODO: GL_BindTransformFeedback
+
+// TODO: GL_BindVertexArray
+
+// TODO: GL_BindVertexBuffer
+
+// TODO: GL_BindVertexBuffers
+
+// TODO: GL_Bitmap
+
+// TODO: GL_BlendColor
 
 void GL_BlendEquation(unsigned int mode)
 {
@@ -265,6 +329,10 @@ void GL_BlendEquationSeparate(unsigned int modeRGB, unsigned int modeA)
         }
     }
 }
+
+// TODO: GL_BlendEquationi
+
+// TODO: GL_BlendEquationSeparatei
 
 void GL_BlendFunc(unsigned int src, unsigned int dst)
 {
@@ -297,24 +365,69 @@ void GL_BlendFuncSeparate(unsigned int srcRGB, unsigned int dstRGB,
     }
 }
 
+// TODO: GL_BlendFunci
+
+// TODO: GL_BlendFuncSeparatei
+
+// TODO: GL_BlitFramebuffer
+
+// TODO: GL_BufferData
+
+// TODO: GL_BufferStorage
+
+// TODO: GL_BufferSubData
+
+// TODO: GL_CallList
+
+// TODO: GL_CallLists
+
+// TODO: GL_CheckFramebufferStatus
+
+// TODO: GL_ClampColor
+
 void GL_Clear(unsigned int mask)
 {
     X(); glClear(mask);
 }
+
+// TODO: GL_ClearBufferData
+
+// TODO: GL_ClearBufferSubData
+
+// TODO: GL_ClearBufferfi
+
+// TODO: GL_ClearBufferfv
+
+// TODO: GL_ClearBufferiv
+
+// TODO: GL_ClearBufferuiv
+
+// TODO: GL_ClearDepthf
+
+// TODO: GL_ClearTexImage
+
+// TODO: GL_ClearTexSubImage
+
+// TODO: GL_ClientActiveTexture
+
+// TODO: GL_ClientWaitSync
+
+// TODO: GL_ClipPlane
+
+// TODO: GL_ClearAccum
 
 void GL_ClearColor(float r, float g, float b, float a)
 {
     X(); glClearColor(r, g, b, a);
 }
 
+// TODO: GL_ClearDepth
+
+// TODO: GL_ClearIndex
+
 void GL_Color3f(float r, float g, float b)
 {
     X(); glColor3f(r, g, b);
-}
-
-void GL_Color4f(float r, float g, float b, float a)
-{
-    X(); glColor4f(r, g, b, a);
 }
 
 void GL_Color3fv(const float* rgb)
@@ -322,35 +435,154 @@ void GL_Color3fv(const float* rgb)
     X(); glColor3fv(rgb);
 }
 
+// TODO: GL_Color3ub
+
+// TODO: GL_Color3ubv
+
+void GL_Color4f(float r, float g, float b, float a)
+{
+    X(); glColor4f(r, g, b, a);
+}
+
 void GL_Color4fv(const float* rgba)
 {
     X(); glColor4fv(rgba);
 }
+
+// TODO: GL_Color4ub
+
+// TODO: GL_Color4ubv
 
 void GL_ColorMask(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
     X(); glColorMask(r, g, b, a);
 }
 
+// TODO: GL_ColorMaski
+
 void GL_ColorMaterial(unsigned int face, unsigned int mode)
 {
     X(); glColorMaterial(face, mode);
 }
+
+// TODO: GL_ColorP3ui
+
+// TODO: GL_ColorP3uiv
+
+// TODO: GL_ColorP4ui
+
+// TODO: GL_ColorP4uiv
 
 void GL_ColorPointer(int size, unsigned int type, int stride, const void* data)
 {
     X(); glColorPointer(size, type, stride, data);
 }
 
+// TODO: GL_ColorSubTable
+
+// TODO: GL_ColorTable
+
+// TODO: GL_ColorTableParameteriv
+
+// TODO: GL_ColorTableParameterfv
+
+// TODO: GL_CompileShader
+
+// TODO: GL_CompressedTexImage1D
+
+// TODO: GL_CompressedTexImage2D
+
+// TODO: GL_CompressedTexImage3D
+
+// TODO: GL_CompressedTexSubImage1D
+
+// TODO: GL_CompressedTexSubImage2D
+
+// TODO: GL_CompressedTexSubImage3D
+
+// TODO: GL_ConvolutionFilter1D
+
+// TODO: GL_ConvolutionFilter2D
+
+// TODO: GL_ConvolutionParameterf
+
+// TODO: GL_ConvolutionParameterfv
+
+// TODO: GL_ConvolutionParameteri
+
+// TODO: GL_ConvolutionParameteriv
+
+// TODO: GL_CopyBufferSubData
+
+// TODO: GL_CopyColorSubTable
+
+// TODO: GL_CopyColorTable
+
+// TODO: GL_CopyConvolutionFilter1D
+
+// TODO: GL_CopyConvolutionFilter2D
+
+// TODO: GL_CopyImageSubData
+
+// TODO: GL_CopyPixels
+
+// TODO: GL_CopyTexImage1D
+
+// TODO: GL_CopyTexImage2D
+
+// TODO: GL_CopyTexImage3D
+
+// TODO: GL_CopyTexSubImage1D
+
+// TODO: GL_CopyTexSubImage2D
+
+// TODO: GL_CopyTexSubImage3D
+
+// TODO: GL_CreateProgram
+
+// TODO: GL_CreateShader
+
+// TODO: GL_CreateShaderProgramv
+
 void GL_CullFace(unsigned int face)
 {
     X(); glCullFace(face);
 }
 
+// TODO: GL_DebugMessageCallback
+
+// TODO: GL_DebugMessageControl
+
+// TODO: GL_DebugMessageInsert
+
+// TODO: GL_DeleteBuffers
+
+// TODO: GL_DeleteFramebuffers
+
+// TODO: GL_DeleteLists
+
+// TODO: GL_DeleteProgram
+
+// TODO: GL_DeleteProgramPipelines
+
+// TODO: GL_DeleteQueries
+
+// TODO: GL_DeleteRenderbuffers
+
+// TODO: GL_DeleteSamplers
+
+// TODO: GL_DeleteShader
+
+// TODO: GL_DeleteSync
+
 void GL_DeleteTextures(int n, const unsigned int* textures)
 {
     X(); glDeleteTextures(n, textures);
 }
+
+// TODO: GL_DeleteTransformFeedbacks
+
+// TODO: GL_DeleteVertexArrays
 
 void GL_DepthFunc(unsigned int func)
 {
@@ -367,40 +599,116 @@ void GL_DepthRange(double near_val, double far_val)
     X(); glDepthRange(near_val, far_val);
 }
 
+// TODO: GL_DepthRangeArrayv
+
+// TODO: GL_DepthRangeIndexed
+
+// TODO: GL_DepthRangef
+
+// TODO: GL_DetachShader
+
 void GL_Disable(unsigned int cap)
 {
     X(); glDisable(cap);
 }
+
+// TODO: GL_Disablei
+
+// TODO: GL_DisableVertexAttribArray
 
 void GL_DisableClientState(unsigned int cap)
 {
     X(); glDisableClientState(cap);
 }
 
+// TODO: GL_DispatchCompute
+
+// TODO: GL_DispatchComputeIndirect
+
 void GL_DrawArrays(unsigned int mode, int first, int count)
 {
     X(); glDrawArrays(mode, first, count);
 }
+
+// TODO: GL_DrawArraysIndirect
+
+// TODO: GL_DrawArraysInstanced
+
+// TODO: GL_DrawArraysInstancedBaseInstance
+
+// TODO: GL_DrawBuffer
+
+// TODO: GL_DrawBuffers
 
 void GL_DrawElements(unsigned int mode, int n, unsigned int type, const void* inds)
 {
     X(); glDrawElements(mode, n, type, inds);
 }
 
+// TODO: GL_DrawElementsBaseVertex
+
+// TODO: GL_DrawElementsIndirect
+
+// TODO: GL_DrawElementsInstanced
+
+// TODO: GL_DrawElementsInstancedBaseInstance
+
+// TODO: GL_DrawElementsInstancedBaseVertex
+
+// TODO: GL_DrawElementsInstancedBaseVertexBaseInstance
+
+// TODO: GL_DrawPixels
+
+// TODO: GL_DrawRangeElements
+
+// TODO: GL_DrawRangeElementsBaseVertex
+
+// TODO: GL_DrawTransformFeedback
+
+// TODO: GL_DrawTransformFeedbackInstanced
+
+// TODO: GL_DrawTransformFeedbackStream
+
+// TODO: GL_DrawTransformFeedbackStreamInstanced
+
+// TODO: GL_EdgeFlagv
+
+// TODO: GL_EdgeFlag
+
+// TODO: GL_EdgeFlagPointer
+
 void GL_Enable(unsigned int cap)
 {
     X(); glEnable(cap);
 }
+
+// TODO: GL_Enablei
 
 void GL_EnableClientState(unsigned int cap)
 {
     X(); glEnableClientState(cap);
 }
 
+// TODO: GL_EnableVertexAttribArray
+
 void GL_End(void)
 {
     X(); glEnd();
 }
+
+// TODO: GL_EndConditionalRender
+
+// TODO: GL_EndList
+
+// TODO: GL_EndQuery
+
+// TODO: GL_EndQueryIndexed
+
+// TODO: GL_EndTransformFeedback
+
+// TODO: GL_FeedbackBuffer
+
+// TODO: GL_FenceSync
 
 void GL_Finish(void)
 {
@@ -411,6 +719,18 @@ void GL_Flush(void)
 {
     X(); glFlush();
 }
+
+// TODO: GL_FlushMappedBufferRange
+
+// TODO: GL_FogCoordd
+
+// TODO: GL_FogCoorddv
+
+// TODO: GL_FogCoordf
+
+// TODO: GL_FogCoordfv
+
+// TODO: GL_FogCoordPointer
 
 void GL_Fogfv(unsigned int pname, const float* params)
 {
@@ -432,6 +752,20 @@ void GL_Fogi(unsigned int pname, int param)
     X(); glFogi(pname, param);
 }
 
+// TODO: GL_FramebufferParameteri
+
+// TODO: GL_FramebufferRenderbuffer
+
+// TODO: GL_FramebufferTexture
+
+// TODO: GL_FramebufferTexture1D
+
+// TODO: GL_FramebufferTexture2D
+
+// TODO: GL_FramebufferTexture3D
+
+// TODO: GL_FramebufferTextureLayer
+
 void GL_FrontFace(unsigned int mode)
 {
     X(); glFrontFace(mode);
@@ -442,70 +776,376 @@ void GL_Frustum(double lf, double rt, double bt, double tp, double nr, double fr
     X(); glFrustum(lf, rt, bt, tp, nr, fr);
 }
 
+// TODO: GL_GenBuffers
+
+// TODO: GL_GenFramebuffers
+
+// TODO: GL_GenLists
+
+// TODO: GL_GenProgramPipelines
+
+// TODO: GL_GenQueries
+
+// TODO: GL_GenRenderbuffers
+
+// TODO: GL_GenSamplers
+
 void GL_GenTextures(int n, unsigned int* textures)
 {
     X(); glGenTextures(n, textures);
 }
+
+// TODO: GL_GenTransformFeedbacks
+
+// TODO: GL_GenVertexArrays
+
+// TODO: GL_GenerateMipmap
+
+// TODO: GL_GetActiveAtomicCounterBufferiv
+
+// TODO: GL_GetActiveAttrib
+
+// TODO: GL_GetActiveSubroutineName
+
+// TODO: GL_GetActiveSubroutineUniformName
+
+// TODO: GL_GetActiveSubroutineUniformiv
+
+// TODO: GL_GetActiveUniform
+
+// TODO: GL_GetActiveUniformBlockName
+
+// TODO: GL_GetActiveUniformBlockiv
+
+// TODO: GL_GetActiveUniformName
+
+// TODO: GL_GetActiveUniformsiv
+
+// TODO: GL_GetAttachedShaders
+
+// TODO: GL_GetAttribLocation
+
+// TODO: GL_GetBooleanv
+
+// TODO: GL_GetBooleani_v
+
+// TODO: GL_GetBufferParameteri64v
+
+// TODO: GL_GetBufferParameteriv
+
+// TODO: GL_GetBufferPointerv
+
+// TODO: GL_GetBufferSubData
+
+// TODO: GL_GetClipPlane
+
+// TODO: GL_GetColorTable
+
+// TODO: GL_GetColorTableParameterfv
+
+// TODO: GL_GetColorTableParameteriv
+
+// TODO: GL_GetConvolutionFilter
+
+// TODO: GL_GetConvolutionParameterfv
+
+// TODO: GL_GetConvolutionParameteriv
+
+// TODO: GL_GetDebugMessageLog
 
 unsigned int GL_GetError(void)
 {
     X(); return glGetError();
 }
 
+// TODO: GL_GetCompressedTexImage
+
+// TODO: GL_GetDoublev
+
+// TODO: GL_GetDoublei_v
+
 void GL_GetFloatv(unsigned int pname, float* data)
 {
     X(); glGetFloatv(pname, data);
 }
+
+// TODO: GL_GetFloati_v
+
+// TODO: GL_GetFragDataIndex
+
+// TODO: GL_GetFragDataLocation
+
+// TODO: GL_GetFramebufferAttachmentParameteriv
+
+// TODO: GL_GetFramebufferParameteriv
+
+// TODO: GL_GetHistogram
+
+// TODO: GL_GetHistogramParameterfv
+
+// TODO: GL_GetHistogramParameteriv
 
 void GL_GetIntegerv(unsigned int pname, int* data)
 {
     X(); glGetIntegerv(pname, data);
 }
 
+// TODO: GL_GetIntegeri_v
+
+// TODO: GL_GetInteger64v
+
+// TODO: GL_GetInteger64i_v
+
+// TODO: GL_GetInternalformativ
+
+// TODO: GL_GetInternalformati64v
+
 void GL_GetLightfv(unsigned int light, unsigned int pname, float* params)
 {
     X(); glGetLightfv(light, pname, params);
 }
+
+// TODO: GL_GetLightiv
 
 void GL_GetMaterialfv(unsigned int face, unsigned int pname, float* params)
 {
     X(); glGetMaterialfv(face, pname, params);
 }
 
+// TODO: GL_GetMaterialiv
+
+// TODO: GL_GetMinmax
+
+// TODO: GL_GetMinmaxParameterfv
+
+// TODO: GL_GetMinmaxParameteriv
+
+// TODO: GL_GetMultisamplefv
+
+// TODO: GL_GetObjectLabel
+
+// TODO: GL_GetObjectPtrLabel
+
+// TODO: GL_GetPixelMapfv
+
+// TODO: GL_GetPixelMapuiv
+
+// TODO: GL_GetPixelMapusv
+
+// TODO: GL_GetPixelMapxv
+
+// TODO: GL_GetPointerv
+
+// TODO: GL_GetPolygonStipple
+
+// TODO: GL_GetProgramBinary
+
+// TODO: GL_GetProgramInfoLog
+
+// TODO: GL_GetProgramInterfaceiv
+
+// TODO: GL_GetProgramPipelineInfoLog
+
+// TODO: GL_GetProgramPipelineiv
+
+// TODO: GL_GetProgramResourceIndex
+
+// TODO: GL_GetProgramResourceLocation
+
+// TODO: GL_GetProgramResourceLocationIndex
+
+// TODO: GL_GetProgramResourceName
+
+// TODO: GL_GetProgramResourceiv
+
+// TODO: GL_GetProgramStageiv
+
+// TODO: GL_GetProgramiv
+
+// TODO: GL_GetQueryIndexediv
+
+// TODO: GL_GetQueryObjecti64v
+
+// TODO: GL_GetQueryObjectiv
+
+// TODO: GL_GetQueryObjectui64v
+
+// TODO: GL_GetQueryObjectuiv
+
+// TODO: GL_GetQueryiv
+
+// TODO: GL_GetRenderbufferParameteriv
+
+// TODO: GL_GetSamplerParameterIiv
+
+// TODO: GL_GetSamplerParameterIuiv
+
+// TODO: GL_GetSamplerParameterfv
+
+// TODO: GL_GetSamplerParameteriv
+
+// TODO: GL_GetSeparableFilter
+
+// TODO: GL_GetShaderInfoLog
+
+// TODO: GL_GetShaderPrecisionFormat
+
+// TODO: GL_GetShaderSource
+
+// TODO: GL_GetShaderiv
+
 const char* GL_GetString(unsigned int name)
 {
     X(); return (const char*)glGetString(name);
 }
 
-// TODO: GL_GetTexEnvfv
+// TODO: GL_GetStringi
 
-// TODO: GL_GetTexEnviv
+// TODO: GL_GetSubroutineIndex
 
-// TODO: GL_GetTexGendv
+// TODO: GL_GetSubroutineUniformLocation
 
-// TODO: GL_GetTexGenfv
+// TODO: GL_GetSynciv
 
-// TODO: GL_GetTexGeniv
+void GL_GetTexEnvfv(unsigned int target, unsigned int pname, float* params)
+{
+    X(); glGetTexEnvfv(target, pname, params);
+}
+
+void GL_GetTexEnviv(unsigned int target, unsigned int pname, int* params)
+{
+    X(); glGetTexEnviv(target, pname, params);
+}
+
+void GL_GetTexGendv(unsigned int coord, unsigned int pname, double* params)
+{
+    X(); glGetTexGendv(coord, pname, params);
+}
+
+void GL_GetTexGenfv(unsigned int coord, unsigned int pname, float* params)
+{
+    X(); glGetTexGenfv(coord, pname, params);
+}
+
+void GL_GetTexGeniv(unsigned int coord, unsigned int pname, int* params)
+{
+    X(); glGetTexGeniv(coord, pname, params);
+}
+
+// TODO: GL_GetTexImage
+
+// TODO: GL_GetTexLevelParameterfv
+
+// TODO: GL_GetTexLevelParameteriv
+
+void GL_GetTexParameterfv(unsigned int target, unsigned int pname, float* params)
+{
+    X(); glGetTexParameterfv(target, pname, params);
+}
 
 void GL_GetTexParameteriv(unsigned int target, unsigned int pname, int* params)
 {
     X(); glGetTexParameteriv(target, pname, params);
 }
 
+// TODO: GL_GetTexParameterIiv
+
+// TODO: GL_GetTexParameterIuiv
+
+// TODO: GL_GetTransformFeedbackVarying
+
+// TODO: GL_GetUniformBlockIndex
+
+// TODO: GL_GetUniformIndices
+
+// TODO: GL_GetUniformLocation
+
+// TODO: GL_GetUniformSubroutineuiv
+
+// TODO: GL_GetUniformdv
+
+// TODO: GL_GetUniformfv
+
+// TODO: GL_GetUniformiv
+
+// TODO: GL_GetUniformuiv
+
+// TODO: GL_GetVertexAttribIiv
+
+// TODO: GL_GetVertexAttribIuiv
+
+// TODO: GL_GetVertexAttribLdv
+
+// TODO: GL_GetVertexAttribPointerv
+
+// TODO: GL_GetVertexAttribdv
+
+// TODO: GL_GetVertexAttribfv
+
+// TODO: GL_GetVertexAttribiv
+
+// TODO: GL_Hint
+
+// TODO: GL_Histogram
+
+// TODO: GL_IndexMask
+
+// TODO: GL_IndexPointer
+
+// TODO: GL_InitNames
+
 void GL_InterleavedArrays(unsigned int format, int stride, const void* pointer)
 {
     X(); glInterleavedArrays(format, stride, pointer);
 }
+
+// TODO: GL_InvalidateBufferData
+
+// TODO: GL_InvalidateBufferSubData
+
+// TODO: GL_InvalidateFramebuffer
+
+// TODO: GL_InvalidateSubFramebuffer
+
+// TODO: GL_InvalidateTexImage
+
+// TODO: GL_InvalidateTexSubImage
+
+// TODO: GL_IsBuffer
 
 unsigned char GL_IsEnabled(unsigned int cap)
 {
     X(); return glIsEnabled(cap);
 }
 
+// TODO: GL_IsEnabledi
+
+// TODO: GL_IsFramebuffer
+
+// TODO: GL_IsList
+
+// TODO: GL_IsProgram
+
+// TODO: GL_IsProgramPipeline
+
+// TODO: GL_IsQuery
+
+// TODO: GL_IsRenderbuffer
+
+// TODO: GL_IsSampler
+
+// TODO: GL_IsShader
+
+// TODO: GL_IsSync
+
+// TODO: GL_IsTransformFeedback
+
 unsigned char GL_IsTexture(unsigned int texture)
 {
     X(); return glIsTexture(texture);
 }
+
+// TODO: GL_IsVertexArray
 
 void GL_Lightfv(unsigned int light, unsigned int pname, const float* params)
 {
@@ -517,20 +1157,52 @@ void GL_Lightf(unsigned int light, unsigned int pname, float param)
     X(); glLightf(light, pname, param);
 }
 
+// TODO: GL_Lightiv
+
+// TODO: GL_Lighti
+
+// TODO: GL_LightModelfv
+
+// TODO: GL_LightModelf
+
+// TODO: GL_LightModeliv
+
+// TODO: GL_LightModeli
+
+// TODO: GL_LineStipple
+
 void GL_LineWidth(float width)
 {
     X(); glLineWidth(width);
 }
+
+// TODO: GL_LinkProgram
+
+// TODO: GL_ListBase
 
 void GL_LoadIdentity(void)
 {
     X(); glLoadIdentity();
 }
 
+// TODO: GL_LoadMatrixd
+
+// TODO: GL_LoadMatrixf
+
+// TODO: GL_LoadName
+
+// TODO: GL_LoadTransposeMatrixd
+
+// TODO: GL_LoadTransposeMatrixf
+
 void GL_LogicOp(unsigned int opcode)
 {
     X(); glLogicOp(opcode);
 }
+
+// TODO: GL_MapBuffer
+
+// TODO: GL_MapBufferRange
 
 void GL_Materialfv(unsigned int face, unsigned int pname, const float* params)
 {
@@ -542,15 +1214,123 @@ void GL_Materialf(unsigned int face, unsigned int pname, float param)
     X(); glMaterialf(face, pname, param);
 }
 
+// TODO: GL_Materialiv
+
+// TODO: GL_Materiali
+
 void GL_MatrixMode(unsigned int mode)
 {
     X(); glMatrixMode(mode);
 }
 
+// TODO: GL_MemoryBarrier
+
+// TODO: GL_Minmax
+
+// TODO: GL_MinSampleShading
+
+// TODO: GL_MultiDrawArrays
+
+// TODO: GL_MultiDrawArraysIndirect
+
+// TODO: GL_MultiDrawElements
+
+// TODO: GL_MultiDrawElementsBaseVertex
+
+// TODO: GL_MultiDrawElementsIndirect
+
+// TODO: GL_MultiTexCoord1d
+
+// TODO: GL_MultiTexCoord1dv
+
+// TODO: GL_MultiTexCoord1f
+
+// TODO: GL_MultiTexCoord1fv
+
+// TODO: GL_MultiTexCoord1i
+
+// TODO: GL_MultiTexCoord1iv
+
+// TODO: GL_MultiTexCoord1s
+
+// TODO: GL_MultiTexCoord1sv
+
+// TODO: GL_MultiTexCoord2d
+
+// TODO: GL_MultiTexCoord2dv
+
+// TODO: GL_MultiTexCoord2f
+
+// TODO: GL_MultiTexCoord2fv
+
+// TODO: GL_MultiTexCoord2i
+
+// TODO: GL_MultiTexCoord2iv
+
+// TODO: GL_MultiTexCoord2s
+
+// TODO: GL_MultiTexCoord2sv
+
+// TODO: GL_MultiTexCoord3d
+
+// TODO: GL_MultiTexCoord3dv
+
+// TODO: GL_MultiTexCoord3f
+
+// TODO: GL_MultiTexCoord3fv
+
+// TODO: GL_MultiTexCoord3i
+
+// TODO: GL_MultiTexCoord3iv
+
+// TODO: GL_MultiTexCoord3s
+
+// TODO: GL_MultiTexCoord3sv
+
+// TODO: GL_MultiTexCoord4d
+
+// TODO: GL_MultiTexCoord4dv
+
+// TODO: GL_MultiTexCoord4f
+
+// TODO: GL_MultiTexCoord4fv
+
+// TODO: GL_MultiTexCoord4i
+
+// TODO: GL_MultiTexCoord4iv
+
+// TODO: GL_MultiTexCoord4s
+
+// TODO: GL_MultiTexCoord4sv
+
+// TODO: GL_MultiTexCoordP1ui
+
+// TODO: GL_MultiTexCoordP1uiv
+
+// TODO: GL_MultiTexCoordP2ui
+
+// TODO: GL_MultiTexCoordP2uiv
+
+// TODO: GL_MultiTexCoordP3ui
+
+// TODO: GL_MultiTexCoordP3uiv
+
+// TODO: GL_MultiTexCoordP4ui
+
+// TODO: GL_MultiTexCoordP4uiv
+
+// TODO: GL_MultMatrixd
+
 void GL_MultMatrixf(const float* matrix)
 {
     X(); glMultMatrixf(matrix);
 }
+
+// TODO: GL_MultTransposeMatrixd
+
+// TODO: GL_MultTransposeMatrixf
+
+// TODO: GL_NewList
 
 void GL_Normal3f(float x, float y, float z)
 {
@@ -562,16 +1342,52 @@ void GL_Normal3fv(const float* normal)
     X(); glNormal3fv(normal);
 }
 
+// TODO: GL_NormalP3ui
+
+// TODO: GL_NormalP3uiv
+
 void GL_NormalPointer(unsigned int type, int stride, const void* data)
 {
     X(); glNormalPointer(type, stride, data);
 }
+
+// TODO: GL_ObjectLabel
+
+// TODO: GL_ObjectPtrLabel
 
 void GL_Ortho(  double left, double right, double bottom,
                 double top, double near_v, double far_v )
 {
     X(); glOrtho(left, right, bottom, top, near_v, far_v);
 }
+
+// TODO: GL_PassThrough
+
+// TODO: GL_PatchParameterfv
+
+// TODO: GL_PatchParameteri
+
+// TODO: GL_PauseTransformFeedback
+
+// TODO: GL_PixelMapfv
+
+// TODO: GL_PixelMapuiv
+
+// TODO: GL_PixelMapusv
+
+// TODO: GL_PixelMapx
+
+// TODO: GL_PixelStoref
+
+// TODO: GL_PixelStorei
+
+// TODO: GL_PixelStorex
+
+// TODO: GL_PixelTransferf
+
+// TODO: GL_PixelTransferi
+
+// TODO: GL_PixelZoom
 
 void GL_PointParameterfv(unsigned int pname, const float* data)
 {
@@ -623,6 +1439,10 @@ void GL_PointParameterf(unsigned int pname, float param)
     }
 }
 
+// TODO: GL_PointParameteriv
+
+// TODO: GL_PointParameteri
+
 void GL_PointSize(float size)
 {
     X(); glPointSize(size);
@@ -637,6 +1457,8 @@ void GL_PolygonOffset(float factor, float units)
 {
     X(); glPolygonOffset(factor, units);
 }
+
+// TODO: GL_PolygonStipple
 
 void GL_PopAttrib(void)
 {
@@ -658,6 +1480,10 @@ void GL_PushClientAttrib(unsigned int mask)
     X(); glPushClientAttrib(mask);
 }
 
+// TODO: GL_PopDebugGroup
+
+// TODO: GL_PushDebugGroup
+
 void GL_PopMatrix(void)
 {
     X(); glPopMatrix();
@@ -668,10 +1494,168 @@ void GL_PushMatrix(void)
     X(); glPushMatrix();
 }
 
+// TODO: GL_PopName
+
+// TODO: GL_PushName
+
+// TODO: GL_PrimitiveRestartIndex
+
+// TODO: GL_PrioritizeTextures
+
+// TODO: GL_ProgramBinary
+
+// TODO: GL_ProgramParameteri
+
+// TODO: GL_ProgramUniform1d
+
+// TODO: GL_ProgramUniform1dv
+
+// TODO: GL_ProgramUniform1f
+
+// TODO: GL_ProgramUniform1fv
+
+// TODO: GL_ProgramUniform1i
+
+// TODO: GL_ProgramUniform1iv
+
+// TODO: GL_ProgramUniform1ui
+
+// TODO: GL_ProgramUniform1uiv
+
+// TODO: GL_ProgramUniform2d
+
+// TODO: GL_ProgramUniform2dv
+
+// TODO: GL_ProgramUniform2f
+
+// TODO: GL_ProgramUniform2fv
+
+// TODO: GL_ProgramUniform2i
+
+// TODO: GL_ProgramUniform2iv
+
+// TODO: GL_ProgramUniform2ui
+
+// TODO: GL_ProgramUniform2uiv
+
+// TODO: GL_ProgramUniform3d
+
+// TODO: GL_ProgramUniform3dv
+
+// TODO: GL_ProgramUniform3f
+
+// TODO: GL_ProgramUniform3fv
+
+// TODO: GL_ProgramUniform3i
+
+// TODO: GL_ProgramUniform3iv
+
+// TODO: GL_ProgramUniform3ui
+
+// TODO: GL_ProgramUniform3uiv
+
+// TODO: GL_ProgramUniform4d
+
+// TODO: GL_ProgramUniform4dv
+
+// TODO: GL_ProgramUniform4f
+
+// TODO: GL_ProgramUniform4fv
+
+// TODO: GL_ProgramUniform4i
+
+// TODO: GL_ProgramUniform4iv
+
+// TODO: GL_ProgramUniform4ui
+
+// TODO: GL_ProgramUniform4uiv
+
+// TODO: GL_ProgramUniformMatrix2dv
+
+// TODO: GL_ProgramUniformMatrix2fv
+
+// TODO: GL_ProgramUniformMatrix2x3dv
+
+// TODO: GL_ProgramUniformMatrix2x3fv
+
+// TODO: GL_ProgramUniformMatrix2x4dv
+
+// TODO: GL_ProgramUniformMatrix2x4fv
+
+// TODO: GL_ProgramUniformMatrix3dv
+
+// TODO: GL_ProgramUniformMatrix3fv
+
+// TODO: GL_ProgramUniformMatrix3x2dv
+
+// TODO: GL_ProgramUniformMatrix3x2fv
+
+// TODO: GL_ProgramUniformMatrix3x4dv
+
+// TODO: GL_ProgramUniformMatrix3x4fv
+
+// TODO: GL_ProgramUniformMatrix4dv
+
+// TODO: GL_ProgramUniformMatrix4fv
+
+// TODO: GL_ProgramUniformMatrix4x2dv
+
+// TODO: GL_ProgramUniformMatrix4x2fv
+
+// TODO: GL_ProgramUniformMatrix4x3dv
+
+// TODO: GL_ProgramUniformMatrix4x3fv
+
+// TODO: GL_ProvokingVertex
+
+// TODO: GL_QueryCounter
+
+// TODO: GL_ReadBuffer
+
+// TODO: GL_ReadPixels
+
+// TODO: GL_Rectf
+
+// TODO: GL_Rectfv
+
+// TODO: GL_ReleaseShaderCompiler
+
+// TODO: GL_RenderbufferStorage
+
+// TODO: GL_RenderbufferStorageMultisample
+
+// TODO: GL_RenderMode
+
+// TODO: GL_ResetHistogram
+
+// TODO: GL_ResetMinmax
+
+// TODO: GL_ResumeTransformFeedback
+
+// TODO: GL_Rotated
+
 void GL_Rotatef(float theta, float x, float y, float z)
 {
     X(); glRotatef(theta, x, y, z);
 }
+
+// TODO: GL_SampleCoverage
+
+// TODO: GL_SampleMaski
+
+// TODO: GL_SamplerParameterIiv
+
+// TODO: GL_SamplerParameterIuiv
+
+// TODO: GL_SamplerParameterf
+
+// TODO: GL_SamplerParameterfv
+
+// TODO: GL_SamplerParameteri
+
+// TODO: GL_SamplerParameteriv
+
+// TODO: GL_Scaled
 
 void GL_Scalef(float x, float y, float z)
 {
@@ -683,10 +1667,64 @@ void GL_Scissor(int x, int y, int width, int height)
     X(); glScissor(x, y, width, height);
 }
 
+// TODO: GL_ScissorArrayv
+
+// TODO: GL_ScissorIndexed
+
+// TODO: GL_ScissorIndexedv
+
+// TODO: GL_SecondaryColor3b
+
+// TODO: GL_SecondaryColor3bv
+
+// TODO: GL_SecondaryColor3d
+
+// TODO: GL_SecondaryColor3dv
+
+// TODO: GL_SecondaryColor3f
+
+// TODO: GL_SecondaryColor3fv
+
+// TODO: GL_SecondaryColor3i
+
+// TODO: GL_SecondaryColor3iv
+
+// TODO: GL_SecondaryColor3s
+
+// TODO: GL_SecondaryColor3sv
+
+// TODO: GL_SecondaryColor3ub
+
+// TODO: GL_SecondaryColor3ubv
+
+// TODO: GL_SecondaryColor3ui
+
+// TODO: GL_SecondaryColor3uiv
+
+// TODO: GL_SecondaryColor3us
+
+// TODO: GL_SecondaryColor3usv
+
+// TODO: GL_SecondaryColorP3ui
+
+// TODO: GL_SecondaryColorP3uiv
+
+// TODO: GL_SecondaryColorPointer
+
+// TODO: GL_SelectBuffer
+
+// TODO: GL_SeparableFilter2D
+
 void GL_ShadeModel(unsigned int mode)
 {
     X(); glShadeModel(mode);
 }
+
+// TODO: GL_ShaderBinary
+
+// TODO: GL_ShaderSource
+
+// TODO: GL_ShaderStorageBlockBinding
 
 // TODO: GL_StencilFunc
 
@@ -700,19 +1738,17 @@ void GL_ShadeModel(unsigned int mode)
 
 // TODO: GL_StencilOpSeparate
 
+// TODO: GL_TexBuffer
+
+// TODO: GL_TexBufferRange
+
+// TODO: GL_TexCoord1f
+
+// TODO: GL_TexCoord1fv
+
 void GL_TexCoord2f(float s, float t)
 {
     X(); glTexCoord2f(s, t);
-}
-
-void GL_TexCoord3f(float s, float t, float r)
-{
-    X(); glTexCoord3f(s, t, r);
-}
-
-void GL_TexCoord4f(float s, float t, float r, float q)
-{
-    X(); glTexCoord4f(s, t, r, q);
 }
 
 void GL_TexCoord2fv(const float* st)
@@ -720,15 +1756,41 @@ void GL_TexCoord2fv(const float* st)
     X(); glTexCoord2fv(st);
 }
 
+void GL_TexCoord3f(float s, float t, float r)
+{
+    X(); glTexCoord3f(s, t, r);
+}
+
 void GL_TexCoord3fv(const float* str)
 {
     X(); glTexCoord3fv(str);
+}
+
+void GL_TexCoord4f(float s, float t, float r, float q)
+{
+    X(); glTexCoord4f(s, t, r, q);
 }
 
 void GL_TexCoord4fv(const float* strq)
 {
     X(); glTexCoord4fv(strq);
 }
+
+// TODO: GL_TexCoordP1ui
+
+// TODO: GL_TexCoordP1uiv
+
+// TODO: GL_TexCoordP2ui
+
+// TODO: GL_TexCoordP2uiv
+
+// TODO: GL_TexCoordP3ui
+
+// TODO: GL_TexCoordP3uiv
+
+// TODO: GL_TexCoordP4ui
+
+// TODO: GL_TexCoordP4uiv
 
 void GL_TexCoordPointer(int size, unsigned int type, int stride, const void* data)
 {
@@ -755,17 +1817,37 @@ void GL_TexEnvi(unsigned int target, unsigned int pname, int param)
     X(); glTexEnvi(target, pname, param);
 }
 
-// TODO: GL_TexGeni
+void GL_TexGeniv(unsigned int coord, unsigned int pname, const int *params)
+{
+    X(); glTexGeniv(coord, pname, params);
+}
 
-// TODO: GL_TexGenf
+void GL_TexGenfv(unsigned int coord, unsigned int pname, const float *params)
+{
+    X(); glTexGenfv(coord, pname, params);
+}
 
-// TODO: GL_TexGend
+void GL_TexGendv(unsigned int coord, unsigned int pname, const double *params)
+{
+    X(); glTexGendv(coord, pname, params);
+}
 
-// TODO: GL_TexGeniv
+void GL_TexGeni(unsigned int coord, unsigned int pname, int param)
+{
+    X(); glTexGeni(coord, pname, param);
+}
 
-// TODO: GL_TexGenfv
+void GL_TexGenf(unsigned int coord, unsigned int pname, float param)
+{
+    X(); glTexGenf(coord, pname, param);
+}
 
-// TODO: GL_TexGendv
+void GL_TexGend(unsigned int coord, unsigned int pname, double param)
+{
+    X(); glTexGend(coord, pname, param);
+}
+
+// TODO: GL_TexImage1D
 
 void GL_TexImage2D(unsigned int target, int level, int internal_format, int w,
         int h, int border, unsigned int fmt, unsigned int type, const void* p)
@@ -773,10 +1855,38 @@ void GL_TexImage2D(unsigned int target, int level, int internal_format, int w,
     X(); glTexImage2D(target, level, internal_format, w, h, border, fmt, type, p);
 }
 
+// TODO: GL_TexImage2DMultisample
+
+// TODO: GL_TexImage3D
+
+// TODO: GL_TexImage3DMultisample
+
+// TODO: GL_TexParameterfv
+
+// TODO: GL_TexParameterf
+
+// TODO: GL_TexParameteriv
+
 void GL_TexParameteri(unsigned int target, unsigned int pname, int param)
 {
     X(); glTexParameteri(target, pname, param);
 }
+
+// TODO: GL_TexParameterIiv
+
+// TODO: GL_TexParameterIuiv
+
+// TODO: GL_TexStorage1D
+
+// TODO: GL_TexStorage2D
+
+// TODO: GL_TexStorage2DMultisample
+
+// TODO: GL_TexStorage3D
+
+// TODO: GL_TexStorage3DMultisample
+
+// TODO: GL_TexSubImage1D
 
 void GL_TexSubImage2D(unsigned int target, int level, int xoffset, int yoffset,
         int w, int h, unsigned int format, unsigned int type, const void* pix)
@@ -784,19 +1894,136 @@ void GL_TexSubImage2D(unsigned int target, int level, int xoffset, int yoffset,
     X(); glTexSubImage2D(target, level, xoffset, yoffset, w, h, format, type, pix);
 }
 
+// TODO: GL_TexSubImage3D
+
+// TODO: GL_TextureView
+
+// TODO: GL_TransformFeedbackVaryings
+
+// TODO: GL_Translated
+
 void GL_Translatef(float x, float y, float z)
 {
     X(); glTranslatef(x, y, z);
 }
 
+// TODO: GL_Uniform1d
+
+// TODO: GL_Uniform1dv
+
+// TODO: GL_Uniform1f
+
+// TODO: GL_Uniform1fv
+
+// TODO: GL_Uniform1i
+
+// TODO: GL_Uniform1iv
+
+// TODO: GL_Uniform1ui
+
+// TODO: GL_Uniform1uiv
+
+// TODO: GL_Uniform2d
+
+// TODO: GL_Uniform2dv
+
+// TODO: GL_Uniform2f
+
+// TODO: GL_Uniform2fv
+
+// TODO: GL_Uniform2i
+
+// TODO: GL_Uniform2iv
+
+// TODO: GL_Uniform2ui
+
+// TODO: GL_Uniform2uiv
+
+// TODO: GL_Uniform3d
+
+// TODO: GL_Uniform3dv
+
+// TODO: GL_Uniform3f
+
+// TODO: GL_Uniform3fv
+
+// TODO: GL_Uniform3i
+
+// TODO: GL_Uniform3iv
+
+// TODO: GL_Uniform3ui
+
+// TODO: GL_Uniform3uiv
+
+// TODO: GL_Uniform4d
+
+// TODO: GL_Uniform4dv
+
+// TODO: GL_Uniform4f
+
+// TODO: GL_Uniform4fv
+
+// TODO: GL_Uniform4i
+
+// TODO: GL_Uniform4iv
+
+// TODO: GL_Uniform4ui
+
+// TODO: GL_Uniform4uiv
+
+// TODO: GL_UniformBlockBinding
+
+// TODO: GL_UniformMatrix2dv
+
+// TODO: GL_UniformMatrix2fv
+
+// TODO: GL_UniformMatrix2x3dv
+
+// TODO: GL_UniformMatrix2x3fv
+
+// TODO: GL_UniformMatrix2x4dv
+
+// TODO: GL_UniformMatrix2x4fv
+
+// TODO: GL_UniformMatrix3dv
+
+// TODO: GL_UniformMatrix3fv
+
+// TODO: GL_UniformMatrix3x2dv
+
+// TODO: GL_UniformMatrix3x2fv
+
+// TODO: GL_UniformMatrix3x4dv
+
+// TODO: GL_UniformMatrix3x4fv
+
+// TODO: GL_UniformMatrix4dv
+
+// TODO: GL_UniformMatrix4fv
+
+// TODO: GL_UniformMatrix4x2dv
+
+// TODO: GL_UniformMatrix4x2fv
+
+// TODO: GL_UniformMatrix4x3dv
+
+// TODO: GL_UniformMatrix4x3fv
+
+// TODO: GL_UniformSubroutinesuiv
+
+// TODO: GL_UnmapBuffer
+
+// TODO: GL_UseProgram
+
+// TODO: GL_UseProgramStages
+
+// TODO: GL_ValidateProgram
+
+// TODO: GL_ValidateProgramPipeline
+
 void GL_Vertex2f(float x, float y)
 {
     X(); glVertex2f(x, y);
-}
-
-void GL_Vertex3f(float x, float y, float z)
-{
-    X(); glVertex3f(x, y, z);
 }
 
 void GL_Vertex2fv(const float* xy)
@@ -804,10 +2031,193 @@ void GL_Vertex2fv(const float* xy)
     X(); glVertex2fv(xy);
 }
 
+void GL_Vertex3f(float x, float y, float z)
+{
+    X(); glVertex3f(x, y, z);
+}
+
 void GL_Vertex3fv(const float* xyz)
 {
     X(); glVertex3fv(xyz);
 }
+
+// TODO: GL_Vertex4f
+
+// TODO: GL_Vertex4fv
+
+// TODO: GL_VertexAttrib1d
+
+// TODO: GL_VertexAttrib1dv
+
+// TODO: GL_VertexAttrib1f
+
+// TODO: GL_VertexAttrib1fv
+
+// TODO: GL_VertexAttrib1s
+
+// TODO: GL_VertexAttrib1sv
+
+// TODO: GL_VertexAttrib2d
+
+// TODO: GL_VertexAttrib2dv
+
+// TODO: GL_VertexAttrib2f
+
+// TODO: GL_VertexAttrib2fv
+
+// TODO: GL_VertexAttrib2s
+
+// TODO: GL_VertexAttrib2sv
+
+// TODO: GL_VertexAttrib3d
+
+// TODO: GL_VertexAttrib3dv
+
+// TODO: GL_VertexAttrib3f
+
+// TODO: GL_VertexAttrib3fv
+
+// TODO: GL_VertexAttrib3s
+
+// TODO: GL_VertexAttrib3sv
+
+// TODO: GL_VertexAttrib4Nbv
+
+// TODO: GL_VertexAttrib4Niv
+
+// TODO: GL_VertexAttrib4Nsv
+
+// TODO: GL_VertexAttrib4Nub
+
+// TODO: GL_VertexAttrib4Nubv
+
+// TODO: GL_VertexAttrib4Nuiv
+
+// TODO: GL_VertexAttrib4Nusv
+
+// TODO: GL_VertexAttrib4bv
+
+// TODO: GL_VertexAttrib4d
+
+// TODO: GL_VertexAttrib4dv
+
+// TODO: GL_VertexAttrib4f
+
+// TODO: GL_VertexAttrib4fv
+
+// TODO: GL_VertexAttrib4iv
+
+// TODO: GL_VertexAttrib4s
+
+// TODO: GL_VertexAttrib4sv
+
+// TODO: GL_VertexAttrib4ubv
+
+// TODO: GL_VertexAttrib4uiv
+
+// TODO: GL_VertexAttrib4usv
+
+// TODO: GL_VertexAttribBinding
+
+// TODO: GL_VertexAttribDivisor
+
+// TODO: GL_VertexAttribFormat
+
+// TODO: GL_VertexAttribI1i
+
+// TODO: GL_VertexAttribI1iv
+
+// TODO: GL_VertexAttribI1ui
+
+// TODO: GL_VertexAttribI1uiv
+
+// TODO: GL_VertexAttribI2i
+
+// TODO: GL_VertexAttribI2iv
+
+// TODO: GL_VertexAttribI2ui
+
+// TODO: GL_VertexAttribI2uiv
+
+// TODO: GL_VertexAttribI3i
+
+// TODO: GL_VertexAttribI3iv
+
+// TODO: GL_VertexAttribI3ui
+
+// TODO: GL_VertexAttribI3uiv
+
+// TODO: GL_VertexAttribI4bv
+
+// TODO: GL_VertexAttribI4i
+
+// TODO: GL_VertexAttribI4iv
+
+// TODO: GL_VertexAttribI4sv
+
+// TODO: GL_VertexAttribI4ubv
+
+// TODO: GL_VertexAttribI4ui
+
+// TODO: GL_VertexAttribI4uiv
+
+// TODO: GL_VertexAttribI4usv
+
+// TODO: GL_VertexAttribIFormat
+
+// TODO: GL_VertexAttribIPointer
+
+// TODO: GL_VertexAttribL1d
+
+// TODO: GL_VertexAttribL1dv
+
+// TODO: GL_VertexAttribL2d
+
+// TODO: GL_VertexAttribL2dv
+
+// TODO: GL_VertexAttribL3d
+
+// TODO: GL_VertexAttribL3dv
+
+// TODO: GL_VertexAttribL4d
+
+// TODO: GL_VertexAttribL4dv
+
+// TODO: GL_VertexAttribLFormat
+
+// TODO: GL_VertexAttribLPointer
+
+// TODO: GL_VertexAttribP1ui
+
+// TODO: GL_VertexAttribP1uiv
+
+// TODO: GL_VertexAttribP2ui
+
+// TODO: GL_VertexAttribP2uiv
+
+// TODO: GL_VertexAttribP3ui
+
+// TODO: GL_VertexAttribP3uiv
+
+// TODO: GL_VertexAttribP4ui
+
+// TODO: GL_VertexAttribP4uiv
+
+// TODO: GL_VertexAttribPointer
+
+// TODO: GL_VertexBindingDivisor
+
+// TODO: GL_VertexP2ui
+
+// TODO: GL_VertexP2uiv
+
+// TODO: GL_VertexP3ui
+
+// TODO: GL_VertexP3uiv
+
+// TODO: GL_VertexP4ui
+
+// TODO: GL_VertexP4uiv
 
 void GL_VertexPointer(int size, unsigned int type, int stride, const void* data)
 {
@@ -818,6 +2228,46 @@ void GL_Viewport(int x, int y, int width, int height)
 {
     X(); glViewport(x, y, width, height);
 }
+
+// TODO: GL_ViewportArrayv
+
+// TODO: GL_ViewportIndexedf
+
+// TODO: GL_ViewportIndexedfv
+
+// TODO: GL_WaitSync
+
+// TODO: GL_WindowPos2d
+
+// TODO: GL_WindowPos2dv
+
+// TODO: GL_WindowPos2f
+
+// TODO: GL_WindowPos2fv
+
+// TODO: GL_WindowPos2i
+
+// TODO: GL_WindowPos2iv
+
+// TODO: GL_WindowPos2s
+
+// TODO: GL_WindowPos2sv
+
+// TODO: GL_WindowPos3d
+
+// TODO: GL_WindowPos3dv
+
+// TODO: GL_WindowPos3f
+
+// TODO: GL_WindowPos3fv
+
+// TODO: GL_WindowPos3i
+
+// TODO: GL_WindowPos3iv
+
+// TODO: GL_WindowPos3s
+
+// TODO: GL_WindowPos3sv
 
 #undef X
 

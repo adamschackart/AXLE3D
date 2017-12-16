@@ -89,12 +89,12 @@ void GL_Color3f(float r, float g, float b)
     AE_STUB();
 }
 
-void GL_Color4f(float r, float g, float b, float a)
+void GL_Color3fv(const float* rgb)
 {
     AE_STUB();
 }
 
-void GL_Color3fv(const float* rgb)
+void GL_Color4f(float r, float g, float b, float a)
 {
     AE_STUB();
 }
@@ -252,6 +252,36 @@ void GL_GetMaterialfv(unsigned int face, unsigned int pname, float* params)
 const char* GL_GetString(unsigned int name)
 {
     AE_STUB(); return "";
+}
+
+void GL_GetTexEnvfv(unsigned int target, unsigned int pname, float* params)
+{
+    AE_STUB();
+}
+
+void GL_GetTexEnviv(unsigned int target, unsigned int pname, int* params)
+{
+    AE_STUB();
+}
+
+void GL_GetTexGendv(unsigned int coord, unsigned int pname, double* params)
+{
+    AE_STUB();
+}
+
+void GL_GetTexGenfv(unsigned int coord, unsigned int pname, float* params)
+{
+    AE_STUB();
+}
+
+void GL_GetTexGeniv(unsigned int coord, unsigned int pname, int* params)
+{
+    AE_STUB();
+}
+
+void GL_GetTexParameterfv(unsigned int target, unsigned int pname, float* params)
+{
+    AE_STUB();
 }
 
 void GL_GetTexParameteriv(unsigned int target, unsigned int pname, int* params)
@@ -419,22 +449,22 @@ void GL_TexCoord2f(float s, float t)
     AE_STUB();
 }
 
-void GL_TexCoord3f(float s, float t, float r)
-{
-    AE_STUB();
-}
-
-void GL_TexCoord4f(float s, float t, float r, float q)
-{
-    AE_STUB();
-}
-
 void GL_TexCoord2fv(const float* st)
 {
     AE_STUB();
 }
 
+void GL_TexCoord3f(float s, float t, float r)
+{
+    AE_STUB();
+}
+
 void GL_TexCoord3fv(const float* str)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord4f(float s, float t, float r, float q)
 {
     AE_STUB();
 }
@@ -469,6 +499,36 @@ void GL_TexEnvi(unsigned int target, unsigned int pname, int param)
     AE_STUB();
 }
 
+void GL_TexGeniv(unsigned int coord, unsigned int pname, const int *params)
+{
+    AE_STUB();
+}
+
+void GL_TexGenfv(unsigned int coord, unsigned int pname, const float *params)
+{
+    AE_STUB();
+}
+
+void GL_TexGendv(unsigned int coord, unsigned int pname, const double *params)
+{
+    AE_STUB();
+}
+
+void GL_TexGeni(unsigned int coord, unsigned int pname, int param)
+{
+    AE_STUB();
+}
+
+void GL_TexGenf(unsigned int coord, unsigned int pname, float param)
+{
+    AE_STUB();
+}
+
+void GL_TexGend(unsigned int coord, unsigned int pname, double param)
+{
+    AE_STUB();
+}
+
 void GL_TexImage2D(unsigned int target, int level, int internal_format, int w,
         int h, int border, unsigned int fmt, unsigned int type, const void* p)
 {
@@ -496,12 +556,12 @@ void GL_Vertex2f(float x, float y)
     AE_STUB();
 }
 
-void GL_Vertex3f(float x, float y, float z)
+void GL_Vertex2fv(const float* xy)
 {
     AE_STUB();
 }
 
-void GL_Vertex2fv(const float* xy)
+void GL_Vertex3f(float x, float y, float z)
 {
     AE_STUB();
 }

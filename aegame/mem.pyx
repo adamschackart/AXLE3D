@@ -204,6 +204,9 @@ cdef extern from "ae_memory.h":
     char* ae_string_copy_sized(char* string, size_t length) # n chars
     char* ae_string_copy(char* string) # copy string to alloced block
 
+    const char* AE_STRING_COPY_SIZED(const char* strn, size_t length)
+    const char* AE_STRING_COPY(const char* strn) # fix type annoyance
+
 cdef extern from "ae_hash.h":
     # ===== [ hash functions ] =================================================
 

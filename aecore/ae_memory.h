@@ -594,6 +594,12 @@ AE_DECL char* AE_CALL ae_string_copy_sized_ex(char* s, size_t length,
 AE_DECL char* AE_CALL ae_string_copy_ex(char* string, // copy to block
         const char* filename, const char* funcname, const int lineno);
 
+/* NOTE: this code was originally designed for use with STB's hashtable code,
+ * which also annoyingly uses char* and I haven't gotten around to fixing it.
+ */
+#define AE_STRING_COPY_SIZED(s, n) ((const char*)ae_string_copy_sized((const char*)(s), (n)))
+#define AE_STRING_COPY(s) ((const char*)ae_string_copy((const char*)(s)))
+
 /*
 ================================================================================
  * ~~ [ C++ array classes ] ~~ *

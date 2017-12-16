@@ -86,10 +86,10 @@ GL_DECL void GL_CALL
 GL_Color3f(float r, float g, float b);
 
 GL_DECL void GL_CALL
-GL_Color4f(float r, float g, float b, float a);
+GL_Color3fv(const float* rgb);
 
 GL_DECL void GL_CALL
-GL_Color3fv(const float* rgb);
+GL_Color4f(float r, float g, float b, float a);
 
 GL_DECL void GL_CALL
 GL_Color4fv(const float* rgba);
@@ -183,6 +183,24 @@ GL_GetMaterialfv(unsigned int face, unsigned int pname, float* params);
 
 GL_DECL const char* GL_CALL
 GL_GetString(unsigned int name);
+
+GL_DECL void GL_CALL
+GL_GetTexEnvfv(unsigned int target, unsigned int pname, float* params);
+
+GL_DECL void GL_CALL
+GL_GetTexEnviv(unsigned int target, unsigned int pname, int* params);
+
+GL_DECL void GL_CALL
+GL_GetTexGendv(unsigned int coord, unsigned int pname, double* params);
+
+GL_DECL void GL_CALL
+GL_GetTexGenfv(unsigned int coord, unsigned int pname, float* params);
+
+GL_DECL void GL_CALL
+GL_GetTexGeniv(unsigned int coord, unsigned int pname, int* params);
+
+GL_DECL void GL_CALL
+GL_GetTexParameterfv(unsigned int target, unsigned int pname, float* params);
 
 GL_DECL void GL_CALL
 GL_GetTexParameteriv(unsigned int target, unsigned int pname, int* params);
@@ -284,16 +302,16 @@ GL_DECL void GL_CALL
 GL_TexCoord2f(float s, float t);
 
 GL_DECL void GL_CALL
-GL_TexCoord3f(float s, float t, float r);
-
-GL_DECL void GL_CALL
-GL_TexCoord4f(float s, float t, float r, float q);
-
-GL_DECL void GL_CALL
 GL_TexCoord2fv(const float* st);
 
 GL_DECL void GL_CALL
+GL_TexCoord3f(float s, float t, float r);
+
+GL_DECL void GL_CALL
 GL_TexCoord3fv(const float* str);
+
+GL_DECL void GL_CALL
+GL_TexCoord4f(float s, float t, float r, float q);
 
 GL_DECL void GL_CALL
 GL_TexCoord4fv(const float* strq);
@@ -314,6 +332,24 @@ GL_DECL void GL_CALL
 GL_TexEnvi(unsigned int target, unsigned int pname, int param);
 
 GL_DECL void GL_CALL
+GL_TexGeniv(unsigned int coord, unsigned int pname, const int *params);
+
+GL_DECL void GL_CALL
+GL_TexGenfv(unsigned int coord, unsigned int pname, const float *params);
+
+GL_DECL void GL_CALL
+GL_TexGendv(unsigned int coord, unsigned int pname, const double *params);
+
+GL_DECL void GL_CALL
+GL_TexGeni(unsigned int coord, unsigned int pname, int param);
+
+GL_DECL void GL_CALL
+GL_TexGenf(unsigned int coord, unsigned int pname, float param);
+
+GL_DECL void GL_CALL
+GL_TexGend(unsigned int coord, unsigned int pname, double param);
+
+GL_DECL void GL_CALL
 GL_TexImage2D(unsigned int target, int level, int internal_format, int w, int h,
             int border, unsigned int format, unsigned int type, const void * p);
 
@@ -331,10 +367,10 @@ GL_DECL void GL_CALL
 GL_Vertex2f(float x, float y);
 
 GL_DECL void GL_CALL
-GL_Vertex3f(float x, float y, float z);
+GL_Vertex2fv(const float* xy);
 
 GL_DECL void GL_CALL
-GL_Vertex2fv(const float* xy);
+GL_Vertex3f(float x, float y, float z);
 
 GL_DECL void GL_CALL
 GL_Vertex3fv(const float* xyz);

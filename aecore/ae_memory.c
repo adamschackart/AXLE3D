@@ -1001,6 +1001,7 @@ TODO: AE_STRING_TRACE, which requires the addition of a STRING logging category.
 TODO: the empty string "" is a very common case - handle without wasting blocks.
 TODO: should we pass file, func, and line through to the lower-level allocators?
 TODO: constant string pool allocator - keep reference count in string hash table
+TODO: ae_string_realloc function for use with a future C++ ae::string::push_back
 --------------------------------------------------------------------------------
 */
 
