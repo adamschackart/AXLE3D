@@ -12,22 +12,24 @@
 --------------------------------------------------------------------------------
 */
 
+static int _al_core_is_initialized;
+
 int al_is_init(void)
 {
-    AE_STUB(); return 0;
+    return _al_core_is_initialized;
 }
 
 const char* al_implementation(void)
 {
-    AE_STUB(); return "";
+    return "TODO";
 }
 
 void al_init(void)
 {
-    AE_STUB();
+    // TODO
 }
 
 void al_quit(void)
 {
-    AE_STUB();
+    // TODO
 }

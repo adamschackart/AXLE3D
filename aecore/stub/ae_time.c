@@ -16,6 +16,41 @@ double ae_seconds(void)
     AE_STUB(); return 0.0;
 }
 
+void
+ae_frame_callback_register(const char* name, ae_frame_callback_t func, void* ctx)
+{
+    AE_STUB();
+}
+
+void
+ae_frame_callback_unregister(const char* name)
+{
+    AE_STUB();
+}
+
+void
+ae_frame_callback_get(const char* name, ae_frame_callback_t* func, void** ctx)
+{
+    AE_STUB();
+}
+
+void ae_timer_callback_register(const char* name, ae_timer_callback_t func,
+                                double seconds, int repeat, void* context)
+{
+    AE_STUB();
+}
+
+void ae_timer_callback_unregister(const char* name)
+{
+    AE_STUB();
+}
+
+void ae_timer_callback_get(const char* name, ae_timer_callback_t* function,
+                            double* seconds, int* repeat, void ** context)
+{
+    AE_STUB();
+}
+
 double ae_frame_delta(void)
 {
     AE_STUB(); return 0.0;

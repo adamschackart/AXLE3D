@@ -7199,6 +7199,9 @@ void xl_animation_close_all(void)
 ================================================================================
  * ~~ [ event handling ] ~~ *
 --------------------------------------------------------------------------------
+TODO: (en/dis)able input events for mouse/keyboard/controllers - function to set
+"input mode" based on platform? (PC KBM, console controller, mobile touchscreen)
+--------------------------------------------------------------------------------
 */
 
 static void
@@ -8107,6 +8110,7 @@ static void xl_event_internal(xl_event_t* dst, SDL_Event* src)
     }
 }
 
+// TODO: this callback should take a context parameter
 static xl_event_handler_t xl_event_handler_p = NULL;
 
 void xl_event_set_handler(xl_event_handler_t handler)

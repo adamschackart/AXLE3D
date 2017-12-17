@@ -1038,7 +1038,12 @@ void* ae_string_malloc_ex(size_t length, // length is character count
 void ae_string_free_ex(void* string, // free from string chunk or heap
         const char* filename, const char* funcname, const int lineno)
 {
-    ae_block_free(&ae_small_strings, string); // might call ae_free
+    #if defined(AE_DEBUG) // stamp down a debug marker for printf after free
+    if (string) strncpy((char*)string, "INVALID FREED STRING MEMORY",
+                                        strlen((const char*)string));
+    #endif
+
+    ae_block_free(&ae_small_strings, string); // can also call ae_free
 }
 
 char* ae_string_copy_sized_ex(char* string, size_t len, // char count

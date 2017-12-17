@@ -20,10 +20,33 @@ cdef extern from "ae_time.h":
     double ae_seconds() # get seconds elapsed since some epoch
     # u64 ae_rdtsc() # get the x86 processor timestamp counter
 
-    double ae_frame_delta()
-
     double ae_time_wave_ex(double curtime, double rate, double offset)
     double ae_time_wave(double rate) # easy animated cos wave function
+
+    ctypedef void (*ae_frame_callback_t)(const char* name, double dt, void* context)
+
+    # allows alternate old-style func naming convention
+    ctypedef ae_frame_callback_t AE_FRAME_CALLBACK_FUNC
+
+    void ae_frame_callback_register(const char* n, ae_frame_callback_t f, void* ctx)
+    void ae_frame_callback_unregister(const char* n)
+    void ae_frame_callback_get(const char* name, ae_frame_callback_t* f, void** ctx)
+
+    ctypedef void (*ae_timer_callback_t)(const char* name, double t,
+                                        int repeats, void* context)
+
+    # allows alternate old-style func naming convention
+    ctypedef ae_timer_callback_t AE_TIMER_CALLBACK_FUNC
+
+    void ae_timer_callback_register(const char* name, ae_timer_callback_t func,
+                                    double seconds, int repeat, void* context)
+
+    void ae_timer_callback_unregister(const char* name)
+
+    void ae_timer_callback_get(const char* name, ae_timer_callback_t* function,
+                                double* seconds, int* repeat, void ** context)
+
+    double ae_frame_delta()
 
     # ===== [ profiler ] =======================================================
 

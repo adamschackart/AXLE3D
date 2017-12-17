@@ -120,15 +120,242 @@ double ae_internal_seconds(void) { return 0.0; }
 
 /* ===== [ frame timer ] ==================================================== */
 
+// callback name -> registered function pointer
+static ae_strmap_t ae_frame_callback_table;
+
+// callback name -> registered context pointer
+static ae_strmap_t ae_frame_callback_context;
+
+void
+ae_frame_callback_register(const char* name, ae_frame_callback_t func, void* ctx)
+{
+    // arg pointer casting for C++
+    char* str = (char*)name;
+    void* ptr = (void*)func;
+
+    const u32 h = ae_hash_str(str);
+
+    if (ae_strmap_get_ex(&ae_frame_callback_table, str, h) != NULL)
+    {
+        ae_frame_callback_unregister(name);
+    }
+
+    if (!ae_strmap_add_ex(&ae_frame_callback_table, str, ptr, h) ||
+        !ae_strmap_add_ex(&ae_frame_callback_context, str, ctx, h))
+    {
+        ae_error("failed to register frame callback \"%s\"", name);
+    }
+    else
+    {
+        ae_log(TIME, "registered frame callback \"%s\"", name);
+    }
+}
+
+void
+ae_frame_callback_unregister(const char* name)
+{
+    const u32 h = ae_hash_str((char*)name);
+
+    if (!ae_strmap_remove_ex(&ae_frame_callback_table, (char*)name, NULL, h) ||
+        !ae_strmap_remove_ex(&ae_frame_callback_context, (char*)name, NULL, h))
+    {
+        ae_error("failed to unregister frame callback \"%s\"", name);
+    }
+    else
+    {
+        ae_log(TIME, "unregistered frame callback \"%s\"", name);
+    }
+}
+
+void
+ae_frame_callback_get(const char* name, ae_frame_callback_t* func, void** ctx)
+{
+    char* n = (char*)name; // C++
+    const u32 h = ae_hash_str(n);
+
+    ae_if (func != NULL)
+    {
+        *func = (ae_frame_callback_t)ae_strmap_get_ex(&ae_frame_callback_table, n, h);
+    }
+
+    ae_if (ctx != NULL)
+    {
+        *ctx = ae_strmap_get_ex(&ae_frame_callback_context, n, h);
+    }
+}
+
+// timer name -> registered callback struct
+static ae_strmap_t ae_timer_callback_table;
+
+typedef struct ae_timer_data_t // hash node
+{
+    ae_timer_callback_t function;
+    void * context;
+
+    // leftover_seconds - seconds - current
+    double current;
+    double seconds;
+
+    // invalid if event fires & repeat is 0
+    int repeat, valid;
+} \
+    ae_timer_data_t;
+
+static void ae_timer_callback_quit(void)
+{
+    int i = 0;
+
+    char* k;
+    void* v;
+
+    for ( ; // iterate the frame callback table and free structs
+        i < ae_timer_callback_table.limit ?
+        k = ae_timer_callback_table.table[i].key,
+        v = ae_timer_callback_table.table[i].val,
+        1 : 0; i++)
+    {
+        if (k == NULL || k == (char*)1) {} else { ae_free(v); }
+    }
+}
+
+static void
+ae_timer_data_update(const char* name, ae_timer_data_t* data, double delta)
+{
+    ae_if (data->valid)
+    {
+        data->current += delta;
+
+        ae_if (data->current >= data->seconds) // fired - wrap or invalidate
+        {
+            data->function(name, data->seconds, data->repeat, data->context);
+
+            ae_if (data->repeat)
+            {
+                data->current -= data->seconds;
+            }
+            else
+            {
+                data->valid = 0;
+            }
+        }
+    }
+}
+
+void ae_timer_callback_register(const char* name, ae_timer_callback_t func,
+                                double seconds, int repeat, void* context)
+{
+    char* str = (char*)name; // C++
+    const u32 h = ae_hash_str(str);
+
+    void* ptr = ae_malloc(sizeof(ae_timer_data_t));
+    ae_timer_data_t* data = (ae_timer_data_t*) ptr;
+
+    data->function = func;
+    data->context = context;
+    data->current = 0.0;
+    data->seconds = seconds;
+    data->valid = 1;
+    data->repeat = repeat;
+
+    if (ae_strmap_get_ex(&ae_timer_callback_table, str, h) != NULL)
+    {
+        ae_timer_callback_unregister(name);
+    }
+
+    if (!ae_strmap_add_ex(&ae_timer_callback_table, str, ptr, h))
+    {
+        ae_error("failed to register timer callback \"%s\"", name);
+    }
+    else
+    {
+        ae_log(TIME, "registered timer callback \"%s\"", name);
+    }
+}
+
+void ae_timer_callback_unregister(const char* name)
+{
+    char* str = (char*)name; // C++
+    const u32 h = ae_hash_str(str);
+
+    ae_free(ae_strmap_get_ex(&ae_timer_callback_table, str, h));
+    if (!ae_strmap_remove_ex(&ae_timer_callback_table, str, NULL, h))
+    {
+        ae_error("failed to unregister timer callback \"%s\"", name);
+    }
+    else
+    {
+        ae_log(TIME, "unregistered timer callback \"%s\"", name);
+    }
+}
+
+void ae_timer_callback_get(const char* name, ae_timer_callback_t* function,
+                            double* seconds, int* repeat, void ** context)
+{
+    char* str = (char*)name; // C++
+    const u32 h = ae_hash_str(str);
+
+    ae_timer_data_t * data = (ae_timer_data_t *) // try to grab
+            ae_strmap_get_ex(&ae_timer_callback_table, str, h);
+
+    ae_if (data == NULL || !data->valid)
+    {
+        data = (ae_timer_data_t*)memset(alloca(sizeof(*data)), 0, sizeof(*data));
+    }
+
+    ae_if (function) *function = data->function;
+    ae_if (seconds) *seconds = data->seconds;
+    ae_if (repeat) *repeat = data->repeat;
+    ae_if (context) *context = data->context;
+}
+
+static double ae_previous_frame_time;
+
 double ae_frame_delta(void)
 {
-    static double previous;
+    AE_PROFILE_ENTER(); // track the amount of time we spend in callbacks
 
-    const double current = ae_seconds(); // dt
-    const double delta_t = current - previous;
+    const double current = ae_seconds(); // seconds elapsed
+    const double delta_t = current - ae_previous_frame_time;
 
-    previous = current;
-    return delta_t;
+    ae_previous_frame_time = current;
+
+    if (1) // call all globally registered named callbacks
+    {
+        char* k;
+        void* v;
+
+        int i;
+
+        for(i = 0; // iterate the frame callback table
+            i < ae_frame_callback_table.limit ?
+            k = ae_frame_callback_table.table[i].key,
+            v = ae_frame_callback_table.table[i].val,
+            1 : 0; i++)
+        {
+            if (k == NULL || k == (char*)1) {} else
+            {
+                void* ctx = ae_strmap_get(&ae_frame_callback_context, k);
+                ae_frame_callback_t fun = (ae_frame_callback_t)v;
+
+                fun((const char*)k, delta_t, ctx);
+            }
+        }
+
+        for(i = 0; // iterate the timer callback table
+            i < ae_timer_callback_table.limit ?
+            k = ae_timer_callback_table.table[i].key,
+            v = ae_timer_callback_table.table[i].val,
+            1 : 0; i++)
+        {
+            if (k == NULL || k == (char*)1) {} else
+            {
+                ae_timer_data_t* d = (ae_timer_data_t*) v; // C++
+                ae_timer_data_update((const char*)k, d, delta_t);
+            }
+        }
+    }
+
+    AE_PROFILE_LEAVE(); return delta_t;
 }
 
 /*
@@ -236,7 +463,10 @@ void ae_profile_leave(void* _context)
         node->time_taken = 0;
         node->call_count = 0;
 
-        ae_strmap_set_ex(&ae_global_profile, funcname, node, funchash);
+        if (!ae_strmap_add_ex(&ae_global_profile, funcname, node, funchash))
+        {
+            ae_error("failed to add profile node (is table code stubbed?");
+        }
     }
 
     ae_assert(!strcmp(filename, node->filename), "file collision for func \"%s"
@@ -386,6 +616,7 @@ void ae_profile_render( AE_PROFILE_RENDER_FUNC draw, ae_profile_sort_t sort,
         int i = 0; // iterate the sorted profile nodes and render them
         for (; i < ae_global_profile.count; i++)
         {
+            // TODO: profile "render" func should take a context param
             if ((size_t)i == max_items) break; else draw(items[i]);
         }
     }
@@ -481,6 +712,15 @@ void ae_time_init(int argc, char** argv)
 
     ae_time_counter_init(argc, argv);
     ae_time_profile_init(argc, argv);
+
+    ae_strmap_init(&ae_timer_callback_table, 16);
+    ae_strmap_init(&ae_frame_callback_context, 16);
+    ae_strmap_init(&ae_frame_callback_table, 16);
+
+    /* prevent big first frame delta if ae_seconds begins with a large value.
+     * this still doesn't prevent library initialization from spiking deltas.
+     */
+    ae_previous_frame_time = ae_seconds();
 }
 
 void ae_time_quit(void)
@@ -499,6 +739,13 @@ void ae_time_quit(void)
 
         ae_log(TIME, "aecore end date is %s", quit_date);
     }
+
+    // TODO: unregister callbacks for logging?
+    ae_strmap_free(&ae_frame_callback_table);
+    ae_strmap_free(&ae_frame_callback_context);
+
+    ae_timer_callback_quit();
+    ae_strmap_free(&ae_timer_callback_table);
 
     ae_time_profile_quit();
     ae_time_counter_quit();

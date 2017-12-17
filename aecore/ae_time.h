@@ -32,10 +32,6 @@ AE_DECL double AE_CALL ae_internal_seconds(void);
 // get the processor timestamp counter. has the same signature everywhere.
 #define ae_rdtsc() ((u64)__rdtsc())
 
-// tick the global game timer. this provides the most basic of frame timing,
-// with no delta capping for smooth physics or running scheduled functions.
-AE_DECL double AE_CALL ae_frame_delta(void);
-
 /* generate a temporal sine wave with a given period and useless initial offset.
  * this provides an easy way to create flashing animations (texture color etc.)
  */
@@ -52,6 +48,41 @@ static c_inline double ae_time_wave(double rate)
 {
     return ae_time_wave_ex(ae_seconds(), rate, 0.0);
 }
+
+/* ===== [ frame timer ] ==================================================== */
+
+typedef void (*ae_frame_callback_t)(const char* name, double dt, void* context);
+
+// allow alternate old-style func naming convention
+typedef ae_frame_callback_t AE_FRAME_CALLBACK_FUNC;
+
+AE_DECL void AE_CALL
+ae_frame_callback_register(const char* name, ae_frame_callback_t fn, void* ctx);
+
+AE_DECL void AE_CALL
+ae_frame_callback_unregister(const char* name);
+
+AE_DECL void AE_CALL
+ae_frame_callback_get(const char* name, ae_frame_callback_t* fn, void** ctx);
+
+typedef void (*ae_timer_callback_t)(const char * name, double t,
+                                    int repeats, void* context);
+
+// allow alternate old-style func naming convention
+typedef ae_timer_callback_t AE_TIMER_CALLBACK_FUNC;
+
+AE_DECL void AE_CALL ae_timer_callback_register(const char* name, ae_timer_callback_t func,
+                                                double seconds, int repeat, void* context);
+
+AE_DECL void AE_CALL ae_timer_callback_unregister(const char* name);
+
+AE_DECL void AE_CALL ae_timer_callback_get(const char* name, ae_timer_callback_t* function,
+                                            double* seconds, int* repeat, void ** context);
+
+/* Tick the global game timer and run all scheduled frame callback functions.
+ * Note that the time delta is not capped (necessary for smooth physics etc).
+ */
+AE_DECL double AE_CALL ae_frame_delta(void);
 
 /*
 ================================================================================
