@@ -120,6 +120,10 @@ double ae_internal_seconds(void) { return 0.0; }
 
 /* ===== [ frame timer ] ==================================================== */
 
+// XXX FIXME TODO: use of hashtables to track frame and timer callbacks means
+// that crashes will happen if callbacks are unregistered inside of callbacks.
+// we need to keep fixed buffers of func data and track validity using flags!
+
 // callback name -> registered function pointer
 static ae_strmap_t ae_frame_callback_table;
 
@@ -319,14 +323,27 @@ double ae_frame_delta(void)
 
     ae_previous_frame_time = current;
 
-    if (1) // call all globally registered named callbacks
+    if (1) // call all globally registered named callbacks (frame + timer)
     {
         char* k;
         void* v;
 
         int i;
 
-        for(i = 0; // iterate the frame callback table
+        for(i = 0; // iterate the timer callback table first
+            i < ae_timer_callback_table.limit ?
+            k = ae_timer_callback_table.table[i].key,
+            v = ae_timer_callback_table.table[i].val,
+            1 : 0; i++)
+        {
+            if (k == NULL || k == (char*)1) {} else
+            {
+                ae_timer_data_t* d = (ae_timer_data_t*) v; // C++
+                ae_timer_data_update((const char*)k, d, delta_t);
+            }
+        }
+
+        for(i = 0; // iterate the frame callback table second
             i < ae_frame_callback_table.limit ?
             k = ae_frame_callback_table.table[i].key,
             v = ae_frame_callback_table.table[i].val,
@@ -338,19 +355,6 @@ double ae_frame_delta(void)
                 ae_frame_callback_t fun = (ae_frame_callback_t)v;
 
                 fun((const char*)k, delta_t, ctx);
-            }
-        }
-
-        for(i = 0; // iterate the timer callback table
-            i < ae_timer_callback_table.limit ?
-            k = ae_timer_callback_table.table[i].key,
-            v = ae_timer_callback_table.table[i].val,
-            1 : 0; i++)
-        {
-            if (k == NULL || k == (char*)1) {} else
-            {
-                ae_timer_data_t* d = (ae_timer_data_t*) v; // C++
-                ae_timer_data_update((const char*)k, d, delta_t);
             }
         }
     }
