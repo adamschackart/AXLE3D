@@ -154,6 +154,28 @@ static void ae_frame_callback_update(double dt)
     AE_PROFILE_LEAVE();
 }
 
+static void
+ae_frame_callback_unregister_ex(const char* name, size_t index)
+{
+    for (; index < AE_ARRAY_COUNT(ae_frame_callbacks); index++)
+    {
+        ae_frame_callback_data_t* data = ae_frame_callbacks + index;
+
+        if (!strncmp(data->name, name, sizeof(data->name) - 1))
+        {
+            ae_log(TIME, "unregistered frame callback \"%s\"", name);
+
+            data->name[0] = '\0';
+            data->function = NULL;
+            data->context = NULL;
+
+            return;  // found our slot, no need to keep iterating
+        }
+    }
+
+    AE_WARN("failed to unregister frame callback \"%s\"!", name);
+}
+
 void
 ae_frame_callback_register(const char* name, ae_frame_callback_t func, void* ctx)
 {
@@ -164,7 +186,7 @@ ae_frame_callback_register(const char* name, ae_frame_callback_t func, void* ctx
 
         if (!strncmp(data->name, name, sizeof(data->name) - 1))
         {
-            ae_frame_callback_unregister(name);
+            ae_frame_callback_unregister_ex(name, i);
         }
 
         if (data->function == NULL)
@@ -182,27 +204,9 @@ ae_frame_callback_register(const char* name, ae_frame_callback_t func, void* ctx
     ae_error("failed to register frame callback \"%s\"!", name);
 }
 
-void
-ae_frame_callback_unregister(const char* name)
+void ae_frame_callback_unregister(const char* name)
 {
-    size_t i = 0, n = AE_ARRAY_COUNT(ae_frame_callbacks); // O(n)
-    for (; i < n; i++)
-    {
-        ae_frame_callback_data_t* data = ae_frame_callbacks + i;
-
-        if (!strncmp(data->name, name, sizeof(data->name) - 1))
-        {
-            ae_log(TIME, "unregistered frame callback \"%s\"", name);
-
-            data->name[0] = '\0';
-            data->function = NULL;
-            data->context = NULL;
-
-            return;  // found our slot, no need to keep iterating
-        }
-    }
-
-    AE_WARN("failed to unregister frame callback \"%s\"!", name);
+    ae_frame_callback_unregister_ex(name, 0);
 }
 
 void
@@ -280,6 +284,32 @@ static void ae_timer_callback_update(double dt)
     AE_PROFILE_LEAVE();
 }
 
+static void
+ae_timer_callback_unregister_ex(const char* name, size_t index)
+{
+    for (; index < AE_ARRAY_COUNT(ae_timer_callbacks); index++)
+    {
+        ae_timer_callback_data_t* data = ae_timer_callbacks + index;
+
+        if (!strncmp(data->name, name, sizeof(data->name) - 1))
+        {
+            ae_log(TIME, "unregistered timer callback \"%s\"", name);
+
+            data->name[0] = '\0';
+            data->function = NULL;
+            data->context = NULL;
+            data->current = 0.0;
+            data->seconds = 0.0;
+            data->repeat = 0;
+
+            return; // found our slot, no need to keep iterating
+        }
+    }
+
+    AE_WARN("failed to unregister timer callback \"%s\"!", name);
+}
+
+
 void ae_timer_callback_register(const char* name, ae_timer_callback_t func,
                                 double seconds, int repeat, void* context)
 {
@@ -290,7 +320,7 @@ void ae_timer_callback_register(const char* name, ae_timer_callback_t func,
 
         if (!strncmp(data->name, name, sizeof(data->name) - 1))
         {
-            ae_timer_callback_unregister(name);
+            ae_timer_callback_unregister_ex(name, i);
         }
 
         if (data->function == NULL)
@@ -313,27 +343,7 @@ void ae_timer_callback_register(const char* name, ae_timer_callback_t func,
 
 void ae_timer_callback_unregister(const char* name)
 {
-    size_t i = 0, n = AE_ARRAY_COUNT(ae_timer_callbacks); // O(n)
-    for (; i < n; i++)
-    {
-        ae_timer_callback_data_t* data = ae_timer_callbacks + i;
-
-        if (!strncmp(data->name, name, sizeof(data->name) - 1))
-        {
-            ae_log(TIME, "unregistered timer callback \"%s\"", name);
-
-            data->name[0] = '\0';
-            data->function = NULL;
-            data->context = NULL;
-            data->current = 0.0;
-            data->seconds = 0.0;
-            data->repeat = 0;
-
-            return; // found our slot, no need to keep iterating
-        }
-    }
-
-    AE_WARN("failed to unregister timer callback \"%s\"!", name);
+    ae_timer_callback_unregister_ex(name, 0);
 }
 
 void ae_timer_callback_get(const char* name, ae_timer_callback_t* function,
