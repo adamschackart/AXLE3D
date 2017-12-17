@@ -136,24 +136,6 @@ static void ae_frame_callback_quit(void)
     memset(ae_frame_callbacks, 0, sizeof(ae_frame_callbacks));
 }
 
-static void ae_frame_callback_update(double dt)
-{
-    AE_PROFILE_ENTER(); // track the time we spend in callbacks
-
-    size_t i = 0, n = AE_ARRAY_COUNT(ae_frame_callbacks);
-    for (; i < n; i++)
-    {
-        ae_frame_callback_data_t* data = ae_frame_callbacks + i;
-
-        ae_if (data->function != NULL)
-        {
-            data->function(data->name, dt, data->context);
-        }
-    }
-
-    AE_PROFILE_LEAVE();
-}
-
 static void
 ae_frame_callback_unregister_ex(const char* name, size_t index)
 {
@@ -176,10 +158,32 @@ ae_frame_callback_unregister_ex(const char* name, size_t index)
     AE_WARN("failed to unregister frame callback \"%s\"!", name);
 }
 
+static void ae_frame_callback_update(double dt)
+{
+    AE_PROFILE_ENTER(); // track the time we spend in callbacks
+
+    size_t i = 0, n = AE_ARRAY_COUNT(ae_frame_callbacks);
+    for (; i < n; i++)
+    {
+        ae_frame_callback_data_t* data = ae_frame_callbacks + i;
+
+        ae_if (data->function != NULL)
+        {
+            data->function(data->name, dt, data->context);
+        }
+    }
+
+    AE_PROFILE_LEAVE();
+}
+
 void
 ae_frame_callback_register(const char* name, ae_frame_callback_t func, void* ctx)
 {
-    size_t i = 0, n = AE_ARRAY_COUNT(ae_frame_callbacks);
+    size_t i = 0, n = AE_ARRAY_COUNT(ae_frame_callbacks); // O(n)
+
+    // TODO: NULL function pointer should unregister the callback!
+    ae_assert(func != NULL, "NULL frame callback \"%s\"", name);
+
     for (; i < n; i++)
     {
         ae_frame_callback_data_t* data = ae_frame_callbacks + i;
@@ -209,7 +213,7 @@ void ae_frame_callback_unregister(const char* name)
     ae_frame_callback_unregister_ex(name, 0);
 }
 
-void
+int
 ae_frame_callback_get(const char* name, ae_frame_callback_t* func, void** ctx)
 {
     size_t i = 0, n = AE_ARRAY_COUNT(ae_frame_callbacks); // O(n)
@@ -226,9 +230,11 @@ ae_frame_callback_get(const char* name, ae_frame_callback_t* func, void** ctx)
             if (func) *func = data->function;
             if (ctx ) *ctx  = data->context;
 
-            return;  // found our slot, no need to keep iterating
+            return 1;  // found our slot, no need to keep iterating
         }
     }
+
+    return 0;
 }
 
 typedef struct ae_timer_callback_data_t
@@ -250,38 +256,6 @@ static ae_timer_callback_data_t ae_timer_callbacks[ 128 ];
 static void ae_timer_callback_quit(void)
 {
     memset(ae_timer_callbacks, 0, sizeof(ae_timer_callbacks));
-}
-
-static void ae_timer_callback_update(double dt)
-{
-    AE_PROFILE_ENTER();  // track the time we spend in callbacks
-
-    size_t i = 0, n = AE_ARRAY_COUNT(ae_timer_callbacks);
-    for (; i < n; i++)
-    {
-        ae_timer_callback_data_t* data = ae_timer_callbacks + i;
-
-        ae_if (data->function != NULL)
-        {
-            data->current += dt;
-
-            ae_if (data->current >= data->seconds) // timer fired - wrap or unregister
-            {
-                data->function(data->name, data->seconds, data->repeat, data->context);
-
-                ae_if (data->repeat)
-                {
-                    data->current -= data->seconds;
-                }
-                else
-                {
-                    ae_timer_callback_unregister(data->name);
-                }
-            }
-        }
-    }
-
-    AE_PROFILE_LEAVE();
 }
 
 static void
@@ -309,11 +283,47 @@ ae_timer_callback_unregister_ex(const char* name, size_t index)
     AE_WARN("failed to unregister timer callback \"%s\"!", name);
 }
 
+static void ae_timer_callback_update(double dt)
+{
+    AE_PROFILE_ENTER();  // track the time we spend in callbacks
+
+    size_t i = 0, n = AE_ARRAY_COUNT(ae_timer_callbacks);
+    for (; i < n; i++)
+    {
+        ae_timer_callback_data_t* data = ae_timer_callbacks + i;
+
+        ae_if (data->function != NULL)
+        {
+            data->current += dt;
+
+            ae_if (data->current >= data->seconds) // timer fired - wrap or unregister
+            {
+                data->function(data->name, data->current, data->repeat, data->context);
+
+                ae_if (data->repeat)
+                {
+                    data->current -= data->seconds;
+                    data->repeat++;
+                }
+                else
+                {
+                    ae_timer_callback_unregister_ex(data->name, i);
+                }
+            }
+        }
+    }
+
+    AE_PROFILE_LEAVE();
+}
 
 void ae_timer_callback_register(const char* name, ae_timer_callback_t func,
                                 double seconds, int repeat, void* context)
 {
     size_t i = 0, n = AE_ARRAY_COUNT(ae_timer_callbacks); // O(n)
+
+    // TODO: NULL function pointer should unregister the callback!
+    ae_assert(func != NULL, "NULL timer callback \"%s\"", name);
+
     for (; i < n; i++)
     {
         ae_timer_callback_data_t* data = ae_timer_callbacks + i;
@@ -346,15 +356,17 @@ void ae_timer_callback_unregister(const char* name)
     ae_timer_callback_unregister_ex(name, 0);
 }
 
-void ae_timer_callback_get(const char* name, ae_timer_callback_t* function,
-                            double* seconds, int* repeat, void ** context)
+int ae_timer_callback_get( const char* name, ae_timer_callback_t* function,
+            double* current, double* seconds, int* repeat, void** context)
 {
+    size_t i = 0, n = AE_ARRAY_COUNT(ae_timer_callbacks); // O(n)
+
     if (function) *function = NULL;
+    if (current) *current = 0.0;
     if (seconds) *seconds = 0.0;
     if (repeat) *repeat = 0;
     if (context) *context = NULL;
 
-    size_t i = 0, n = AE_ARRAY_COUNT(ae_timer_callbacks); // O(n)
     for (; i < n; i++)
     {
         ae_timer_callback_data_t* data = ae_timer_callbacks + i;
@@ -362,13 +374,16 @@ void ae_timer_callback_get(const char* name, ae_timer_callback_t* function,
         if (!strncmp(data->name, name, sizeof(data->name) - 1))
         {
             if (function) *function = data->function;
+            if (current) *current = data->current;
             if (seconds) *seconds = data->seconds;
             if (repeat) *repeat = data->repeat;
             if (context) *context = data->context;
 
-            return; // found our slot, no need to keep iterating
+            return 1; // found our slot, no need to keep iterating
         }
     }
+
+    return 0;
 }
 
 static double ae_previous_frame_time;

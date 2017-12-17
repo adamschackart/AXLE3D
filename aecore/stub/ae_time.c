@@ -28,10 +28,10 @@ ae_frame_callback_unregister(const char* name)
     AE_STUB();
 }
 
-void
+int
 ae_frame_callback_get(const char* name, ae_frame_callback_t* func, void** ctx)
 {
-    AE_STUB();
+    AE_STUB(); return 0;
 }
 
 void ae_timer_callback_register(const char* name, ae_timer_callback_t func,
@@ -45,10 +45,10 @@ void ae_timer_callback_unregister(const char* name)
     AE_STUB();
 }
 
-void ae_timer_callback_get(const char* name, ae_timer_callback_t* function,
-                            double* seconds, int* repeat, void ** context)
+int ae_timer_callback_get( const char* name, ae_timer_callback_t* function,
+            double* current, double* seconds, int* repeat, void** context)
 {
-    AE_STUB();
+    AE_STUB(); return 0;
 }
 
 double ae_frame_delta(void)

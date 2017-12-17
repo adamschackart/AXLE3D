@@ -30,7 +30,7 @@ cdef extern from "ae_time.h":
 
     void ae_frame_callback_register(const char* n, ae_frame_callback_t f, void* ctx)
     void ae_frame_callback_unregister(const char* n)
-    void ae_frame_callback_get(const char* name, ae_frame_callback_t* f, void** ctx)
+    int  ae_frame_callback_get(const char* name, ae_frame_callback_t* f, void** ctx)
 
     ctypedef void (*ae_timer_callback_t)(const char* name, double t,
                                         int repeats, void* context)
@@ -43,8 +43,8 @@ cdef extern from "ae_time.h":
 
     void ae_timer_callback_unregister(const char* name)
 
-    void ae_timer_callback_get(const char* name, ae_timer_callback_t* function,
-                                double* seconds, int* repeat, void ** context)
+    int ae_timer_callback_get( const char* name, ae_timer_callback_t* function,
+                double* current, double* seconds, int* repeat, void** context)
 
     double ae_frame_delta()
 

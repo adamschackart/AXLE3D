@@ -51,6 +51,7 @@ static c_inline double ae_time_wave(double rate)
 
 /* ===== [ frame timer ] ==================================================== */
 
+// a function to run every frame - only one function can be registered per name.
 typedef void (*ae_frame_callback_t)(const char* name, double dt, void* context);
 
 // allow alternate old-style func naming convention
@@ -62,9 +63,13 @@ ae_frame_callback_register(const char* name, ae_frame_callback_t fn, void* ctx);
 AE_DECL void AE_CALL
 ae_frame_callback_unregister(const char* name);
 
-AE_DECL void AE_CALL
+AE_DECL int AE_CALL
 ae_frame_callback_get(const char* name, ae_frame_callback_t* fn, void** ctx);
 
+/* function called after a set amount of time - unregisters if repeat is false.
+ * otherwise, repeat reports the number of times the callback has been called.
+ * t is the actual amount of time elapsed before the timer function was called.
+ */
 typedef void (*ae_timer_callback_t)(const char * name, double t,
                                     int repeats, void* context);
 
@@ -76,8 +81,13 @@ AE_DECL void AE_CALL ae_timer_callback_register(const char* name, ae_timer_callb
 
 AE_DECL void AE_CALL ae_timer_callback_unregister(const char* name);
 
-AE_DECL void AE_CALL ae_timer_callback_get(const char* name, ae_timer_callback_t* function,
-                                            double* seconds, int* repeat, void ** context);
+AE_DECL int AE_CALL ae_timer_callback_get( const char* name, ae_timer_callback_t* function,
+                            double* current, double* seconds, int* repeat, void** context);
+
+// reserve these easier short names for user convenience
+#define ae_timer_register   ae_timer_callback_register
+#define ae_timer_unregister ae_timer_callback_unregister
+#define ae_timer_get        ae_timer_callback_get
 
 /* Tick the global game timer and run all scheduled frame callback functions.
  * Note that the time delta is not capped (necessary for smooth physics etc).
