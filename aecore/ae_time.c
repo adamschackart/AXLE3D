@@ -241,6 +241,9 @@ ae_frame_callback_get(const char* name, ae_frame_callback_t* func, void** ctx)
     return 0;
 }
 
+// TODO: keep a separate hashtable (name -> index) to avoid O(n) timer queries!!!
+// ae_(frame/timer)_callback_get should use a get_ex() that checks the hashtable.
+
 typedef struct ae_timer_callback_data_t
 {
     char name[128];
