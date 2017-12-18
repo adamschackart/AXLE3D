@@ -7199,6 +7199,12 @@ void xl_animation_close_all(void)
 ================================================================================
  * ~~ [ timed events ] ~~ *
 --------------------------------------------------------------------------------
+TODO: implement in another thread (SDL_AddTimer) to avoid needing ae_frame_delta
+TODO: set context data and pass it through to event + xl_timer_set_data function
+--------------------------------------------------------------------------------
+TODO: list all timers and set_current for easier serialization of xl timer state
+(call ae_timer_list when it exists, and filter funcs that aren't our push_event)
+--------------------------------------------------------------------------------
 */
 
 static u32 xl_timer_event_type;
