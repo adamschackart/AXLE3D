@@ -51,6 +51,11 @@ int ae_timer_callback_get( const char* name, ae_timer_callback_t* function,
     AE_STUB(); return 0;
 }
 
+void ae_timer_callback_set_repeat(const char* name, int repeat)
+{
+    AE_STUB();
+}
+
 double ae_frame_delta(void)
 {
     AE_STUB(); return 0.0;

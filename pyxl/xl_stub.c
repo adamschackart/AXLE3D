@@ -1068,6 +1068,36 @@ void xl_animation_close_all(void)
 
 /*
 ================================================================================
+ * ~~ [ timed events ] ~~ *
+--------------------------------------------------------------------------------
+*/
+
+void
+xl_timer_register(const char* name, double seconds, int repeat)
+{
+    AE_STUB();
+}
+
+void
+xl_timer_unregister(const char* name)
+{
+    AE_STUB();
+}
+
+int
+xl_timer_get(const char* name, double* current, double* seconds, int* repeat)
+{
+    AE_STUB(); return 0;
+}
+
+void
+xl_timer_set_repeat(const char* name, int repeat)
+{
+    AE_STUB();
+}
+
+/*
+================================================================================
  * ~~ [ event handling ] ~~ *
 --------------------------------------------------------------------------------
 */

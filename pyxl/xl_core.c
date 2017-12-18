@@ -7197,6 +7197,61 @@ void xl_animation_close_all(void)
 
 /*
 ================================================================================
+ * ~~ [ timed events ] ~~ *
+--------------------------------------------------------------------------------
+*/
+
+static u32 xl_timer_event_type;
+
+static void
+xl_timer_push_event(const char * name, double current, int repeat, void * ctx)
+{
+    SDL_Event sdl_event = AE_ZERO_STRUCT;
+    xl_event_t* event;
+
+    sdl_event.user.type = xl_timer_event_type;
+    sdl_event.user.timestamp = SDL_GetTicks();
+    sdl_event.user.data1 = ae_malloc(sizeof(xl_event_t));
+
+    event = (xl_event_t*)sdl_event.user.data1;
+    event->type = XL_EVENT_TIMER;
+
+    strncpy(event->as_timer.name, name, sizeof(event->as_timer.name) - 1);
+    event->as_timer.seconds = current;
+    event->as_timer.repeat = repeat;
+
+    if (SDL_PushEvent(&sdl_event) < 0)
+    {
+        AE_WARN("failed to push xl timer finished event: %s", SDL_GetError());
+    }
+}
+
+void
+xl_timer_register(const char* name, double seconds, int repeat)
+{
+    ae_timer_register(name, xl_timer_push_event, seconds, repeat, NULL);
+}
+
+void
+xl_timer_unregister(const char* name)
+{
+    ae_timer_unregister(name);
+}
+
+int
+xl_timer_get(const char* name, double* current, double* seconds, int* repeat)
+{
+    return ae_timer_get(name, NULL, current, seconds, repeat, NULL);
+}
+
+void
+xl_timer_set_repeat(const char* name, int repeat)
+{
+    ae_timer_set_repeat(name, repeat);
+}
+
+/*
+================================================================================
  * ~~ [ event handling ] ~~ *
 --------------------------------------------------------------------------------
 TODO: (en/dis)able input events for mouse/keyboard/controllers - function to set
@@ -8076,6 +8131,14 @@ static void xl_event_internal(xl_event_t* dst, SDL_Event* src)
 
         default:
         {
+            if (src->type == xl_timer_event_type) // timer event callback has fired
+            {
+                memcpy(dst, src->user.data1, sizeof(xl_event_t));
+                ae_free(src->user.data1);
+
+                break; // data already set up and passed through
+            }
+
             if (src->type == xl_keyboard_insert_event_type) // allocate and setup
             {
                 xl_internal_keyboard_t* data = (xl_internal_keyboard_t*)
@@ -8374,6 +8437,12 @@ void xl_init(void)
 
         xl_animation_finished_event_type = SDL_RegisterEvents(1);
         if (xl_animation_finished_event_type == (u32)-1)
+        {
+            ae_error("failed to allocate a custom event type (out of events)!");
+        }
+
+        xl_timer_event_type = SDL_RegisterEvents(1);
+        if (xl_timer_event_type == (u32)-1)
         {
             ae_error("failed to allocate a custom event type (out of events)!");
         }

@@ -886,6 +886,15 @@ cdef extern from "xl_core.h":
     void xl_animation_close_all()
 
     # ==========================================================================
+    # ~ [ timed events ]
+    # ==========================================================================
+
+    void xl_timer_register(const char* tm_name, double seconds, int repeat)
+    void xl_timer_unregister(const char* name)
+    int  xl_timer_get(const char* n, double* cur, double* sec, int* repeat)
+    void xl_timer_set_repeat(const char* name, int repeat)
+
+    # ==========================================================================
     # ~ [ event handling ]
     # ==========================================================================
 
@@ -917,6 +926,7 @@ cdef extern from "xl_core.h":
         XL_EVENT_CONTROLLER_BUTTON
         XL_EVENT_CONTROLLER_TRIGGER
         XL_EVENT_CONTROLLER_STICK
+        XL_EVENT_TIMER
         XL_EVENT_COUNT
 
     const char* xl_event_type_name[]
@@ -993,6 +1003,11 @@ cdef extern from "xl_core.h":
         char which
         double magnitude, angle, x, y
 
+    ctypedef struct _xl_timer_event_t:
+        char* name
+        double seconds
+        int repeat
+
     ctypedef struct xl_event_t:
         xl_event_type_t type
 
@@ -1023,6 +1038,7 @@ cdef extern from "xl_core.h":
         _xl_controller_button_event_t           as_controller_button
         _xl_controller_trigger_event_t          as_controller_trigger
         _xl_controller_stick_event_t            as_controller_stick
+        _xl_timer_event_t                       as_timer
 
     ctypedef void (*xl_event_handler_t)(xl_event_t* event)
 
@@ -4192,6 +4208,75 @@ cdef class Animation:
         xl_animation_draw(self.animation, pos.v); return self
 
 # ==============================================================================
+# ~ [ timed events ]
+# ==============================================================================
+
+class timer(object):
+    """
+    Interface to the timed event system. All timer names must be unique.
+    """
+    @staticmethod
+    def register(str name, double seconds, bint repeat):
+        cdef bytes b
+
+        if sys.version_info.major > 2:
+            b = <bytes>name.encode('utf-8')
+        else:
+            b = <bytes>name
+
+        xl_timer_register(<const char*>b, seconds, repeat)
+
+    @staticmethod
+    def unregister(str name):
+        cdef bytes b
+
+        if sys.version_info.major > 2:
+            b = <bytes>name.encode('utf-8')
+        else:
+            b = <bytes>name
+
+        xl_timer_unregister(<const char*>b)
+
+    @staticmethod
+    def get(str name):
+        """
+        Retrieve the current state of the timer, for fading effects etc.
+        """
+        cdef bytes b
+
+        cdef double current
+        cdef double seconds
+
+        cdef int repeat
+
+        if sys.version_info.major > 2:
+            b = <bytes>name.encode('utf-8')
+        else:
+            b = <bytes>name
+
+        if xl_timer_get(<const char*>b, &current, &seconds, &repeat):
+            return {
+                'name': name,
+                'current': current,
+                'seconds': seconds,
+                'repeat': repeat,
+            }
+
+    @staticmethod
+    def set_repeat(str name, int repeat):
+        """
+        Used for finishing timers without immediately unregistering them.
+        """
+        cdef bytes b
+
+        if sys.version_info.major > 2:
+            b = <bytes>name.encode('utf-8')
+        else:
+            b = <bytes>name
+
+        xl_timer_set_repeat(<const char*>b, repeat)
+
+# ==============================================================================
 # ~ [ event handling ]
 # ==============================================================================
 
@@ -4383,6 +4468,12 @@ class event(object):
 
                     c_event.as_controller_stick.magnitude, c_event.as_controller_stick.angle,
                     c_event.as_controller_stick.x, c_event.as_controller_stick.y)
+
+        elif c_type == XL_EVENT_TIMER:
+            name = <bytes>c_event.as_timer.name
+
+            return ('timer', name.decode() if sys.version_info.major > 2 else name,
+                    c_event.as_timer.seconds, c_event.as_timer.repeat)
 
         assert 0, xl_event_type_name[<size_t>c_type]
 

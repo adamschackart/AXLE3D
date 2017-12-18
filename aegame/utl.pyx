@@ -46,6 +46,8 @@ cdef extern from "ae_time.h":
     int ae_timer_callback_get( const char* name, ae_timer_callback_t* function,
                 double* current, double* seconds, int* repeat, void** context)
 
+    void ae_timer_callback_set_repeat(const char* name, int repeat)
+
     double ae_frame_delta()
 
     # ===== [ profiler ] =======================================================

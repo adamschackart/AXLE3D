@@ -145,7 +145,9 @@ ae_frame_callback_unregister_ex(const char* name, size_t index)
 
         if (!strncmp(data->name, name, sizeof(data->name) - 1))
         {
+            #if defined(AE_TIME_TRACE)
             ae_log(TIME, "unregistered frame callback \"%s\"", name);
+            #endif
 
             data->name[0] = '\0';
             data->function = NULL;
@@ -195,7 +197,9 @@ ae_frame_callback_register(const char* name, ae_frame_callback_t func, void* ctx
 
         if (data->function == NULL)
         {
+            #if defined(AE_TIME_TRACE)
             ae_log(TIME, "registered frame callback \"%s\"", name);
+            #endif
 
             strncpy(data->name, name, sizeof(data->name) - 1);
             data->function = func;
@@ -267,7 +271,9 @@ ae_timer_callback_unregister_ex(const char* name, size_t index)
 
         if (!strncmp(data->name, name, sizeof(data->name) - 1))
         {
+            #if defined(AE_TIME_TRACE)
             ae_log(TIME, "unregistered timer callback \"%s\"", name);
+            #endif
 
             data->name[0] = '\0';
             data->function = NULL;
@@ -335,7 +341,9 @@ void ae_timer_callback_register(const char* name, ae_timer_callback_t func,
 
         if (data->function == NULL)
         {
+            #if defined(AE_TIME_TRACE)
             ae_log(TIME, "registered timer callback \"%s\"", name);
+            #endif
 
             strncpy(data->name, name, sizeof(data->name) - 1);
             data->function = func;
@@ -384,6 +392,23 @@ int ae_timer_callback_get( const char* name, ae_timer_callback_t* function,
     }
 
     return 0;
+}
+
+void ae_timer_callback_set_repeat(const char* name, int repeat)
+{
+    size_t i = 0, n = AE_ARRAY_COUNT(ae_timer_callbacks); // O(n)
+    for (; i < n; i++)
+    {
+        ae_timer_callback_data_t* data = ae_timer_callbacks + i;
+
+        if (!strncmp(data->name, name, sizeof(data->name) - 1))
+        {
+            data->repeat = repeat;
+            return; // found our slot, no need to keep iterating
+        }
+    }
+
+    AE_WARN("failed to set_repeat timer callback \"%s\"!", name);
 }
 
 static double ae_previous_frame_time;

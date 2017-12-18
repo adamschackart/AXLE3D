@@ -98,6 +98,7 @@ shared_libs = [
 
             # ('AE_LIBRARY_TRACE', '1'),
             # ('AE_FILE_TRACE', '1'),
+            # ('AE_TIME_TRACE', '1'),
             # ('AE_STACK_TRACE', '1'),
             # ('AE_HEAP_TRACE', '1'),
             # ('AE_BLOCK_TRACE', '1'),

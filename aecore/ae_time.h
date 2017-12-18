@@ -84,10 +84,13 @@ AE_DECL void AE_CALL ae_timer_callback_unregister(const char* name);
 AE_DECL int AE_CALL ae_timer_callback_get( const char* name, ae_timer_callback_t* function,
                             double* current, double* seconds, int* repeat, void** context);
 
+AE_DECL void AE_CALL ae_timer_callback_set_repeat(const char* name, int repeat);
+
 // reserve these easier short names for user convenience
 #define ae_timer_register   ae_timer_callback_register
 #define ae_timer_unregister ae_timer_callback_unregister
 #define ae_timer_get        ae_timer_callback_get
+#define ae_timer_set_repeat ae_timer_callback_set_repeat
 
 /* Tick the global game timer and run all scheduled frame callback functions.
  * Note that the time delta is not capped (necessary for smooth physics etc).

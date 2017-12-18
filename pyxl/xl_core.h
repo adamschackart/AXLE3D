@@ -2161,6 +2161,24 @@ XL_DECL void XL_CALL xl_animation_close_all(void);
 
 /*
 ================================================================================
+ * ~~ [ timed events ] ~~ *
+--------------------------------------------------------------------------------
+*/
+
+XL_DECL void XL_CALL
+xl_timer_register(const char* name, double seconds, int repeat);
+
+XL_DECL void XL_CALL
+xl_timer_unregister(const char* name);
+
+XL_DECL int XL_CALL
+xl_timer_get(const char* name, double* current, double* seconds, int* repeat);
+
+XL_DECL void XL_CALL
+xl_timer_set_repeat(const char* name, int repeat);
+
+/*
+================================================================================
  * ~~ [ event handling ] ~~ *
 --------------------------------------------------------------------------------
 */
@@ -2251,6 +2269,9 @@ XL_DECL void XL_CALL xl_animation_close_all(void);
     /* the user moved an analog thumbstick (NOTE: deadzone is applied to input) */  \
     N(XL_EVENT_CONTROLLER_STICK, controller_stick, xl_controller_t* controller;     \
                 char which; double magnitude; double angle; double x; double y;)    \
+                                                                                    \
+    /* a named timer has fired */                                                   \
+    N(XL_EVENT_TIMER, timer, char name[128]; double seconds; int repeat;)           \
                                                                                     \
     N(XL_EVENT_COUNT, count, char _pad;)                                            \
 
