@@ -2419,6 +2419,7 @@ void xl_texture_close_all(void)
 TODO: get / set font style mask, ascent and descent, height, hinting and kerning
 TODO: blit or draw the profile (see ae_time.h), along with branch/switch reports
 TODO: minifont support (keep an atlas texture member with copy enabled for blit)
+TODO: xl_font_load_system_(arial/helvetica/times_new_roman/courier/olde_english)
 --------------------------------------------------------------------------------
 */
 
