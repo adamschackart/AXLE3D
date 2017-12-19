@@ -323,6 +323,12 @@ if sys.platform == "win32":
 # ~ [ setup ]
 # ==============================================================================
 
+try: # generic test import hook
+    import setup_game
+    setup_game.patch(globals())
+
+except ImportError: pass
+
 setup(
     shared_libs = shared_libs,
     ext_modules = ext_modules,
