@@ -82,6 +82,7 @@ cdef extern from "ae_time.h":
         AE_PROFILE_SORT_FIRST_CALL
         AE_PROFILE_SORT_MIN_TIME
         AE_PROFILE_SORT_MAX_TIME
+        AE_PROFILE_SORT_DIFF_TIME
         AE_PROFILE_SORT_COUNT
 
     const char* ae_profile_sort_name[] # name of the sort key
@@ -543,6 +544,7 @@ PROFILE_SORT_FILENAME = AE_PROFILE_SORT_FILENAME
 PROFILE_SORT_FIRST_CALL = AE_PROFILE_SORT_FIRST_CALL
 PROFILE_SORT_MIN_TIME = AE_PROFILE_SORT_MIN_TIME
 PROFILE_SORT_MAX_TIME = AE_PROFILE_SORT_MAX_TIME
+PROFILE_SORT_DIFF_TIME = AE_PROFILE_SORT_DIFF_TIME
 
 def profile_print(  ae_profile_sort_t sort, size_t max_items,
                         double dt, bint autoprof_clear=True):

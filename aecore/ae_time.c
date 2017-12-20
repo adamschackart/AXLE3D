@@ -662,6 +662,23 @@ static int ae_profile_sort_max_time(const void* a, const void* b)
     return ae_profile_sort_total_time(a, b); // TODO: average?
 }
 
+static int ae_profile_sort_diff_time(const void* a, const void* b)
+{
+    const double a_min = (*(ae_profile_node_t**)a)->min_time;
+    const double b_min = (*(ae_profile_node_t**)b)->min_time;
+
+    const double a_max = (*(ae_profile_node_t**)a)->max_time;
+    const double b_max = (*(ae_profile_node_t**)b)->max_time;
+
+    const double a_diff = a_max - a_min;
+    const double b_diff = b_max - b_min;
+
+    if (a_diff > b_diff) return -1;
+    if (a_diff < b_diff) return +1;
+
+    return ae_profile_sort_total_time(a, b); // TODO: average?
+}
+
 void ae_profile_render(AE_PROFILE_RENDER_FUNC render, ae_profile_sort_t sort,
                         size_t max_items, double dt) // abstract sort & draw
 {
@@ -718,21 +735,15 @@ void ae_profile_render(AE_PROFILE_RENDER_FUNC render, ae_profile_sort_t sort,
 
 static void ae_profile_node_print(ae_profile_node_t* node)
 {
-    // NOTE: prevents profile text from wrapping (the windows command prompt has a fixed width)
-    #if defined(_WIN32)
-
-    printf("%s\n\t(time %f, avg %f, calls %u, file \"%s\")\n", node->funcname, node->time_taken,
-            node->time_taken / (double)node->call_count, (u32)node->call_count, node->filename);
-    #else
-    printf("%s\n\t(time %f, avg %f, min %f, max %f, calls %u, file \"%s\")\n",
+    printf("%s\n\ttime %f, avg %f, min %f, max %f, diff %f,\n\tcalls %u, file \"%s\"\n",
             node->funcname,
             node->time_taken,
             node->time_taken / (double)node->call_count,
             node->min_time,
             node->max_time,
+            node->max_time - node->min_time,
             (u32)node->call_count,
             node->filename);
-    #endif
 }
 
 void ae_profile_print(ae_profile_sort_t sort, size_t max_items, double dt)

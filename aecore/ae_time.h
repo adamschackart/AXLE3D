@@ -189,6 +189,7 @@ typedef void (*AE_PROFILE_RENDER_FUNC)(ae_profile_node_t* node);
     N(FIRST_CALL,   first_call)     \
     N(MIN_TIME,     min_time)       \
     N(MAX_TIME,     max_time)       \
+    N(DIFF_TIME,    diff_time)      \
 
 typedef enum ae_profile_sort_t
 {
