@@ -4,11 +4,17 @@
 # ------------------------------------------------------------------------------
 from setup_utils import *
 
+shared_libs = []
+ext_modules = []
+executables = []
+setup_kwarg = {}
+
 # ==============================================================================
 # ~ [ aecore & aegame ]
 # ==============================================================================
 
-shared_libs = [
+shared_libs.extend(
+[
     SharedLibrary('aecore', ['aecore/ae_core.c',
             # 'aecore/ae_branch.c',
             # 'aecore/ae_color.c',
@@ -114,9 +120,10 @@ shared_libs = [
             # ('AE_FATAL_WARNINGS', '1'),
         ],
     ),
-]
+])
 
-ext_modules = [
+ext_modules.extend(
+[
     Extension('aegame.utl', ['aegame/utl.pyx'], libraries=['aecore'], include_dirs=['aecore']),
     Extension('aegame.rng', ['aegame/rng.pyx'], libraries=['aecore'], include_dirs=['aecore']),
     Extension('aegame.vec', ['aegame/vec.pyx'], libraries=['aecore'], include_dirs=['aecore']),
@@ -132,7 +139,7 @@ ext_modules = [
     Extension('aegame.clr', ['aegame/clr.pyx'], libraries=['aecore'], include_dirs=['aecore']),
     Extension('aegame.img', ['aegame/img.pyx'], libraries=['aecore'], include_dirs=['aecore']),
     Extension('aegame.fnt', ['aegame/fnt.pyx'], libraries=['aecore'], include_dirs=['aecore']),
-]
+])
 
 if sys.platform == "win32":
     if __debug__: # windows needs to link with different libs in debug
@@ -323,13 +330,27 @@ if sys.platform == "win32":
 # ~ [ setup ]
 # ==============================================================================
 
-try: # generic test import hook
+try: # setup hook for drop-in projects
     import setup_game
     setup_game.patch(globals())
 
-except ImportError: pass
+except ImportError:
+    try:
+        import setup_project
+        setup_project.patch(globals())
+
+    except ImportError:
+        try:
+            import setup_app
+            setup_app.patch(globals())
+
+        except ImportError: pass
 
 setup(
     shared_libs = shared_libs,
     ext_modules = ext_modules,
+    executables = executables,
+
+    # anything else we may have missed
+    **setup_kwarg
 )
