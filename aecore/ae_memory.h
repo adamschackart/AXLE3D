@@ -192,6 +192,16 @@ TODO: create ae_string.(h/c) and move this stuff into it, along with allocation
 AE_DECL int AE_CALL ae_vsnprintf(char* buf, size_t size, const char* fmt, va_list args);
 AE_DECL int AE_CALL ae_snprintf(char* buf, size_t size, const char* fmt, ...);
 
+/* Not all sized string copy implementations write a terminating null char
+ * in case of truncation - they also don't check for NULL string pointers.
+ * snprintf is the superset of these functions, and should be used instead.
+ */
+#define AE_STRNCPY(dst, src) ae_strncpy((dst), (src), (sizeof(dst) - 1))
+AE_DECL char* AE_CALL ae_strncpy(char* dst, const char* src, size_t num);
+
+#define AE_STRNCAT(dst, src) ae_strncat((dst), (src), (sizeof(src) - 1))
+AE_DECL char* AE_CALL ae_strncat(char* dst, const char* src, size_t num);
+
 /* Compute the size (in chars) of a string to be displayed. Non-printable
  * characters are ignored. Useful for rendering font strings to bitmaps.
  */

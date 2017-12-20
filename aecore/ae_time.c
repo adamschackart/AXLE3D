@@ -201,7 +201,7 @@ ae_frame_callback_register(const char* name, ae_frame_callback_t func, void* ctx
             ae_log(TIME, "registered frame callback \"%s\"", name);
             #endif
 
-            strncpy(data->name, name, sizeof(data->name) - 1);
+            ae_strncpy(data->name, name, sizeof(data->name) - 1);
             data->function = func;
             data->context = ctx;
 
@@ -350,7 +350,7 @@ void ae_timer_callback_register(const char* name, ae_timer_callback_t func,
             ae_log(TIME, "registered timer callback \"%s\"", name);
             #endif
 
-            strncpy(data->name, name, sizeof(data->name) - 1);
+            ae_strncpy(data->name, name, sizeof(data->name) - 1);
             data->function = func;
             data->context = context;
             data->current = 0.0;
@@ -526,10 +526,10 @@ void ae_profile_leave(void* _context)
          * however, we can safely copy and store nodes indefinitely this way.
          */
         ae_assert(strlen(funcname) < sizeof(node->funcname), "%s", funcname);
-        strncpy(node->funcname, funcname, sizeof(node->funcname)-1);
+        AE_STRNCPY(node->funcname, funcname);
 
         ae_assert(strlen(filename) < sizeof(node->filename), "%s", filename);
-        strncpy(node->filename, filename, sizeof(node->filename)-1);
+        AE_STRNCPY(node->filename, filename);
 
         node->first_call = context->start_seconds;
         node->time_taken = 0;

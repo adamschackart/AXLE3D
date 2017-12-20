@@ -7206,6 +7206,9 @@ TODO: set context data and pass it through to event + xl_timer_set_data function
 TODO: list all timers and set_current for easier serialization of xl timer state
 (call ae_timer_list when it exists, and filter funcs that aren't our push_event)
 --------------------------------------------------------------------------------
+TODO: paused state as part of xl and ae timer API + function to pause all timers
+(call ae_timer_list when it exists, and filter funcs that aren't our push_event)
+--------------------------------------------------------------------------------
 */
 
 static u32 xl_timer_event_type;
@@ -7223,7 +7226,7 @@ xl_timer_push_event(const char * name, double current, int repeat, void * ctx)
     event = (xl_event_t*)sdl_event.user.data1;
     event->type = XL_EVENT_TIMER;
 
-    strncpy(event->as_timer.name, name, sizeof(event->as_timer.name) - 1);
+    ae_strncpy(event->as_timer.name, name, sizeof(event->as_timer.name) - 1);
     event->as_timer.seconds = current;
     event->as_timer.repeat = repeat;
 

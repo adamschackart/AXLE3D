@@ -237,6 +237,25 @@ int ae_snprintf(char* buf, size_t size, const char* fmt, ...)
     return result;
 }
 
+char* ae_strncpy(char* dst, const char* src, size_t num_chars)
+{
+    char* out; // a safer version of strncpy (always null-terminates)
+    ae_assert(dst != NULL && src != NULL, "dst %p src %p", dst, src);
+
+    out = strncpy(dst, src, num_chars);
+
+    ae_assert(out == dst, "%p %p", out, dst);
+    dst[num_chars] = '\0'; // validate result
+
+    return out;
+}
+
+char* ae_strncat(char* dst, const char* src, size_t num_chars)
+{
+    ae_assert(dst != NULL && src != NULL, "dst %p src %p", dst, src);
+    return strncat(dst, src, num_chars);
+}
+
 void ae_strbounds(const char* str, size_t tab_width, size_t* cols, size_t* rows)
 {
     ae_strnbounds(str, (size_t)-1, tab_width, cols, rows);
@@ -296,8 +315,8 @@ void ae_heap_create_ex(ae_memory_heap_t * heap, const char* name, size_t reserve
 {
     ae_heap_destroy(heap);
 
-    ae_assert( strlen(name) < sizeof(heap->name), "heap name \"%s\" is too long", name );
-    strncpy(heap->name, name, sizeof(heap->name));
+    ae_assert(strlen(name) < sizeof(heap->name), "heap name \"%s\" is too long", name);
+    AE_STRNCPY(heap->name, name);
 
     #if defined(_WIN32)
         heap->heap = HeapCreate(0, reserve, 0);
@@ -715,7 +734,7 @@ void ae_chunk_create_ex(ae_memory_chunk_t* chunk, const char* name, u32 block_si
     ae_chunk_destroy(chunk);
 
     ae_assert(strlen(name) < sizeof(chunk->name), "chunk name \"%s\" is too long", name);
-    strncpy(chunk->name, name, sizeof(chunk->name));
+    AE_STRNCPY(chunk->name, name);
 
     ae_assert(block_size >= 4, "block size %u can't fit free block indices", block_size);
 
@@ -885,7 +904,7 @@ void ae_stack_create_ex(ae_memory_stack_t* stack, const char* name, u32 size,
     ae_stack_destroy(stack);
 
     ae_assert(strlen(name) < sizeof(stack->name), "stack name \"%s\" is too long", name);
-    strncpy(stack->name, name, sizeof(stack->name));
+    AE_STRNCPY(stack->name, name);
 
     stack->mem_stack = (u8*)ae_malloc(size);
     stack->size = size;
@@ -1039,7 +1058,7 @@ void ae_string_free_ex(void* string, // free from string chunk or heap
         const char* filename, const char* funcname, const int lineno)
 {
     #if defined(AE_DEBUG) // stamp down a debug marker for printf after free
-    if (string) strncpy((char*)string, "INVALID FREED STRING MEMORY",
+    if (string) ae_strncpy((char*)string, "INVALID FREED STRING MEM",
                                         strlen((const char*)string));
     #endif
 

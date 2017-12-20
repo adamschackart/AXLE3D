@@ -99,6 +99,12 @@ cdef extern from "ae_memory.h":
     # int ae_vsnprintf(char* buf, size_t size, const char* fmt, va_list args)
     int ae_snprintf(char* buf, size_t size, const char* fmt, ...)
 
+    # NOTE: remember that num is sizeof(dst) - 1 for fixed-length dst buffers
+    char* ae_strncpy(char* dst, const char* src, size_t num_chars)
+
+    # NOTE: remember that num is sizeof(src) - 1 for fixed-length src buffers
+    char* ae_strncat(char* dst, const char* src, size_t num_chars)
+
     void ae_strbounds(const char* s, size_t tab_width, size_t* cols, size_t* rows)
 
     void ae_strnbounds(const char* string, size_t length,

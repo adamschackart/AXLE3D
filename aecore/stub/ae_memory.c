@@ -42,6 +42,16 @@ int ae_snprintf(char* buf, size_t size, const char* fmt, ...)
     AE_STUB(); return -1;
 }
 
+char* ae_strncpy(char* dst, const char* src, size_t num_chars)
+{
+    AE_STUB(); return dst;
+}
+
+char* ae_strncat(char* dst, const char* src, size_t num_chars)
+{
+    AE_STUB(); return dst;
+}
+
 void ae_strbounds(const char* str, size_t tab_width, size_t* cols, size_t* rows)
 {
     AE_STUB();
