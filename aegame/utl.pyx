@@ -65,7 +65,11 @@ cdef extern from "ae_time.h":
         char * filename
 
         double time_taken
+        double first_call
         size_t call_count
+
+        double min_time
+        double max_time
 
     ctypedef void (*AE_PROFILE_RENDER_FUNC)(ae_profile_node_t* node)
 
@@ -76,6 +80,9 @@ cdef extern from "ae_time.h":
         AE_PROFILE_SORT_FUNCNAME
         AE_PROFILE_SORT_FILENAME
         AE_PROFILE_SORT_FIRST_CALL
+        AE_PROFILE_SORT_MIN_TIME
+        AE_PROFILE_SORT_MAX_TIME
+        AE_PROFILE_SORT_COUNT
 
     const char* ae_profile_sort_name[] # name of the sort key
 
@@ -534,6 +541,8 @@ PROFILE_SORT_CALL_COUNT = AE_PROFILE_SORT_CALL_COUNT
 PROFILE_SORT_FUNCNAME = AE_PROFILE_SORT_FUNCNAME
 PROFILE_SORT_FILENAME = AE_PROFILE_SORT_FILENAME
 PROFILE_SORT_FIRST_CALL = AE_PROFILE_SORT_FIRST_CALL
+PROFILE_SORT_MIN_TIME = AE_PROFILE_SORT_MIN_TIME
+PROFILE_SORT_MAX_TIME = AE_PROFILE_SORT_MAX_TIME
 
 def profile_print(  ae_profile_sort_t sort, size_t max_items,
                         double dt, bint autoprof_clear=True):

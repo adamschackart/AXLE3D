@@ -81,7 +81,7 @@ void ae_profile_clear(void)
     AE_STUB();
 }
 
-void ae_profile_render( AE_PROFILE_RENDER_FUNC draw, ae_profile_sort_t sort,
+void ae_profile_render(AE_PROFILE_RENDER_FUNC render, ae_profile_sort_t sort,
                                                 size_t max_items, double dt)
 {
     AE_STUB();

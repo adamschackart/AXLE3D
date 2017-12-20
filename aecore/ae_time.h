@@ -168,6 +168,9 @@ typedef struct ae_profile_node_t
     double time_taken;
     double first_call;
     size_t call_count;
+
+    double min_time;
+    double max_time;
 } \
     ae_profile_node_t;
 
@@ -176,26 +179,31 @@ typedef struct ae_profile_node_t
  */
 typedef void (*AE_PROFILE_RENDER_FUNC)(ae_profile_node_t* node);
 
-#define AE_PROFILE_SORT_N \
-    N(AE_PROFILE_SORT_TOTAL_TIME), \
-    N(AE_PROFILE_SORT_AVERAGE_TIME), \
-    N(AE_PROFILE_SORT_CALL_COUNT), \
-    N(AE_PROFILE_SORT_FUNCNAME), \
-    N(AE_PROFILE_SORT_FILENAME), \
-    N(AE_PROFILE_SORT_FIRST_CALL), \
-    N(AE_PROFILE_SORT_COUNT)
+#define AE_PROFILE_SORT_N           \
+                                    \
+    N(TOTAL_TIME,   total_time)     \
+    N(AVERAGE_TIME, average_time)   \
+    N(CALL_COUNT,   call_count)     \
+    N(FUNCNAME,     funcname)       \
+    N(FILENAME,     filename)       \
+    N(FIRST_CALL,   first_call)     \
+    N(MIN_TIME,     min_time)       \
+    N(MAX_TIME,     max_time)       \
 
 typedef enum ae_profile_sort_t
 {
-    #define N(x) x
+    #define N(hi, lo) AE_PROFILE_SORT_ ## hi,
     AE_PROFILE_SORT_N
     #undef N
+    AE_PROFILE_SORT_COUNT
 } \
     ae_profile_sort_t;
 
+// TODO: short name strings, ae_profile_sort_from_short_name function
+
 static const char* ae_profile_sort_name[] =
 {
-    #define N(x) #x
+    #define N(hi, lo) AE_STRINGIFY(AE_PROFILE_SORT_ ## hi),
     AE_PROFILE_SORT_N
     #undef N
 };
@@ -203,7 +211,7 @@ static const char* ae_profile_sort_name[] =
 /* display the profile, sorted by some criteria. takes the frame's delta.
  * this can also be used simply to gather all sorted profile information.
  */
-AE_DECL void AE_CALL ae_profile_render( AE_PROFILE_RENDER_FUNC draw ,
+AE_DECL void AE_CALL ae_profile_render(AE_PROFILE_RENDER_FUNC render,
                 ae_profile_sort_t sort, size_t max_items, double dt);
 
 AE_DECL void AE_CALL ae_profile_print(ae_profile_sort_t sort,

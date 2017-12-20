@@ -242,7 +242,9 @@ ae_frame_callback_get(const char* name, ae_frame_callback_t* func, void** ctx)
 }
 
 // TODO: keep a separate hashtable (name -> index) to avoid O(n) timer queries!!!
-// ae_(frame/timer)_callback_get should use a get_ex() that checks the hashtable.
+// ae_(frame/timer)_callback_get should use a get_ex() that checks the hashtable,
+// as well as unregister. could we repurpose our block allocator code to register
+// timers in O(1), storing our index as the block's offset from the chunk start?
 
 typedef struct ae_timer_callback_data_t
 {
@@ -434,7 +436,6 @@ double ae_frame_delta(void)
  * ~~ [ profiler ] ~~ *
 --------------------------------------------------------------------------------
 TODO: each thread needs to have its own profiler (this isn't threadsafe at all)
-TODO: we should track each function/block's minimum and maximum execution times
 TODO: could handle C++ overloading easier if we took line numbers (big change!)
 TODO: track depths of functions in the profiler callstack (min, max, & average)
 --------------------------------------------------------------------------------
@@ -534,6 +535,9 @@ void ae_profile_leave(void* _context)
         node->time_taken = 0;
         node->call_count = 0;
 
+        node->min_time = functime;
+        node->max_time = functime;
+
         if (!ae_strmap_add_ex(&ae_global_profile, funcname, node, funchash))
         {
             ae_error("failed to add profile node (is table code stubbed?");
@@ -545,6 +549,9 @@ void ae_profile_leave(void* _context)
 
     node->time_taken += functime;
     node->call_count += 1;
+
+    if (functime < node->min_time) node->min_time = functime;
+    if (functime > node->max_time) node->max_time = functime;
 
     ae_stack_free(ae_global_stack(), _context, sizeof(ae_profile_context_t));
 }
@@ -629,10 +636,33 @@ static int ae_profile_sort_first_call(const void* a, const void* b)
     if (a_time < b_time) return -1;
     if (a_time > b_time) return +1;
 
-    return 0;
+    // it shouldn't even be possible to call two functions at once
+    assert(0); return 0;
 }
 
-void ae_profile_render( AE_PROFILE_RENDER_FUNC draw, ae_profile_sort_t sort,
+static int ae_profile_sort_min_time(const void* a, const void* b)
+{
+    const double a_min = (*(ae_profile_node_t**)a)->min_time;
+    const double b_min = (*(ae_profile_node_t**)b)->min_time;
+
+    if (a_min > b_min) return -1;
+    if (a_min < b_min) return +1;
+
+    return ae_profile_sort_total_time(a, b); // TODO: average?
+}
+
+static int ae_profile_sort_max_time(const void* a, const void* b)
+{
+    const double a_max = (*(ae_profile_node_t**)a)->max_time;
+    const double b_max = (*(ae_profile_node_t**)b)->max_time;
+
+    if (a_max > b_max) return -1;
+    if (a_max < b_max) return +1;
+
+    return ae_profile_sort_total_time(a, b); // TODO: average?
+}
+
+void ae_profile_render(AE_PROFILE_RENDER_FUNC render, ae_profile_sort_t sort,
                         size_t max_items, double dt) // abstract sort & draw
 {
     int (*compare)(const void*, const void*) = NULL;
@@ -659,25 +689,15 @@ void ae_profile_render( AE_PROFILE_RENDER_FUNC draw, ae_profile_sort_t sort,
         assert(ae_global_profile.count == j);
     }
 
-    switch (sort)
+    ae_switch (sort, ae_profile_sort, AE_PROFILE_SORT, suffix)
     {
-        case AE_PROFILE_SORT_TOTAL_TIME:
-            compare = ae_profile_sort_total_time; break;
+        #define N(hi, lo)                                   \
+                                                            \
+            case AE_PROFILE_SORT_ ## hi: /* comparator */   \
+                compare = ae_profile_sort_ ## lo; break;    \
 
-        case AE_PROFILE_SORT_AVERAGE_TIME:
-            compare = ae_profile_sort_average_time; break;
-
-        case AE_PROFILE_SORT_CALL_COUNT:
-            compare = ae_profile_sort_call_count; break;
-
-        case AE_PROFILE_SORT_FUNCNAME:
-            compare = ae_profile_sort_funcname; break;
-
-        case AE_PROFILE_SORT_FILENAME:
-            compare = ae_profile_sort_filename; break;
-
-        case AE_PROFILE_SORT_FIRST_CALL:
-            compare = ae_profile_sort_first_call; break;
+        AE_PROFILE_SORT_N
+        #undef N
 
         default: assert(0); break;
     }
@@ -688,7 +708,7 @@ void ae_profile_render( AE_PROFILE_RENDER_FUNC draw, ae_profile_sort_t sort,
         for (; i < ae_global_profile.count; i++)
         {
             // TODO: profile "render" func should take a context param
-            if ((size_t)i == max_items) break; else draw(items[i]);
+            if ((size_t)i == max_items) break; else render(items[i]);
         }
     }
 
@@ -698,8 +718,21 @@ void ae_profile_render( AE_PROFILE_RENDER_FUNC draw, ae_profile_sort_t sort,
 
 static void ae_profile_node_print(ae_profile_node_t* node)
 {
+    // NOTE: prevents profile text from wrapping (the windows command prompt has a fixed width)
+    #if defined(_WIN32)
+
     printf("%s\n\t(time %f, avg %f, calls %u, file \"%s\")\n", node->funcname, node->time_taken,
             node->time_taken / (double)node->call_count, (u32)node->call_count, node->filename);
+    #else
+    printf("%s\n\t(time %f, avg %f, min %f, max %f, calls %u, file \"%s\")\n",
+            node->funcname,
+            node->time_taken,
+            node->time_taken / (double)node->call_count,
+            node->min_time,
+            node->max_time,
+            (u32)node->call_count,
+            node->filename);
+    #endif
 }
 
 void ae_profile_print(ae_profile_sort_t sort, size_t max_items, double dt)
@@ -750,7 +783,7 @@ void ae_profile_leave(void* ctx) {}
 int ae_profile_enabled(void) { return 0; }
 void ae_profile_clear(void) {}
 
-void ae_profile_render( AE_PROFILE_RENDER_FUNC draw , ae_profile_sort_t sort,
+void ae_profile_render(AE_PROFILE_RENDER_FUNC render, ae_profile_sort_t sort,
                                             size_t max_items, double dt) {}
 
 void ae_profile_print(ae_profile_sort_t sort, size_t max_items, double dt) {}
