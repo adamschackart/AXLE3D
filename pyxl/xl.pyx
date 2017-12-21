@@ -45,6 +45,7 @@ cdef extern from "xl_core.h":
     ctypedef void xl_animation_t
     ctypedef void xl_keyboard_t
     ctypedef void xl_mouse_t
+    ctypedef void xl_clock_t
 
     ctypedef enum xl_object_type_t:
         XL_OBJECT_TYPE_UNKNOWN
@@ -56,6 +57,7 @@ cdef extern from "xl_core.h":
         XL_OBJECT_TYPE_ANIMATION
         XL_OBJECT_TYPE_KEYBOARD
         XL_OBJECT_TYPE_MOUSE
+        XL_OBJECT_TYPE_CLOCK
         XL_OBJECT_TYPE_COUNT
 
     xl_object_type_t xl_object_type(void *)
@@ -886,6 +888,62 @@ cdef extern from "xl_core.h":
     void xl_animation_close_all()
 
     # ==========================================================================
+    # ~ [ timer objects ]
+    # ==========================================================================
+
+    xl_clock_t* xl_clock_create()
+
+    ctypedef enum xl_clock_property_t:
+        XL_CLOCK_PROPERTY_TOTAL
+        XL_CLOCK_PROPERTY_ID
+        XL_CLOCK_PROPERTY_NUM_TIMERS
+        XL_CLOCK_PROPERTY_DT
+        XL_CLOCK_PROPERTY_AUTO_UPDATE
+        XL_CLOCK_PROPERTY_STATUS
+        XL_CLOCK_PROPERTY_NAME
+        XL_CLOCK_PROPERTY_OPEN
+        XL_CLOCK_PROPERTY_COUNT
+
+    const char* xl_clock_property_name[]
+    const char* xl_clock_property_type[]
+
+    void xl_clock_set_int(xl_clock_t*, xl_clock_property_t, int)
+    int xl_clock_get_int(xl_clock_t*, xl_clock_property_t)
+
+    void xl_clock_set_dbl(xl_clock_t*, xl_clock_property_t, double)
+    double xl_clock_get_dbl(xl_clock_t*, xl_clock_property_t)
+
+    void xl_clock_set_str(xl_clock_t*, xl_clock_property_t, const char*)
+    const char* xl_clock_get_str(xl_clock_t*, xl_clock_property_t)
+
+    void xl_clock_close(xl_clock_t* clock)
+
+    void xl_clock_update(xl_clock_t* clock, double dt)
+    void xl_clock_update_all(double dt) # tick timers
+
+    void xl_clock_add_timer(xl_clock_t* clock, const char* name, double seconds, int repeat)
+
+    void xl_clock_remove_timer(xl_clock_t* clock, const char* name)
+    void xl_clock_remove_all_timers(xl_clock_t* clock)
+
+    int xl_clock_get_timer(xl_clock_t* clock, const char* name, double* current,
+                                    double* seconds, int* paused, int* repeats)
+
+    void xl_clock_set_timer_current(xl_clock_t* clock, const char* name, double value)
+    void xl_clock_set_timer_seconds(xl_clock_t* clock, const char* name, double value)
+
+    void xl_clock_set_timer_paused(xl_clock_t* clock, const char* name, int value)
+    void xl_clock_set_timer_repeat(xl_clock_t* clock, const char* name, int value)
+
+    char** xl_clock_copy_timer_names(xl_clock_t* clock)
+    void xl_clock_free_timer_names(xl_clock_t* clock, char** names)
+
+    size_t xl_clock_count_all()
+
+    void xl_clock_list_all(xl_clock_t** clocks)
+    void xl_clock_close_all()
+
+    # ==========================================================================
     # ~ [ timed events ]
     # ==========================================================================
 
@@ -1004,6 +1062,7 @@ cdef extern from "xl_core.h":
         double magnitude, angle, x, y
 
     ctypedef struct _xl_timer_event_t:
+        xl_clock_t* clock
         char* name
         double seconds
         int repeat
@@ -1040,13 +1099,13 @@ cdef extern from "xl_core.h":
         _xl_controller_stick_event_t            as_controller_stick
         _xl_timer_event_t                       as_timer
 
-    ctypedef void (*xl_event_handler_t)(xl_event_t* event)
+    ctypedef void (*xl_event_handler_t)(xl_event_t* event, void* context)
 
-    void xl_event_set_handler(xl_event_handler_t handler)
-    xl_event_handler_t xl_event_get_handler() # callbacks
+    void xl_event_get_handler(xl_event_handler_t* handler, void** context)
+    void xl_event_set_handler(xl_event_handler_t handler, void* context)
 
-    size_t xl_event_count_pending() # num unprocessed
-    int xl_event_poll(xl_event_t * event, int wait)
+    size_t xl_event_count_pending()
+    int xl_event_poll(xl_event_t* event, int wait)
 
 def early_init(bint audio=True):
     """
@@ -4208,6 +4267,260 @@ cdef class Animation:
         xl_animation_draw(self.animation, pos.v); return self
 
 # ==============================================================================
+# ~ [ timer objects ]
+# ==============================================================================
+
+cdef class Clock:
+    """
+    A local set of named timers that fire events when they expire. Useful
+    for stuff like entity behavior (my "on_fire" timer is active, so for
+    the next five seconds I'll render myself on fire and take damage etc).
+    """
+    cdef xl_clock_t* clock
+
+    def __init__(self, **kwargs):
+        if 'reference' in kwargs:
+            self.clock = <xl_clock_t*>(<size_t>kwargs['reference'])
+        else:
+            self.clock = xl_clock_create()
+
+            # convenient way to set named animation properties inline
+            for key, val in kwargs.items(): setattr(self, key, val)
+
+    def __repr__(self):
+        return "{}({})".format(self.__class__.__name__, self.status)
+
+    def __hash__(self):
+        return hash(self.address())
+
+    def __richcmp__(self, Clock other, int op):
+        if   op == 0: return self.address() <  other.address()
+        elif op == 1: return self.address() <= other.address()
+        elif op == 2: return self.address() == other.address()
+        elif op == 3: return self.address() != other.address()
+        elif op == 4: return self.address() >  other.address()
+        elif op == 5: return self.address() >= other.address()
+
+        else: assert 0
+
+    def __nonzero__(self):
+        return xl_clock_get_int(self.clock, XL_CLOCK_PROPERTY_OPEN)
+
+    def __reduce__(self):
+        raise NotImplementedError("TODO")
+
+    def __copy__(self):
+        raise NotImplementedError("TODO")
+
+    copy = __copy__
+
+    @staticmethod
+    def count_all(): return xl_clock_count_all()
+
+    @classmethod
+    def list_all(cls):
+        """
+        Gather references to all open, active, valid clocks in a single list.
+        """
+        cdef xl_clock_t* clocks[2048]
+        cdef int i
+        cdef list objects = []
+
+        if xl_clock_count_all() > 2048:
+            raise MemoryError("too many open clocks for temp")
+
+        xl_clock_list_all(clocks)
+
+        for i in range(<int>xl_clock_count_all()):
+            objects.append(cls(reference = <size_t>clocks[i]))
+
+        return objects
+
+    @staticmethod
+    def close_all(): xl_clock_close_all()
+
+    property id:
+        def __get__(self):
+            return xl_clock_get_int(self.clock, XL_CLOCK_PROPERTY_ID)
+
+    property num_timers:
+        def __get__(self):
+            return xl_clock_get_int(self.clock, XL_CLOCK_PROPERTY_NUM_TIMERS)
+
+    property dt:
+        def __get__(self):
+            return xl_clock_get_dbl(self.clock, XL_CLOCK_PROPERTY_DT)
+
+    property auto_update:
+        def __get__(self):
+            return xl_clock_get_int(self.clock, XL_CLOCK_PROPERTY_AUTO_UPDATE)
+
+        def __set__(self, bint value):
+            xl_clock_set_int(self.clock, XL_CLOCK_PROPERTY_AUTO_UPDATE, value)
+
+    property status:
+        def __get__(self):
+            cdef bytes s = xl_clock_get_str(self.clock, XL_CLOCK_PROPERTY_STATUS)
+            return s.decode() if sys.version_info.major > 2 else s
+
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            xl_clock_set_str(self.clock, XL_CLOCK_PROPERTY_STATUS, <char*>string)
+
+    property name:
+        def __get__(self):
+            cdef bytes s = xl_clock_get_str(self.clock, XL_CLOCK_PROPERTY_NAME)
+            return s.decode() if sys.version_info.major > 2 else s
+
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            xl_clock_set_str(self.clock, XL_CLOCK_PROPERTY_NAME, <char*>string)
+
+    property open:
+        def __get__(self):
+            return xl_clock_get_int(self.clock, XL_CLOCK_PROPERTY_OPEN)
+
+        def __set__(self, bint value):
+            xl_clock_set_int(self.clock, XL_CLOCK_PROPERTY_OPEN, value)
+
+    def address(self):
+        return <size_t>self.clock
+
+    def cast(self):
+        return self
+
+    def close(self):
+        xl_clock_close(self.clock); return self
+
+    @staticmethod
+    def update_all(double dt):
+        """
+        Update all open clock objects by a given time delta (usually frame time).
+        """
+        xl_clock_update_all(dt)
+
+    def update(self, double dt):
+        """
+        Update this clock object by a given time delta (usually frame time).
+        """
+        xl_clock_update(self.clock, dt); return self
+
+    def add_timer(self, str name, double seconds, bint repeat):
+        cdef bytes b
+
+        if sys.version_info.major > 2:
+            b = <bytes>name.encode('utf-8')
+        else:
+            b = <bytes>name
+
+        xl_clock_add_timer(self.clock, <const char*>b, seconds, repeat)
+        return self
+
+    def remove_timer(self, str name):
+        cdef bytes b
+
+        if sys.version_info.major > 2:
+            b = <bytes>name.encode('utf-8')
+        else:
+            b = <bytes>name
+
+        xl_clock_remove_timer(self.clock, <const char*>b); return self
+
+    def remove_all_timers(self):
+        xl_clock_remove_all_timers(self.clock); return self
+
+    def get_timer(self, str name):
+        cdef bytes b
+
+        cdef double current
+        cdef double seconds
+
+        cdef int paused
+        cdef int repeat
+
+        if sys.version_info.major > 2:
+            b = <bytes>name.encode('utf-8')
+        else:
+            b = <bytes>name
+
+        if xl_clock_get_timer(self.clock, <const char *>b, &current,
+                                        &seconds, &paused, &repeat):
+            return {
+                'name': name,
+                'current': current,
+                'seconds': seconds,
+                'paused': paused,
+                'repeat': repeat,
+            }
+
+    def get_all_timers(self):
+        cdef bytes b
+        cdef list ls = []
+
+        cdef int n = xl_clock_get_int(self.clock, XL_CLOCK_PROPERTY_NUM_TIMERS)
+        cdef int i
+        cdef char** names = xl_clock_copy_timer_names(self.clock)
+
+        for i in range(n):
+            b = <bytes>names[i]
+            ls.append(self.get_timer(b.decode() if sys.version_info.major > 2 else b))
+
+        xl_clock_free_timer_names(self.clock, names)
+        return ls
+
+    def set_timer_current(self, str name, double value):
+        cdef bytes b
+
+        if sys.version_info.major > 2:
+            b = <bytes>name.encode('utf-8')
+        else:
+            b = <bytes>name
+
+        xl_clock_set_timer_current(self.clock, <const char*>b, value)
+
+    def set_timer_seconds(self, str name, double value):
+        cdef bytes b
+
+        if sys.version_info.major > 2:
+            b = <bytes>name.encode('utf-8')
+        else:
+            b = <bytes>name
+
+        xl_clock_set_timer_seconds(self.clock, <const char*>b, value)
+
+    def set_timer_paused(self, str name, bint value):
+        cdef bytes b
+
+        if sys.version_info.major > 2:
+            b = <bytes>name.encode('utf-8')
+        else:
+            b = <bytes>name
+
+        xl_clock_set_timer_paused(self.clock, <const char*>b, value)
+
+    def set_timer_repeat(self, str name, bint value):
+        cdef bytes b
+
+        if sys.version_info.major > 2:
+            b = <bytes>name.encode('utf-8')
+        else:
+            b = <bytes>name
+
+        xl_clock_set_timer_repeat(self.clock, <const char*>b, value)
+
+# ==============================================================================
 # ~ [ timed events ]
 # ==============================================================================
 
@@ -4307,6 +4620,7 @@ class event(object):
         cdef Sound sound = Sound(reference=0)
         cdef Window window = Window(reference=0)
         cdef Animation animation = Animation(reference=0)
+        cdef Clock clock = Clock(reference=0)
 
         cdef xl_event_type_t c_type
         cdef xl_event_t c_event
@@ -4470,9 +4784,11 @@ class event(object):
                     c_event.as_controller_stick.x, c_event.as_controller_stick.y)
 
         elif c_type == XL_EVENT_TIMER:
+            clock.clock = c_event.as_timer.clock
             name = <bytes>c_event.as_timer.name
 
-            return ('timer', name.decode() if sys.version_info.major > 2 else name,
+            return ('timer', clock,
+                    name.decode() if sys.version_info.major > 2 else name,
                     c_event.as_timer.seconds, c_event.as_timer.repeat)
 
         assert 0, xl_event_type_name[<size_t>c_type]

@@ -6399,7 +6399,8 @@ gl_buffer_t* gl_buffer_create_lsystem(char const* program, int slices, int maxde
 ================================================================================
  * ~~ [ particle system ] ~~ *
 --------------------------------------------------------------------------------
-TODO: (un)lock - should we interleave arrays in case we add a color component?
+TODO: (un)lock --- should we interleave arrays in case we add a color component?
+TODO: particle emitter auto-update mode similar to xl clock? (ae frame callback)
 --------------------------------------------------------------------------------
 */
 

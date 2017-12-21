@@ -98,7 +98,7 @@ void xl_object_list_all(void ** objects)
 
 void xl_object_close_all(void)
 {
-    AE_STATIC_ASSERT(all_objects_covered, XL_OBJECT_TYPE_COUNT == 9);
+    AE_STATIC_ASSERT(all_objects_covered, XL_OBJECT_TYPE_COUNT == 10);
     AE_PROFILE_ENTER();
 
     // window closes textures and fonts. controllers can't be closed,
@@ -106,6 +106,7 @@ void xl_object_close_all(void)
     xl_animation_close_all();
     xl_sound_close_all();
     xl_window_close_all();
+    xl_clock_close_all();
 
     AE_PROFILE_LEAVE();
 }
@@ -6211,6 +6212,7 @@ TODO: apply easing method to animation current time across its entire duration?
 TODO: if interpolating within the frame (between frames), use frame ease method?
 TODO: xl_animation_load_from_memory(_ex) for loading animations from pack files.
 NOTE: this is a transliteration of an old system, and has a few... janky spots.
+TODO: animation auto-update mode similar to clock? (set ae_time frame callback)
 --------------------------------------------------------------------------------
 */
 
@@ -7198,6 +7200,575 @@ void xl_animation_close_all(void)
 
 /*
 ================================================================================
+ * ~~ [ timer objects ] ~~ *
+--------------------------------------------------------------------------------
+TODO: this code was pretty much ripped out of the original ae_time callback lib
+and repurposed to fit into our object system - it could be optimized for time,
+and especially space (clock timer strings occupy an enormous amount of memory).
+in addition, the precision of this timing is directly affected by the framerate
+of the game, so things like vsync and fixed framerates can kinda mess this up.
+TODO: pause and unpause all timers; perhaps just pause the whole clock instead?
+--------------------------------------------------------------------------------
+*/
+
+static u32 xl_timer_event_type; // custom sdl user event type - fired on timers
+
+typedef struct xl_internal_timer_t
+{
+    char name[128];
+
+    double current;
+    double seconds;
+
+    int paused;
+    int repeat;
+} \
+    xl_internal_timer_t;
+
+typedef struct xl_internal_clock_t
+{
+    int id; // random id
+    double time_created;
+
+    const char* name;
+    double dt;
+    int auto_update;
+
+    xl_internal_timer_t timers[128];
+    int num_timers; // XXX ~19kb!!!
+} \
+    xl_internal_clock_t;
+
+xl_clock_t* xl_clock_create(void)
+{
+    xl_init();
+    {
+        AE_PROFILE_ENTER(); // not a slow call, but i want to track these
+        xl_internal_clock_t* data = ae_create(xl_internal_clock_t, clear);
+
+        data->time_created = ae_seconds(); // set a sort key and unique id
+        data->id = (int)ae_random_xorshift32_ex(&xl_clock_id_state);
+
+        // automatically tick (update) this clock during a frame callback
+        data->auto_update = 1;
+
+        if (ae_ptrset_add(&xl_clock_set, data) == 0)
+        {
+            AE_WARN("clock is not new to the set (is set code stubbed?)");
+        }
+
+        AE_PROFILE_LEAVE();
+        return (xl_clock_t *)data;
+    }
+}
+
+void
+xl_clock_set_int(xl_clock_t* clock, xl_clock_property_t property, int value)
+{
+    xl_internal_clock_t* data = (xl_internal_clock_t*)clock; // private data
+
+    ae_switch (property, xl_clock_property, XL_CLOCK_PROPERTY, suffix)
+    {
+        case XL_CLOCK_PROPERTY_AUTO_UPDATE:
+        {
+            if (xl_clock_get_open(clock)) data->auto_update = value;
+        }
+        break;
+
+        case XL_CLOCK_PROPERTY_OPEN:
+        {
+            if (value)
+            {
+                if (!xl_clock_get_open(clock))
+                {
+                    AE_WARN("tried to re-open closed/invalid clock at %p", clock);
+                }
+            }
+            else
+            {
+                if (xl_clock_get_open(clock))
+                {
+                    ae_ptrset_remove(&xl_clock_set, clock);
+                    ae_string_free((char*)data->name);
+                    ae_free(clock);
+                }
+                else
+                {
+                    AE_WARN("tried to re-shut closed/invalid clock at %p", clock);
+                }
+            }
+        }
+        break;
+
+        default:
+        {
+            AE_WARN("%s in %s", xl_clock_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
+}
+
+int
+xl_clock_get_int(xl_clock_t* clock, xl_clock_property_t property)
+{
+    xl_internal_clock_t* data = (xl_internal_clock_t*)clock; // private data
+
+    ae_switch (property, xl_clock_property, XL_CLOCK_PROPERTY, suffix)
+    {
+        case XL_CLOCK_PROPERTY_TOTAL: return xl_clock_set.count;
+
+        case XL_CLOCK_PROPERTY_OPEN:
+        {
+            return xl_is_init() && ae_ptrset_contains(&xl_clock_set, clock);
+        }
+        break;
+
+        case XL_CLOCK_PROPERTY_NUM_TIMERS:
+        {
+            if (xl_clock_get_open(clock)) return data->num_timers;
+        }
+        break;
+
+        case XL_CLOCK_PROPERTY_ID:
+        {
+            if (xl_clock_get_open(clock)) return data->id;
+        }
+        break;
+
+        case XL_CLOCK_PROPERTY_AUTO_UPDATE:
+        {
+            if (xl_clock_get_open(clock)) return data->auto_update;
+        }
+        break;
+
+        default:
+        {
+            AE_WARN("%s in %s", xl_clock_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
+
+    return 0;
+}
+
+void
+xl_clock_set_dbl(xl_clock_t* clock, xl_clock_property_t property, double value)
+{
+    xl_internal_clock_t* data = (xl_internal_clock_t*)clock; // private data
+
+    ae_switch (property, xl_clock_property, XL_CLOCK_PROPERTY, suffix)
+    {
+        default:
+        {
+            AE_WARN("%s in %s", xl_clock_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
+}
+
+double
+xl_clock_get_dbl(xl_clock_t* clock, xl_clock_property_t property)
+{
+    xl_internal_clock_t* data = (xl_internal_clock_t*)clock; // private data
+
+    ae_switch (property, xl_clock_property, XL_CLOCK_PROPERTY, suffix)
+    {
+        case XL_CLOCK_PROPERTY_DT:
+        {
+            if (xl_clock_get_open(clock)) return data->dt;
+        }
+        break;
+
+        default:
+        {
+            AE_WARN("%s in %s", xl_clock_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
+
+    return 0.0;
+}
+
+void
+xl_clock_set_str(xl_clock_t* clock, xl_clock_property_t property, const char* value)
+{
+    xl_internal_clock_t* data = (xl_internal_clock_t*)clock; // private data
+
+    ae_switch (property, xl_clock_property, XL_CLOCK_PROPERTY, suffix)
+    {
+        case XL_CLOCK_PROPERTY_NAME:
+        {
+            if (xl_clock_get_open(clock))
+            {
+                // rather than setting this to "" to save space, users can free it
+                ae_string_free((char *)data->name);
+
+                data->name = NULL;
+                if (value != NULL) { data->name = ae_string_copy((char *)value); }
+            }
+        }
+        break;
+
+        default:
+        {
+            AE_WARN("%s in %s", xl_clock_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
+}
+
+const char*
+xl_clock_get_str(xl_clock_t* clock, xl_clock_property_t property)
+{
+    xl_internal_clock_t* data = (xl_internal_clock_t*)clock; // private data
+
+    ae_switch (property, xl_clock_property, XL_CLOCK_PROPERTY, suffix)
+    {
+        case XL_CLOCK_PROPERTY_STATUS:
+        {
+            return xl_clock_get_open(clock) ? xl_clock_get_name(clock) : "closed";
+        }
+        break;
+
+        case XL_CLOCK_PROPERTY_NAME:
+        {
+            if (xl_clock_get_open(clock) && data->name) return data->name;
+        }
+        break;
+
+        default:
+        {
+            AE_WARN("%s in %s", xl_clock_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
+
+    return "";
+}
+
+static void
+xl_clock_remove_timer_ex(xl_internal_clock_t* data, const char* name, size_t index)
+{
+    AE_PROFILE_ENTER();
+
+    for (; ae_branch(index < AE_ARRAY_COUNT(data->timers)); index++)
+    {
+        xl_internal_timer_t* timer = data->timers + index;
+
+        if (!strncmp(timer->name, name, sizeof(timer->name) - 1))
+        {
+            data->num_timers--;
+
+            // timers are valid if they have a name string
+            timer->name[0] = '\0';
+
+            AE_PROFILE_LEAVE(); return;
+        }
+    }
+
+    AE_WARN("xl clock \"%s\" failed to remove timer \"%s\"",
+                xl_clock_get_name((xl_clock_t*)data), name);
+
+    AE_PROFILE_LEAVE();
+}
+
+static void xl_clock_add_timer_ex(xl_internal_clock_t* data, const char* name,
+                                    double seconds, int repeats, size_t index)
+{
+    AE_PROFILE_ENTER();
+
+    for (; ae_branch(index < AE_ARRAY_COUNT(data->timers)); index++)
+    {
+        xl_internal_timer_t* timer = data->timers + index;
+
+        if (!strncmp(timer->name, name, sizeof(timer->name) - 1))
+        {
+            xl_clock_remove_timer_ex(data, name, index);
+        }
+
+        if (timer->name[0] == '\0')
+        {
+            data->num_timers++;
+
+            ae_strncpy(timer->name, name, sizeof(timer->name) - 1);
+            timer->current = 0.0;
+            timer->seconds = seconds;
+            timer->paused = 0;
+            timer->repeat = repeats;
+
+            AE_PROFILE_LEAVE(); return; // found timer slot
+        }
+    }
+
+    ae_error("clock \"%s\" failed to add timer \"%s\"!",
+            xl_clock_get_name((xl_clock_t*)data), name);
+
+    AE_PROFILE_LEAVE();
+}
+
+static void xl_clock_update_ex(xl_internal_clock_t* data, double dt)
+{
+    AE_PROFILE_ENTER(); size_t i = 0;
+
+    // set the clock last time delta
+    data->dt = dt;
+
+    for (; i < AE_ARRAY_COUNT(data->timers); i++)
+    {
+        xl_internal_timer_t* timer = data->timers + i;
+
+        ae_if (timer->name[0] != '\0' && !timer->paused)
+        {
+            timer->current += dt;
+
+            ae_if (timer->current >= timer->seconds) // clock timer fired - push event
+            {
+                SDL_Event sdl_event = AE_ZERO_STRUCT;
+                xl_event_t* event;
+
+                sdl_event.user.type = xl_timer_event_type;
+                sdl_event.user.timestamp = SDL_GetTicks();
+                sdl_event.user.data1 = ae_malloc(sizeof(xl_event_t));
+
+                event = (xl_event_t*)sdl_event.user.data1;
+                event->type = XL_EVENT_TIMER;
+
+                AE_STRNCPY(event->as_timer.name, timer->name);
+
+                event->as_timer.seconds = timer->current;
+                event->as_timer.repeat = timer->repeat;
+                event->as_timer.clock = (xl_clock_t*)data;
+
+                if (SDL_PushEvent(&sdl_event) < 0)
+                {
+                    AE_WARN("failed to push timer finished event: %s", SDL_GetError());
+                }
+
+                ae_if (timer->repeat)
+                {
+                    timer->current -= timer->seconds;
+                    timer->repeat++;
+                }
+                else
+                {
+                    xl_clock_remove_timer_ex(data, timer->name, i);
+                }
+            }
+        }
+    }
+
+    AE_PROFILE_LEAVE();
+}
+
+static void xl_clock_auto_update_callback(const char* name, double dt, void* ctx)
+{
+    AE_PROFILE_ENTER(); // track timer update * n timers * n clocks
+    size_t i = 0, n = xl_clock_count_all();
+
+    xl_clock_t** clocks = (xl_clock_t**)
+        alloca(sizeof(xl_clock_t *) * n);
+
+    ae_ptrset_list(&xl_clock_set, (void**)clocks);
+
+    for (; i < n; i++)
+    {
+        xl_internal_clock_t* data = (xl_internal_clock_t*)clocks[i];
+        if (data->auto_update) xl_clock_update_ex(data, dt);
+    }
+
+    AE_PROFILE_LEAVE();
+}
+
+void xl_clock_update(xl_clock_t* clock, double dt)
+{
+    if (xl_clock_get_open(clock))
+    {
+        // TODO: warn if we're updating an auto-update clock
+        xl_clock_update_ex((xl_internal_clock_t*)clock, dt);
+    }
+}
+
+void xl_clock_update_all(double dt)
+{
+    AE_PROFILE_ENTER(); // track timer update * n timers * n clocks
+    size_t i = 0, n = xl_clock_count_all();
+
+    // TODO: issue a warning if we're updating an auto-update clock
+    xl_clock_t** clocks = (xl_clock_t**)
+        alloca(sizeof(xl_clock_t *) * n);
+
+    ae_ptrset_list(&xl_clock_set, (void**)clocks);
+
+    while (i < n)
+    {
+        xl_clock_update_ex((xl_internal_clock_t*)clocks[i++], dt);
+    }
+
+    AE_PROFILE_LEAVE();
+}
+
+void
+xl_clock_add_timer(xl_clock_t* clock, const char* name, double seconds, int repeat)
+{
+    if (xl_clock_get_open(clock))
+    {
+        xl_clock_add_timer_ex((xl_internal_clock_t*)clock, name, seconds, repeat, 0);
+    }
+}
+
+void xl_clock_remove_timer(xl_clock_t* clock, const char* name)
+{
+    if (xl_clock_get_open(clock))
+    {
+        xl_clock_remove_timer_ex((xl_internal_clock_t*)clock, name, 0);
+    }
+}
+
+void xl_clock_remove_all_timers(xl_clock_t* clock)
+{
+    if (xl_clock_get_open(clock))
+    {
+        xl_internal_clock_t* data = (xl_internal_clock_t*)clock;
+
+        data->num_timers = 0; // TODO: just zero timer->name[0]
+        memset(data->timers, 0, sizeof(data->timers));
+    }
+}
+
+int xl_clock_get_timer(xl_clock_t* clock, const char* name, double* current,
+                                double* seconds, int* paused, int* repeat)
+{
+    AE_PROFILE_ENTER(); // track the amount of time we spend searching
+
+    if (current) *current = 0.0;
+    if (seconds) *seconds = 0.0;
+
+    if (paused) *paused = 0;
+    if (repeat) *repeat = 0;
+
+    if (xl_clock_get_open(clock))
+    {
+        xl_internal_clock_t* data = (xl_internal_clock_t*)clock;
+
+        size_t i = 0, n = AE_ARRAY_COUNT(data->timers);
+        for (; i < n; i++)
+        {
+            xl_internal_timer_t* timer = data->timers + i;
+
+            if (!strncmp(timer->name, name, sizeof(timer->name) - 1))
+            {
+                if (current) *current = timer->current;
+                if (seconds) *seconds = timer->seconds;
+
+                if (paused) *paused = timer->paused;
+                if (repeat) *repeat = timer->repeat;
+
+                AE_PROFILE_LEAVE(); return 1; // found a timer
+            }
+        }
+    }
+
+    AE_PROFILE_LEAVE(); return 0;
+}
+
+void xl_clock_set_timer_current(xl_clock_t* clock, const char* name, double value)
+{
+    if (xl_clock_get_open(clock))
+    {
+        AE_STUB();
+    }
+}
+
+void xl_clock_set_timer_seconds(xl_clock_t* clock, const char* name, double value)
+{
+    if (xl_clock_get_open(clock))
+    {
+        AE_STUB();
+    }
+}
+
+void xl_clock_set_timer_paused(xl_clock_t* clock, const char* name, int value)
+{
+    if (xl_clock_get_open(clock))
+    {
+        AE_STUB();
+    }
+}
+
+void xl_clock_set_timer_repeat(xl_clock_t* clock, const char* name, int value)
+{
+    if (xl_clock_get_open(clock))
+    {
+        AE_STUB();
+    }
+}
+
+char** xl_clock_copy_timer_names(xl_clock_t* clock)
+{
+    if (xl_clock_get_open(clock))
+    {
+        xl_internal_clock_t* data = (xl_internal_clock_t*)clock;
+
+        static char* timer_names[AE_ARRAY_COUNT(data->timers)];
+        size_t i = 0, j = 0, n = AE_ARRAY_COUNT(data->timers);
+
+        for (; i < n; i++)
+        {
+            xl_internal_timer_t* timer = data->timers + i;
+
+            ae_if (timer->name[0] != '\0')
+            {
+                timer_names[j++] = timer->name;
+            }
+        }
+
+        return (char**)timer_names;
+    }
+
+    return NULL;
+}
+
+void xl_clock_free_timer_names(xl_clock_t* clock, char** names)
+{
+    assert(xl_clock_get_open(clock));
+}
+
+static int xl_clock_compare_time_created(const void* av, const void* bv)
+{
+    xl_internal_clock_t* a = *(xl_internal_clock_t**)av;
+    xl_internal_clock_t* b = *(xl_internal_clock_t**)bv;
+
+    if (a->time_created < b->time_created) return -1;
+    if (a->time_created > b->time_created) return +1;
+
+    return 0;
+}
+
+void xl_clock_list_all(xl_clock_t** clocks)
+{
+    ae_ptrset_list(&xl_clock_set, (void**)clocks);
+
+    qsort(clocks, xl_clock_count_all(), // keep stable order
+        sizeof(xl_clock_t*), xl_clock_compare_time_created);
+}
+
+void xl_clock_close_all(void)
+{
+    size_t i = 0, n = xl_clock_count_all();
+
+    xl_clock_t** clocks = (xl_clock_t**)
+        alloca(sizeof(xl_clock_t *) * n);
+
+    xl_clock_list_all(clocks);
+
+    while (i < n)
+    {
+        xl_clock_set_open(clocks[i++], 0);
+    }
+}
+
+/*
+================================================================================
  * ~~ [ timed events ] ~~ *
 --------------------------------------------------------------------------------
 TODO: implement in another thread (SDL_AddTimer) to avoid needing ae_frame_delta
@@ -7210,8 +7781,6 @@ TODO: paused state as part of xl and ae timer API + function to pause all timers
 (call ae_timer_list when it exists, and filter funcs that aren't our push_event)
 --------------------------------------------------------------------------------
 */
-
-static u32 xl_timer_event_type;
 
 static void
 xl_timer_push_event(const char * name, double current, int repeat, void * ctx)
@@ -7227,6 +7796,7 @@ xl_timer_push_event(const char * name, double current, int repeat, void * ctx)
     event->type = XL_EVENT_TIMER;
 
     ae_strncpy(event->as_timer.name, name, sizeof(event->as_timer.name) - 1);
+    event->as_timer.clock = NULL;
     event->as_timer.seconds = current;
     event->as_timer.repeat = repeat;
 
@@ -8183,17 +8753,22 @@ static void xl_event_internal(xl_event_t* dst, SDL_Event* src)
     }
 }
 
-// TODO: this callback should take a context parameter
 static xl_event_handler_t xl_event_handler_p = NULL;
+static void* xl_event_handler_c = NULL;
 
-void xl_event_set_handler(xl_event_handler_t handler)
+void xl_event_get_handler(xl_event_handler_t* handler, void** context)
 {
-    xl_event_handler_p = handler;
+    ae_assert(handler != NULL, "got invalid event handler parameter");
+    *handler = xl_event_handler_p;
+
+    ae_assert(context != NULL, "got invalid event context parameter");
+    *context = xl_event_handler_c;
 }
 
-xl_event_handler_t xl_event_get_handler(void)
+void xl_event_set_handler(xl_event_handler_t handler, void* context)
 {
-    return xl_event_handler_p;
+    xl_event_handler_p = handler;
+    xl_event_handler_c = context;
 }
 
 size_t xl_event_count_pending(void)
@@ -8267,7 +8842,7 @@ int xl_event_poll(xl_event_t* event, int wait)
     /* dispatch the currently installed global event handling callback */
     ae_if (event->type != XL_EVENT_NOTHING && xl_event_handler_p != NULL)
     {
-        xl_event_handler_p(event);
+        xl_event_handler_p(event, xl_event_handler_c);
     }
 
     AE_PROFILE_LEAVE();
@@ -8457,6 +9032,9 @@ void xl_init(void)
             ae_error("failed to allocate a custom event type (out of events)!");
         }
 
+        ae_frame_callback_register("xl_clock_auto_update", // clock ticker
+                                    xl_clock_auto_update_callback, NULL);
+
         if (TTF_Init() < 0)
         {
             ae_error("failed to initialize font system: %s", SDL_GetError());
@@ -8499,6 +9077,7 @@ void xl_quit(void)
         xl_keyboard_close_all();
         xl_window_close_all();
         xl_animation_close_all();
+        xl_clock_close_all();
 
         #define N(cap, low) /* free and zero out object lists */            \
                                                                             \
@@ -8512,6 +9091,9 @@ void xl_quit(void)
 
         /* reset the global event handler callback to nothing */
         xl_event_handler_p = NULL;
+        xl_event_handler_c = NULL;
+
+        ae_frame_callback_unregister("xl_clock_auto_update");
 
         TTF_Quit();
         SDL_Quit();

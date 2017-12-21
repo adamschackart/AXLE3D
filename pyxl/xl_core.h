@@ -84,6 +84,7 @@ XL_DECL const char* XL_CALL xl_audio_implementation(void);
     N(ANIMATION, animation)     \
     N(KEYBOARD, keyboard)       \
     N(MOUSE, mouse)             \
+    N(CLOCK, clock)             \
 
 #if 0
 #define N(cap, low) typedef struct xl_internal_ ## low ## _t xl_ ## low ## _t;
@@ -2161,6 +2162,129 @@ XL_DECL void XL_CALL xl_animation_close_all(void);
 
 /*
 ================================================================================
+ * ~~ [ timer objects ] ~~ *
+--------------------------------------------------------------------------------
+*/
+
+XL_DECL xl_clock_t* XL_CALL xl_clock_create(void);
+
+#define XL_CLOCK_PROPERTY_N                                 \
+                                                            \
+    N(XL_CLOCK_PROPERTY_TOTAL, int, int, total)             \
+    N(XL_CLOCK_PROPERTY_ID, int, int, id)                   \
+    N(XL_CLOCK_PROPERTY_NUM_TIMERS, int, int, num_timers)   \
+    N(XL_CLOCK_PROPERTY_DT, double, dbl, dt)                \
+    N(XL_CLOCK_PROPERTY_AUTO_UPDATE, int, int, auto_update) \
+    N(XL_CLOCK_PROPERTY_STATUS, const char*, str, status)   \
+    N(XL_CLOCK_PROPERTY_NAME, const char*, str, name)       \
+    N(XL_CLOCK_PROPERTY_OPEN, int, int, open)               \
+    N(XL_CLOCK_PROPERTY_COUNT, int, int, _)                 \
+
+typedef enum xl_clock_property_t
+{
+    #define N(x, t, s, n) x,
+    XL_CLOCK_PROPERTY_N
+    #undef N
+} \
+    xl_clock_property_t;
+
+static const char* xl_clock_property_name[] =
+{
+    #define N(x, t, s, n) #x,
+    XL_CLOCK_PROPERTY_N
+    #undef N
+};
+
+static const char* xl_clock_property_type[] =
+{
+    #define N(x, t, s, n) #s,
+    XL_CLOCK_PROPERTY_N
+    #undef N
+};
+
+XL_DECL void XL_CALL
+xl_clock_set_int(xl_clock_t* clock, xl_clock_property_t prop, int value);
+
+XL_DECL int XL_CALL
+xl_clock_get_int(xl_clock_t* clock, xl_clock_property_t prop);
+
+XL_DECL void XL_CALL
+xl_clock_set_dbl(xl_clock_t* clock, xl_clock_property_t prop, double value);
+
+XL_DECL double XL_CALL
+xl_clock_get_dbl(xl_clock_t* clock, xl_clock_property_t prop);
+
+XL_DECL void XL_CALL
+xl_clock_set_str(xl_clock_t* clock, xl_clock_property_t prop, const char* value);
+
+XL_DECL const char* XL_CALL
+xl_clock_get_str(xl_clock_t* clock, xl_clock_property_t prop);
+
+/* Make shorthand wrappers so we don't have to type SUPER_GIGANTIC_ENUM_NAMES in C code.
+ */
+#define N(x, type, short_type, name)                                            \
+                                                                                \
+    static c_inline void xl_clock_set_ ## name (xl_clock_t* clock, type value)  \
+    {                                                                           \
+        xl_clock_set_ ## short_type (clock, x, value);                          \
+    }                                                                           \
+                                                                                \
+    static c_inline type xl_clock_get_ ## name (xl_clock_t* clock)              \
+    {                                                                           \
+        return xl_clock_get_ ## short_type (clock, x);                          \
+    }                                                                           \
+
+XL_CLOCK_PROPERTY_N
+#undef N
+
+static c_inline void xl_clock_close(xl_clock_t* clock)
+{
+    xl_clock_set_open(clock, 0);
+}
+
+XL_DECL void XL_CALL xl_clock_update(xl_clock_t* clock, double dt);
+XL_DECL void XL_CALL xl_clock_update_all(double dt); // tick clock
+
+XL_DECL void XL_CALL
+xl_clock_add_timer(xl_clock_t* clock, const char* name, double seconds, int repeat);
+
+XL_DECL void XL_CALL
+xl_clock_remove_timer(xl_clock_t* clock, const char* name);
+
+XL_DECL void XL_CALL
+xl_clock_remove_all_timers(xl_clock_t* clock);
+
+XL_DECL int XL_CALL xl_clock_get_timer(xl_clock_t* clock, const char* name,
+                double* current, double* seconds, int* paused, int* repeat);
+
+XL_DECL void XL_CALL
+xl_clock_set_timer_current(xl_clock_t* clock, const char* name, double value);
+
+XL_DECL void XL_CALL
+xl_clock_set_timer_seconds(xl_clock_t* clock, const char* name, double value);
+
+XL_DECL void XL_CALL
+xl_clock_set_timer_paused(xl_clock_t* clock, const char* name, int value);
+
+XL_DECL void XL_CALL
+xl_clock_set_timer_repeat(xl_clock_t* clock, const char* name, int value);
+
+XL_DECL char** XL_CALL
+xl_clock_copy_timer_names(xl_clock_t* clock);
+
+XL_DECL void XL_CALL
+xl_clock_free_timer_names(xl_clock_t* clock, char** names);
+
+static c_inline size_t xl_clock_count_all(void)
+{
+    return (size_t)xl_clock_get_total(NULL);
+}
+
+XL_DECL void XL_CALL xl_clock_list_all(xl_clock_t** clocks);
+XL_DECL void XL_CALL xl_clock_close_all(void);
+
+/*
+================================================================================
  * ~~ [ timed events ] ~~ *
 --------------------------------------------------------------------------------
 */
@@ -2270,8 +2394,9 @@ xl_timer_set_repeat(const char* name, int repeat);
     N(XL_EVENT_CONTROLLER_STICK, controller_stick, xl_controller_t* controller;     \
                 char which; double magnitude; double angle; double x; double y;)    \
                                                                                     \
-    /* a named timer has fired */                                                   \
-    N(XL_EVENT_TIMER, timer, char name[128]; double seconds; int repeat;)           \
+    /* a named timer has fired - if global timer, clock is NULL */                  \
+    N(XL_EVENT_TIMER, timer, xl_clock_t* clock; char name[128];                     \
+                                    double seconds; int repeat;)                    \
                                                                                     \
     N(XL_EVENT_COUNT, count, char _pad;)                                            \
 
@@ -2311,10 +2436,10 @@ typedef struct xl_event_t
     xl_event_t;
 
 // Get and set a callback to be run on all events before poll returns.
-typedef void (*xl_event_handler_t)(xl_event_t* event);
+typedef void (*xl_event_handler_t)(xl_event_t* event, void* context);
 
-XL_DECL void XL_CALL xl_event_set_handler(xl_event_handler_t handler);
-XL_DECL xl_event_handler_t XL_CALL xl_event_get_handler(void);
+XL_DECL void XL_CALL xl_event_get_handler(xl_event_handler_t*, void**);
+XL_DECL void XL_CALL xl_event_set_handler(xl_event_handler_t, void*);
 
 // Get the number of events in the queue waiting to be processed.
 XL_DECL size_t XL_CALL xl_event_count_pending(void);

@@ -1068,6 +1068,124 @@ void xl_animation_close_all(void)
 
 /*
 ================================================================================
+ * ~~ [ timer objects ] ~~ *
+--------------------------------------------------------------------------------
+*/
+
+xl_clock_t* xl_clock_create(void)
+{
+    AE_STUB(); return NULL;
+}
+
+void
+xl_clock_set_int(xl_clock_t* clock, xl_clock_property_t prop, int value)
+{
+    AE_STUB();
+}
+
+int
+xl_clock_get_int(xl_clock_t* clock, xl_clock_property_t prop)
+{
+    AE_STUB(); return 0;
+}
+
+void
+xl_clock_set_dbl(xl_clock_t* clock, xl_clock_property_t prop, double value)
+{
+    AE_STUB();
+}
+
+double
+xl_clock_get_dbl(xl_clock_t* clock, xl_clock_property_t prop)
+{
+    AE_STUB(); return 0.0;
+}
+
+void
+xl_clock_set_str(xl_clock_t* clock, xl_clock_property_t prop, const char* value)
+{
+    AE_STUB();
+}
+
+const char*
+xl_clock_get_str(xl_clock_t* clock, xl_clock_property_t prop)
+{
+    AE_STUB(); return "";
+}
+
+void xl_clock_update(xl_clock_t* clock, double dt)
+{
+    AE_STUB();
+}
+
+void xl_clock_update_all(double dt)
+{
+    AE_STUB();
+}
+
+void xl_clock_add_timer(xl_clock_t* clock, const char* name, double seconds, int repeat)
+{
+    AE_STUB();
+}
+
+void xl_clock_remove_timer(xl_clock_t* clock, const char* name)
+{
+    AE_STUB();
+}
+
+void xl_clock_remove_all_timers(xl_clock_t* clock)
+{
+    AE_STUB();
+}
+
+int xl_clock_get_timer(xl_clock_t* clock, const char* name, double* current,
+                                double* seconds, int* paused, int* repeats)
+{
+    AE_STUB(); return 0;
+}
+
+void xl_clock_set_timer_current(xl_clock_t* clock, const char* name, double value)
+{
+    AE_STUB();
+}
+
+void xl_clock_set_timer_seconds(xl_clock_t* clock, const char* name, double value)
+{
+    AE_STUB();
+}
+
+void xl_clock_set_timer_paused(xl_clock_t* clock, const char* name, int value)
+{
+    AE_STUB();
+}
+
+void xl_clock_set_timer_repeat(xl_clock_t* clock, const char* name, int value)
+{
+    AE_STUB();
+}
+
+char** xl_clock_copy_timer_names(xl_clock_t* clock)
+{
+    AE_STUB(); return NULL;
+}
+
+void xl_clock_free_timer_names(xl_clock_t* clock, char** names)
+{
+    AE_STUB();
+}
+
+void xl_clock_list_all(xl_clock_t** clocks)
+{
+    AE_STUB();
+}
+
+void xl_clock_close_all(void)
+{
+    AE_STUB();
+}
+
+/*
+================================================================================
  * ~~ [ timed events ] ~~ *
 --------------------------------------------------------------------------------
 */
@@ -1102,14 +1220,14 @@ xl_timer_set_repeat(const char* name, int repeat)
 --------------------------------------------------------------------------------
 */
 
-void xl_event_set_handler(xl_event_handler_t handler)
+void xl_event_get_handler(xl_event_handler_t* handler, void** context)
 {
     AE_STUB();
 }
 
-xl_event_handler_t xl_event_get_handler(void)
+void xl_event_set_handler(xl_event_handler_t handler, void* context)
 {
-    AE_STUB(); return NULL;
+    AE_STUB();
 }
 
 size_t xl_event_count_pending(void)

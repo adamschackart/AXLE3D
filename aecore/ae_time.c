@@ -296,7 +296,7 @@ ae_timer_callback_unregister_ex(const char* name, size_t index)
 
 static void ae_timer_callback_update(double dt)
 {
-    AE_PROFILE_ENTER();  // track the time we spend in callbacks
+    AE_PROFILE_ENTER(); // track the time we spend in callbacks
 
     size_t i = 0, n = AE_ARRAY_COUNT(ae_timer_callbacks);
     for (; i < n; i++)
