@@ -7207,7 +7207,6 @@ and repurposed to fit into our object system - it could be optimized for time,
 and especially space (clock timer strings occupy an enormous amount of memory).
 in addition, the precision of this timing is directly affected by the framerate
 of the game, so things like vsync and fixed framerates can kinda mess this up.
-TODO: pause and unpause all timers; perhaps just pause the whole clock instead?
 --------------------------------------------------------------------------------
 */
 
@@ -7230,9 +7229,9 @@ typedef struct xl_internal_clock_t
     int id; // random id
     double time_created;
 
-    const char* name;
+    int auto_update, paused;
     double dt;
-    int auto_update;
+    const char* name;
 
     xl_internal_timer_t timers[128];
     int num_timers; // XXX ~19kb!!!
@@ -7272,6 +7271,12 @@ xl_clock_set_int(xl_clock_t* clock, xl_clock_property_t property, int value)
         case XL_CLOCK_PROPERTY_AUTO_UPDATE:
         {
             if (xl_clock_get_open(clock)) data->auto_update = value;
+        }
+        break;
+
+        case XL_CLOCK_PROPERTY_PAUSED:
+        {
+            if (xl_clock_get_open(clock)) data->paused = value;
         }
         break;
 
@@ -7338,6 +7343,12 @@ xl_clock_get_int(xl_clock_t* clock, xl_clock_property_t property)
         case XL_CLOCK_PROPERTY_AUTO_UPDATE:
         {
             if (xl_clock_get_open(clock)) return data->auto_update;
+        }
+        break;
+
+        case XL_CLOCK_PROPERTY_PAUSED:
+        {
+            if (xl_clock_get_open(clock)) return data->paused;
         }
         break;
 
@@ -7509,6 +7520,9 @@ static void xl_clock_add_timer_ex(xl_internal_clock_t* data, const char* name,
 static void xl_clock_update_ex(xl_internal_clock_t* data, double dt)
 {
     AE_PROFILE_ENTER(); size_t i = 0;
+
+    // pause state prevents all updates from happening
+    if (data->paused) { AE_PROFILE_LEAVE(); return; }
 
     // set the clock last time delta
     data->dt = dt;

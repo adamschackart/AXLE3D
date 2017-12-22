@@ -899,6 +899,7 @@ cdef extern from "xl_core.h":
         XL_CLOCK_PROPERTY_NUM_TIMERS
         XL_CLOCK_PROPERTY_DT
         XL_CLOCK_PROPERTY_AUTO_UPDATE
+        XL_CLOCK_PROPERTY_PAUSED
         XL_CLOCK_PROPERTY_STATUS
         XL_CLOCK_PROPERTY_NAME
         XL_CLOCK_PROPERTY_OPEN
@@ -4362,6 +4363,13 @@ cdef class Clock:
 
         def __set__(self, bint value):
             xl_clock_set_int(self.clock, XL_CLOCK_PROPERTY_AUTO_UPDATE, value)
+
+    property paused:
+        def __get__(self):
+            return xl_clock_get_int(self.clock, XL_CLOCK_PROPERTY_PAUSED)
+
+        def __set__(self, bint value):
+            xl_clock_set_int(self.clock, XL_CLOCK_PROPERTY_PAUSED, value)
 
     property status:
         def __get__(self):
