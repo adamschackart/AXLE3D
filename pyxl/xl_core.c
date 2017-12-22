@@ -7832,10 +7832,46 @@ xl_timer_set_repeat(const char* name, int repeat)
 
 /*
 ================================================================================
+ * ~~ [ long frames ] ~~ *
+--------------------------------------------------------------------------------
+*/
+
+static u32 xl_long_frame_event_type;
+
+static void
+xl_long_frame_watch_callback(const char* name, double dt, void* context)
+{
+    if (dt > 0.1) // TODO: make this value customizable
+    {
+        SDL_Event sdl_event = AE_ZERO_STRUCT;
+        xl_event_t* event;
+
+        sdl_event.user.type = xl_long_frame_event_type;
+        sdl_event.user.timestamp = SDL_GetTicks();
+        sdl_event.user.data1 = ae_malloc(sizeof(xl_event_t));
+
+        event = (xl_event_t*)sdl_event.user.data1;
+        event->type = XL_EVENT_LONG_FRAME;
+
+        event->as_long_frame.dt = dt; // uncapped value
+
+        if (SDL_PushEvent(&sdl_event) < 0)
+        {
+            AE_WARN("failed to push long frame event: %s", SDL_GetError());
+        }
+    }
+}
+
+/*
+================================================================================
  * ~~ [ event handling ] ~~ *
 --------------------------------------------------------------------------------
 TODO: (en/dis)able input events for mouse/keyboard/controllers - function to set
 "input mode" based on platform? (PC KBM, console controller, mobile touchscreen)
+--------------------------------------------------------------------------------
+TODO: public function to push events onto the queue - the timer code is a good
+example for how this could be implemented (create a custom SDL user event type,
+and copy the pushed event into the SDL event's data param before copying back).
 --------------------------------------------------------------------------------
 */
 
@@ -8711,7 +8747,8 @@ static void xl_event_internal(xl_event_t* dst, SDL_Event* src)
 
         default:
         {
-            if (src->type == xl_timer_event_type) // timer event callback has fired
+            if (src->type == xl_timer_event_type || // timer event or long frame
+                src->type == xl_long_frame_event_type)
             {
                 memcpy(dst, src->user.data1, sizeof(xl_event_t));
                 ae_free(src->user.data1);
@@ -8758,10 +8795,10 @@ static void* xl_event_handler_c = NULL;
 
 void xl_event_get_handler(xl_event_handler_t* handler, void** context)
 {
-    ae_assert(handler != NULL, "got invalid event handler parameter");
+    ae_assert(handler != NULL, "got invalid event handler out param");
     *handler = xl_event_handler_p;
 
-    ae_assert(context != NULL, "got invalid event context parameter");
+    ae_assert(context != NULL, "got invalid event context out param");
     *context = xl_event_handler_c;
 }
 
@@ -8951,6 +8988,12 @@ void xl_init(void)
         XL_OBJECT_TYPE_N
         #undef N
 
+        ae_frame_callback_register("xl_clock_auto_update", // clock ticker
+                                    xl_clock_auto_update_callback, NULL);
+
+        ae_frame_callback_register("xl_long_frame_watch", // large deltas
+                                    xl_long_frame_watch_callback, NULL);
+
         if (SDL_WasInit(0))
         {
             AE_WARN("SDL already initialized, are two engines conflicting?");
@@ -9032,8 +9075,11 @@ void xl_init(void)
             ae_error("failed to allocate a custom event type (out of events)!");
         }
 
-        ae_frame_callback_register("xl_clock_auto_update", // clock ticker
-                                    xl_clock_auto_update_callback, NULL);
+        xl_long_frame_event_type = SDL_RegisterEvents(1);
+        if (xl_long_frame_event_type == (u32)-1)
+        {
+            ae_error("failed to allocate a custom event type (out of events)!");
+        }
 
         if (TTF_Init() < 0)
         {
@@ -9094,6 +9140,7 @@ void xl_quit(void)
         xl_event_handler_c = NULL;
 
         ae_frame_callback_unregister("xl_clock_auto_update");
+        ae_frame_callback_unregister("xl_long_frame_watch");
 
         TTF_Quit();
         SDL_Quit();

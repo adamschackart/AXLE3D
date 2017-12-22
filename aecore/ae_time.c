@@ -770,7 +770,7 @@ static void ae_time_profile_init(int argc, char** argv)
     }
 
     ae_chunk_create(&ae_profile_node_chunk, "profile_node",
-                    sizeof(ae_profile_node_t), 1024);
+                    sizeof(ae_profile_node_t), 1024 * 4);
 
     ae_profile_clear();
 }

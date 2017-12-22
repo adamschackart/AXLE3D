@@ -1720,6 +1720,9 @@ TODO: get image region in DevIL memory, then apply blur, alienify, misc filters
 
 void ae_image_unary_op(ae_image_t* image, int* rect, ae_image_unary_op_t* op, void* data)
 {
+    /* NOTE: we don't profile this function (or binary op) because it might call itself,
+     * which could lead to inflated times (outer call also contains time of inner call).
+     */
     int box[4], w = (int)image->width, h = (int)image->height, y;
     size_t comp = ae_image_format_components[image->format];
 
@@ -1936,6 +1939,8 @@ void ae_image_unary_clut(ae_image_t* image, int* rect, u8* r, u8* g, u8* b, u8* 
 
 void ae_image_negative(ae_image_t* image, int* rect, int r, int g, int b)
 {
+    AE_PROFILE_ENTER();
+
     // TODO this isn't optimized at all (avoid table?),
     // implement for floating point and mono images...
     size_t i = 0;
@@ -1948,10 +1953,14 @@ void ae_image_negative(ae_image_t* image, int* rect, int r, int g, int b)
 
     ae_image_unary_clut(image, rect, r ? clut : NULL,
             g ? clut : NULL, b ? clut : NULL, NULL );
+
+    AE_PROFILE_LEAVE();
 }
 
 void ae_image_solarize(ae_image_t* image, int* rect, u8 threshold, int r, int g, int b)
 {
+    AE_PROFILE_ENTER();
+
     // TODO this isn't optimized at all (avoid table?)
     size_t i = 0;
     u8 clut[256];
@@ -1963,6 +1972,8 @@ void ae_image_solarize(ae_image_t* image, int* rect, u8 threshold, int r, int g,
 
     ae_image_unary_clut(image, rect, r ? clut : NULL,
             g ? clut : NULL, b ? clut : NULL, NULL );
+
+    AE_PROFILE_LEAVE();
 }
 
 static void ae_image_greyscale_u8(u8* pix, u8* end, size_t comp, void* data)
@@ -2001,6 +2012,8 @@ static void ae_image_greyscale_flt(float* pix, float* end, size_t comp, void* da
 
 void ae_image_greyscale(ae_image_t* image, int* rect, int r, int g, int b)
 {
+    AE_PROFILE_ENTER(); // TODO: optimize inner functions!!!
+
     int rgb[3] = { r, g, b };
     ae_image_unary_op_t op;
 
@@ -2011,6 +2024,7 @@ void ae_image_greyscale(ae_image_t* image, int* rect, int r, int g, int b)
     op.u8_func [3] = op.u8_func [4] = ae_image_greyscale_u8;
 
     ae_image_unary_op(image, rect, &op, rgb);
+    AE_PROFILE_LEAVE();
 }
 
 static void ae_image_threshold_u8(u8* pix, u8* end, size_t comp, void* data)
@@ -2071,6 +2085,8 @@ static void ae_image_threshold_flt(float* pix, float* end, size_t comp, void* da
 
 void ae_image_threshold(ae_image_t* image, int* rect, u8 threshold, int r, int g, int b)
 {
+    AE_PROFILE_ENTER();
+
     // NOTE: this looks best with a light gaussian blur after
     int rgb[4] = { r, g, b, (int)threshold };
     ae_image_unary_op_t op;
@@ -2082,6 +2098,7 @@ void ae_image_threshold(ae_image_t* image, int* rect, u8 threshold, int r, int g
     op.u8_func [3] = op.u8_func [4] = ae_image_threshold_u8;
 
     ae_image_unary_op(image, rect, &op, rgb);
+    AE_PROFILE_LEAVE();
 }
 
 static void ae_image_bleach_u8(u8* pix, u8* end, size_t comp, void* data)
@@ -2130,6 +2147,8 @@ static void ae_image_bleach_flt(float* pix, float* end, size_t comp, void* data)
 
 void ae_image_bleach(ae_image_t* image, int* rect, u8 threshold, int r, int g, int b)
 {
+    AE_PROFILE_ENTER(); // TODO: optimize inner functions
+
     int rgb[4] = { r, g, b, (int)threshold };
     ae_image_unary_op_t op;
 
@@ -2140,12 +2159,15 @@ void ae_image_bleach(ae_image_t* image, int* rect, u8 threshold, int r, int g, i
     op.u8_func [3] = op.u8_func [4] = ae_image_bleach_u8;
 
     ae_image_unary_op(image, rect, &op, rgb);
+    AE_PROFILE_LEAVE();
 }
 
 void ae_image_neonize(ae_image_t * image, int * rect, u8 threshold,
                     int lr, int lg, int lb, int hr, int hg, int hb)
 {
-    size_t i; // TODO: optimize this!!!
+    AE_PROFILE_ENTER();
+
+    size_t i; // TODO: optimize!!! (float path, RGB branch removal)
     u8 r[256], g[256], b[256];
 
     for (i = 0; i < 256; ++i)
@@ -2165,6 +2187,7 @@ void ae_image_neonize(ae_image_t * image, int * rect, u8 threshold,
     }
 
     ae_image_unary_clut(image, rect, r, g, b, NULL);
+    AE_PROFILE_LEAVE();
 }
 
 #define AE_IMAGE_PASTELIZE_LOCALS()     \
@@ -2231,6 +2254,7 @@ static void ae_image_pastelize_flt(float* pix, float* end, size_t comp, void* da
 void ae_image_pastelize(ae_image_t* image, int* rect, u8 threshold,
                     int lr, int lg, int lb, int hr, int hg, int hb)
 {
+    AE_PROFILE_ENTER(); // TODO: optimize inner functions!!!
     int rgb[7] = { lr, lg, lb, hr, hg, hb, (int)threshold };
 
     ae_image_unary_op_t op = AE_ZERO_STRUCT;
@@ -2240,6 +2264,7 @@ void ae_image_pastelize(ae_image_t* image, int* rect, u8 threshold,
     op.u8_func [3] = op.u8_func [4] = ae_image_pastelize_u8;
 
     ae_image_unary_op(image, rect, &op, rgb);
+    AE_PROFILE_LEAVE();
 }
 
 static void ae_image_isolate_channel_u8(u8* pix, u8* end, size_t comp, void* data)
@@ -2274,6 +2299,8 @@ static void ae_image_isolate_channel_flt(float* pix, float* end, size_t comp, vo
 
 void ae_image_isolate_channel(ae_image_t* image, int* rect, int channel, int r, int g, int b)
 {
+    AE_PROFILE_ENTER(); // TODO: optimize (branch removal, memcpy)
+
     int rgb[4] = { r, g, b, channel };
     ae_image_unary_op_t op;
 
@@ -2285,6 +2312,8 @@ void ae_image_isolate_channel(ae_image_t* image, int* rect, int channel, int r, 
 
     ae_assert(channel >= 0 && channel <= 2, "%i", channel);
     ae_image_unary_op(image, rect, &op, rgb);
+
+    AE_PROFILE_LEAVE();
 }
 
 typedef struct ae_image_set_color_t
@@ -2437,6 +2466,8 @@ static void ae_image_flip_x_u8(u8* pix, u8* end, size_t comp, void* data)
 
 void ae_image_flip_x(ae_image_t* image, int* rect, int r, int g, int b, int a)
 {
+    AE_PROFILE_ENTER(); // TODO: optimize inner funcs!!!
+
     int fixed_rect[4], rgba[4] = { r, g, b, a };
     ae_image_unary_op_t op;
 
@@ -2457,6 +2488,7 @@ void ae_image_flip_x(ae_image_t* image, int* rect, int r, int g, int b, int a)
     op.u8_func[3] = op.u8_func[4] = ae_image_flip_x_u8;
 
     ae_image_unary_op(image, rect, &op, rgba);
+    AE_PROFILE_LEAVE();
 }
 
 void ae_image_flip_y(ae_image_t* image, int* rect, int r, int g, int b, int a)
@@ -3754,6 +3786,6 @@ void ae_image_init(int argc, char** argv)
 
 void ae_image_quit(void)
 {
-    devil_quit(); // close devil lib
+    devil_quit(); // close codec lib
     ae_heap_destroy(&ae_image_heap);
 }

@@ -985,6 +985,7 @@ cdef extern from "xl_core.h":
         XL_EVENT_CONTROLLER_TRIGGER
         XL_EVENT_CONTROLLER_STICK
         XL_EVENT_TIMER
+        XL_EVENT_LONG_FRAME
         XL_EVENT_COUNT
 
     const char* xl_event_type_name[]
@@ -1067,6 +1068,9 @@ cdef extern from "xl_core.h":
         double seconds
         int repeat
 
+    ctypedef struct _xl_long_frame_event_t:
+        double dt
+
     ctypedef struct xl_event_t:
         xl_event_type_t type
 
@@ -1098,6 +1102,7 @@ cdef extern from "xl_core.h":
         _xl_controller_trigger_event_t          as_controller_trigger
         _xl_controller_stick_event_t            as_controller_stick
         _xl_timer_event_t                       as_timer
+        _xl_long_frame_event_t                  as_long_frame
 
     ctypedef void (*xl_event_handler_t)(xl_event_t* event, void* context)
 
@@ -4790,6 +4795,9 @@ class event(object):
             return ('timer', clock,
                     name.decode() if sys.version_info.major > 2 else name,
                     c_event.as_timer.seconds, c_event.as_timer.repeat)
+
+        elif c_type == XL_EVENT_LONG_FRAME:
+            return ('long_frame', c_event.as_long_frame.dt)
 
         assert 0, xl_event_type_name[<size_t>c_type]
 

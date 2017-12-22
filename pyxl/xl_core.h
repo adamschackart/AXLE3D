@@ -2398,6 +2398,9 @@ xl_timer_set_repeat(const char* name, int repeat);
     N(XL_EVENT_TIMER, timer, xl_clock_t* clock; char name[128];                     \
                                     double seconds; int repeat;)                    \
                                                                                     \
+    /* got a long frame delta due to a loading screen or poor performance */        \
+    N(XL_EVENT_LONG_FRAME, long_frame, double dt;)                                  \
+                                                                                    \
     N(XL_EVENT_COUNT, count, char _pad;)                                            \
 
 typedef enum xl_event_type_t
