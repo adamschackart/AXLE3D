@@ -159,6 +159,7 @@ cdef extern from "ae_memory.h":
         size_t _cap # reserved bytes
 
     void ae_array_append(ae_array_t* array, void* data, size_t size)
+    void* ae_array_expand(ae_array_t* array, size_t size)
 
     void ae_array_resize (ae_array_t* array, size_t size)
     void ae_array_reserve(ae_array_t* array, size_t size)
@@ -841,6 +842,14 @@ cdef class Array:
         """Compute the number of bytes required to store a given number of bits."""
         return ae_bitvector_bytes(count)
 
+    def expand(self, size_t size):
+        """Grow the array by N bytes. Returns the byte offset of the new region."""
+        cdef size_t p = <size_t>ae_array_expand(&self.array, size)
+
+        # we have to cast these pointers to size_t, or cython will generate ptrdiff
+        # overflow checking code in debug builds that will issue warnings on clang.
+        return p - <size_t>self.array.data
+
     def resize(self, size_t size):
         """Change the size of the array to N bytes, either growing or shrinking."""
         ae_array_resize(&self.array, size); return self
@@ -854,5 +863,5 @@ cdef class Array:
         ae_array_zero(&self.array); return self
 
     def trim(self):
-        """Remove any excess extra memory capacity allocated behind the scenes."""
+        """Removes any excess extra memory capacity allocated behind the scenes."""
         ae_array_trim(&self.array); return self

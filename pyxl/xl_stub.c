@@ -1077,6 +1077,26 @@ xl_clock_t* xl_clock_create(void)
     AE_STUB(); return NULL;
 }
 
+xl_clock_t* xl_clock_copy(xl_clock_t* clock)
+{
+    AE_STUB(); return NULL;
+}
+
+size_t xl_clock_buffer_size(xl_clock_t* clock) // serialize
+{
+    AE_STUB(); return 0;
+}
+
+void xl_clock_buffer_save(u8* out, xl_clock_t* clock)
+{
+    AE_STUB();
+}
+
+xl_clock_t* xl_clock_buffer_load(u8* buffer, size_t length)
+{
+    AE_STUB(); return NULL;
+}
+
 void
 xl_clock_set_int(xl_clock_t* clock, xl_clock_property_t prop, int value)
 {
@@ -1160,6 +1180,12 @@ void xl_clock_set_timer_paused(xl_clock_t* clock, const char* name, int value)
 }
 
 void xl_clock_set_timer_repeat(xl_clock_t* clock, const char* name, int value)
+{
+    AE_STUB();
+}
+
+void xl_clock_set_timer_name(xl_clock_t* clock, const char* old_name,
+                                                const char* new_name)
 {
     AE_STUB();
 }

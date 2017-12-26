@@ -891,7 +891,13 @@ cdef extern from "xl_core.h":
     # ~ [ timer objects ]
     # ==========================================================================
 
-    xl_clock_t* xl_clock_create()
+    xl_clock_t* xl_clock_create() # init & clone
+    xl_clock_t* xl_clock_copy(xl_clock_t* clock)
+
+    size_t xl_clock_buffer_size(xl_clock_t*) # serialization
+
+    void xl_clock_buffer_save(u8* outbuf, xl_clock_t *clock)
+    xl_clock_t* xl_clock_buffer_load(u8* buf, size_t length)
 
     ctypedef enum xl_clock_property_t:
         XL_CLOCK_PROPERTY_TOTAL
@@ -935,6 +941,9 @@ cdef extern from "xl_core.h":
 
     void xl_clock_set_timer_paused(xl_clock_t* clock, const char* name, int value)
     void xl_clock_set_timer_repeat(xl_clock_t* clock, const char* name, int value)
+
+    void xl_clock_set_timer_name(xl_clock_t* clock, const char* old_name,
+                                                    const char* new_name)
 
     char** xl_clock_copy_timer_names(xl_clock_t* clock)
     void xl_clock_free_timer_names(xl_clock_t* clock, char** names)
@@ -3665,22 +3674,20 @@ cdef class Controller:
         Get the string identifier of the last button pressed down on the controller.
         """
         def __get__(self):
-            cdef bytes s = xl_controller_button_short_name[xl_controller_get_int(
-                    self.controller, XL_CONTROLLER_PROPERTY_LAST_PRESSED_BUTTON)]
+            cdef bytes btn_s = <bytes>xl_controller_get_str(self.controller,
+                                XL_CONTROLLER_PROPERTY_LAST_PRESSED_BUTTON)
 
-            # TODO do name table read through xl_controller_get_str
-            return s.decode() if sys.version_info.major > 2 else s
+            return btn_s.decode() if sys.version_info.major > 2 else btn_s
 
     property last_released_button:
         """
         Get the string identifier of the last button released up from the controller.
         """
         def __get__(self):
-            cdef bytes s = xl_controller_button_short_name[xl_controller_get_int(
-                    self.controller, XL_CONTROLLER_PROPERTY_LAST_RELEASED_BUTTON)]
+            cdef bytes btn_s = <bytes>xl_controller_get_str(self.controller,
+                                XL_CONTROLLER_PROPERTY_LAST_RELEASED_BUTTON)
 
-            # TODO do name table read through xl_controller_get_str
-            return s.decode() if sys.version_info.major > 2 else s
+            return btn_s.decode() if sys.version_info.major > 2 else btn_s
 
     property last_pressed_time:
         def __get__(self):
@@ -4284,11 +4291,18 @@ cdef class Clock:
     """
     cdef xl_clock_t* clock
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         if 'reference' in kwargs:
             self.clock = <xl_clock_t*>(<size_t>kwargs['reference'])
+
+        elif args and args[0] is None:
+            self.clock = NULL # HACK: special serialization backdoor
+
         else:
             self.clock = xl_clock_create()
+
+            # easy syntax to create a named clock - Clock("test")
+            if args: self.name = args[0]
 
             # convenient way to set named animation properties inline
             for key, val in kwargs.items(): setattr(self, key, val)
@@ -4313,12 +4327,22 @@ cdef class Clock:
         return xl_clock_get_int(self.clock, XL_CLOCK_PROPERTY_OPEN)
 
     def __reduce__(self):
-        raise NotImplementedError("TODO")
+        cdef bytes b = b'\0' * xl_clock_buffer_size(self.clock)
+        cdef char* p = <char*>b
+
+        xl_clock_buffer_save(<u8*>p, self.clock)
+        return (self.__class__, (None, ), b)
+
+    def __setstate__(self, bytes state):
+        self.clock = xl_clock_buffer_load(<u8*>(<char*>state), len(state))
 
     def __copy__(self):
-        raise NotImplementedError("TODO")
+        return self.__class__(reference=<size_t>xl_clock_copy(self.clock))
 
     copy = __copy__
+
+    def __call__(self, *a, **k):
+        return self.get_timer(*a, **k)
 
     @staticmethod
     def count_all(): return xl_clock_count_all()
@@ -4502,6 +4526,7 @@ cdef class Clock:
             b = <bytes>name
 
         xl_clock_set_timer_current(self.clock, <const char*>b, value)
+        return self
 
     def set_timer_seconds(self, str name, double value):
         cdef bytes b
@@ -4512,6 +4537,7 @@ cdef class Clock:
             b = <bytes>name
 
         xl_clock_set_timer_seconds(self.clock, <const char*>b, value)
+        return self
 
     def set_timer_paused(self, str name, bint value):
         cdef bytes b
@@ -4522,6 +4548,7 @@ cdef class Clock:
             b = <bytes>name
 
         xl_clock_set_timer_paused(self.clock, <const char*>b, value)
+        return self
 
     def set_timer_repeat(self, str name, bint value):
         cdef bytes b
@@ -4532,6 +4559,22 @@ cdef class Clock:
             b = <bytes>name
 
         xl_clock_set_timer_repeat(self.clock, <const char*>b, value)
+        return self
+
+    def set_timer_name(self, str old_name, str new_name):
+        cdef bytes old_s
+        cdef bytes new_s
+
+        if sys.version_info.major > 2:
+            old_s = <bytes>old_name.encode('utf-8')
+            new_s = <bytes>new_name.encode('utf-8')
+        else:
+            old_s = <bytes>old_name
+            new_s = <bytes>new_name
+
+        xl_clock_set_timer_name(self.clock, <const char*>old_s,
+                                            <const char*>new_s)
+        return self
 
 # ==============================================================================
 # ~ [ timed events ]

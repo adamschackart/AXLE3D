@@ -5838,6 +5838,9 @@ const char* xl_controller_get_str(xl_controller_t* controller,
 
     ae_switch (property, xl_controller_property, XL_CONTROLLER_PROPERTY, suffix)
     {
+        /* TODO: the integer properties we delegate to have reasonable fallbacks
+         * if the controller is closed - will empty strings cause any problems?
+         */
         case XL_CONTROLLER_PROPERTY_RIGHT_DEADZONE_MODE:
         case XL_CONTROLLER_PROPERTY_LEFT_DEADZONE_MODE:
         {
@@ -5845,6 +5848,17 @@ const char* xl_controller_get_str(xl_controller_t* controller,
             {
                 const int mode = xl_controller_get_int(controller, property);
                 return xl_controller_deadzone_short_name[mode];
+            }
+        }
+        break;
+
+        case XL_CONTROLLER_PROPERTY_LAST_RELEASED_BUTTON:
+        case XL_CONTROLLER_PROPERTY_LAST_PRESSED_BUTTON:
+        {
+            if (xl_controller_get_open(controller))
+            {
+                const int button = xl_controller_get_int(controller, property);
+                return xl_controller_button_short_name[button];
             }
         }
         break;
@@ -7261,6 +7275,191 @@ xl_clock_t* xl_clock_create(void)
     }
 }
 
+xl_clock_t* xl_clock_copy(xl_clock_t* clock)
+{
+    if (xl_clock_get_open(clock))
+    {
+        AE_PROFILE_ENTER();
+
+        xl_internal_clock_t* copy = ae_create(xl_internal_clock_t, noclear);
+        xl_internal_clock_t* data = (xl_internal_clock_t*)clock;
+
+        memcpy(copy, data, sizeof(xl_internal_clock_t));
+
+        copy->time_created = ae_seconds(); // sort key and unique id
+        copy->id = (int)ae_random_xorshift32_ex(&xl_clock_id_state);
+
+        if (copy->name) { copy->name = ae_string_copy((char *)copy->name); }
+
+        if (ae_ptrset_add(&xl_clock_set, copy) == 0)
+        {
+            AE_WARN("clock is not new to the set (is set code stubbed?)");
+        }
+
+        AE_PROFILE_LEAVE();
+        return (xl_clock_t *)copy;
+    }
+
+    return NULL;
+}
+
+// FIXME: The clock serialization code could prevent the safe exchange of save games
+// or other serialized program state between platforms, as it makes binary dumps of
+// structures that might be sized or padded in a platform-independent way. The code
+// was written in haste as a proof-of-concept prototype. Replace it before shipping!
+
+#if 1
+
+size_t xl_clock_buffer_size(xl_clock_t* clock) // serialize
+{
+    size_t bytes = 0;
+
+    if (xl_clock_get_open(clock))
+    {
+        xl_internal_clock_t* data = (xl_internal_clock_t*)clock;
+
+        // header
+        bytes += 16;
+
+        // padded name
+        bytes += num_pow2_align(strlen(xl_clock_get_name(clock)) + 1, 16);
+
+        // timers
+        bytes += sizeof(xl_internal_timer_t) * data->num_timers;
+    }
+
+    return bytes;
+}
+
+void xl_clock_buffer_save(u8* out, xl_clock_t* clock)
+{
+    if (xl_clock_get_open(clock))
+    {
+        // FIXME: save timers in a better way than dumping them!
+        u8* start = out;
+
+        xl_internal_clock_t* data = (xl_internal_clock_t*)clock;
+        size_t i;
+
+        const char * name = xl_clock_get_name(clock);
+        u32 name_length = strlen(name);
+
+        // header version id
+        *(u16*)out = 0; out += sizeof(u16);
+
+        // header endianness
+        *out++ = ae_cpuinfo_lil_endian();
+
+        // header flags
+        *out = 0;
+
+        if (data->auto_update) *out |= AE_IDX2BIT(0);
+        if (data->paused) *out |= AE_IDX2BIT(1);
+
+        out++;
+
+        // header timer count
+        *(s32*)out = data->num_timers; out += sizeof(s32);
+
+        // header name length
+        *(u32*)out = name_length; out += sizeof(u32);
+
+        // header padding
+        out += sizeof(u32);
+
+        // name string
+        memcpy(out, name, name_length);
+        out[name_length] = '\0';
+        out += num_pow2_align(name_length + 1, 16);
+
+        // timers
+        for (i = 0; i < AE_ARRAY_COUNT(data->timers); i++)
+        {
+            xl_internal_timer_t* timer = data->timers + i;
+
+            if (timer->name[0])
+            {
+                memcpy(out, timer, sizeof(xl_internal_timer_t));
+                out += sizeof(xl_internal_timer_t);
+            }
+        }
+
+        ae_assert(out == start + xl_clock_buffer_size(clock),
+                "clock buffer size doesn't match save size");
+    }
+}
+
+xl_clock_t* xl_clock_buffer_load(u8* buf, size_t length)
+{
+    if (length) // FIXME: if the timer structure changes, this code is hosed!!!
+    {
+        u8* start = buf;
+
+        xl_clock_t* clock = xl_clock_create(); // default state
+        xl_internal_clock_t* data = (xl_internal_clock_t*)clock;
+
+        u32 name_length;
+
+        // header version id
+        assert(*(u16*)buf == 0); buf += sizeof(u16);
+
+        // header endianness
+        assert(*buf++ == 1);
+
+        // header flags
+        if ((*buf & AE_IDX2BIT(0)) == 0) data->auto_update = 0;
+        if ((*buf & AE_IDX2BIT(1)) != 0) data->paused = 1;
+
+        buf++;
+
+        // header timer count
+        data->num_timers = *(s32*)buf; buf += sizeof(s32);
+
+        // header name length
+        name_length = *(u32*)buf; buf += sizeof(u32);
+
+        // header padding
+        buf += sizeof(u32);
+
+        // name string
+        xl_clock_set_name(clock, (const char*)buf);
+        buf += num_pow2_align(name_length + 1, 16);
+
+        // timers
+        memcpy(data->timers, buf, data->num_timers * sizeof(xl_internal_timer_t));
+
+        #ifdef AE_DEBUG
+        buf += data->num_timers * sizeof(xl_internal_timer_t);
+        #endif
+
+        ae_assert(buf == start + xl_clock_buffer_size(clock),
+                "clock buffer size doesn't match load size");
+
+        return clock;
+    }
+
+    return NULL;
+}
+
+#else
+
+size_t xl_clock_buffer_size(xl_clock_t* clock) // serialize
+{
+    ae_error("TODO: xl_clock_buffer_size"); return 0;
+}
+
+void xl_clock_buffer_save(u8* out, xl_clock_t* clock)
+{
+    ae_error("TODO: xl_clock_buffer_save");
+}
+
+xl_clock_t* xl_clock_buffer_load(u8* buffer, size_t length)
+{
+    ae_error("TODO: xl_clock_buffer_load"); return NULL;
+}
+
+#endif
+
 void
 xl_clock_set_int(xl_clock_t* clock, xl_clock_property_t property, int value)
 {
@@ -7437,7 +7636,12 @@ xl_clock_get_str(xl_clock_t* clock, xl_clock_property_t property)
     {
         case XL_CLOCK_PROPERTY_STATUS:
         {
-            return xl_clock_get_open(clock) ? xl_clock_get_name(clock) : "closed";
+            const char* name = xl_clock_get_name(clock); // TODO: quotation marks
+
+            if (name && name[0]) { return name; } else
+            {
+                return xl_clock_get_open(clock) ? "open" : "closed";
+            }
         }
         break;
 
@@ -7687,34 +7891,157 @@ int xl_clock_get_timer(xl_clock_t* clock, const char* name, double* current,
 
 void xl_clock_set_timer_current(xl_clock_t* clock, const char* name, double value)
 {
+    AE_PROFILE_ENTER();
+
     if (xl_clock_get_open(clock))
     {
-        AE_STUB();
+        xl_internal_clock_t* data = (xl_internal_clock_t*)clock;
+
+        size_t index = 0, n = AE_ARRAY_COUNT(data->timers);
+        for (; index < n; index++)
+        {
+            xl_internal_timer_t* timer = data->timers + index;
+
+            if (!strncmp(timer->name, name, sizeof(timer->name) - 1))
+            {
+                // TODO: set_timer_foo macro (these are all similar)
+                timer->current = value;
+
+                AE_PROFILE_LEAVE(); return;
+            }
+        }
+
+        AE_WARN("xl clock \"%s\" has no timer named \"%s\"",
+                            xl_clock_get_name(clock), name);
     }
+
+    AE_PROFILE_LEAVE();
 }
 
 void xl_clock_set_timer_seconds(xl_clock_t* clock, const char* name, double value)
 {
+    AE_PROFILE_ENTER();
+
     if (xl_clock_get_open(clock))
     {
-        AE_STUB();
+        xl_internal_clock_t* data = (xl_internal_clock_t*)clock;
+
+        size_t index = 0, n = AE_ARRAY_COUNT(data->timers);
+        for (; index < n; index++)
+        {
+            xl_internal_timer_t* timer = data->timers + index;
+
+            if (!strncmp(timer->name, name, sizeof(timer->name) - 1))
+            {
+                // TODO: set_timer_foo macro (these are all similar)
+                timer->seconds = value;
+
+                AE_PROFILE_LEAVE(); return;
+            }
+        }
+
+        AE_WARN("xl clock \"%s\" has no timer named \"%s\"",
+                            xl_clock_get_name(clock), name);
     }
+
+    AE_PROFILE_LEAVE();
 }
 
 void xl_clock_set_timer_paused(xl_clock_t* clock, const char* name, int value)
 {
+    AE_PROFILE_ENTER();
+
     if (xl_clock_get_open(clock))
     {
-        AE_STUB();
+        xl_internal_clock_t* data = (xl_internal_clock_t*)clock;
+
+        size_t index = 0, n = AE_ARRAY_COUNT(data->timers);
+        for (; index < n; index++)
+        {
+            xl_internal_timer_t* timer = data->timers + index;
+
+            if (!strncmp(timer->name, name, sizeof(timer->name) - 1))
+            {
+                // TODO: set_timer_foo macro (these are all similar)
+                timer->paused = value;
+
+                AE_PROFILE_LEAVE(); return;
+            }
+        }
+
+        AE_WARN("xl clock \"%s\" has no timer named \"%s\"",
+                            xl_clock_get_name(clock), name);
     }
+
+    AE_PROFILE_LEAVE();
 }
 
 void xl_clock_set_timer_repeat(xl_clock_t* clock, const char* name, int value)
 {
+    AE_PROFILE_ENTER();
+
     if (xl_clock_get_open(clock))
     {
-        AE_STUB();
+        xl_internal_clock_t* data = (xl_internal_clock_t*)clock;
+
+        size_t index = 0, n = AE_ARRAY_COUNT(data->timers);
+        for (; index < n; index++)
+        {
+            xl_internal_timer_t* timer = data->timers + index;
+
+            if (!strncmp(timer->name, name, sizeof(timer->name) - 1))
+            {
+                // TODO: set_timer_foo macro (these are all similar)
+                timer->repeat = value;
+
+                AE_PROFILE_LEAVE(); return;
+            }
+        }
+
+        AE_WARN("xl clock \"%s\" has no timer named \"%s\"",
+                            xl_clock_get_name(clock), name);
     }
+
+    AE_PROFILE_LEAVE();
+}
+
+void xl_clock_set_timer_name(xl_clock_t* clock, const char* old_name,
+                                                const char* new_name)
+{
+    AE_PROFILE_ENTER();
+
+    if (xl_clock_get_open(clock))
+    {
+        xl_internal_clock_t* data = (xl_internal_clock_t*)clock;
+        int changed = 0;
+
+        size_t index = 0, n = AE_ARRAY_COUNT(data->timers);
+        for (; index < n; index++)
+        {
+            xl_internal_timer_t* timer = data->timers + index;
+
+            if (!strncmp(timer->name, new_name, sizeof(timer->name) - 1))
+            {
+                ae_error("clock \"%s\" already has a timer named \"%s\"",
+                                    xl_clock_get_name(clock), new_name);
+            }
+
+            if (!changed && // don't do 2 comparisons if we don't need to
+                !strncmp(timer->name, old_name, sizeof(timer->name) - 1))
+            {
+                AE_STRNCPY(timer->name, new_name);
+                changed = 1;
+            }
+        }
+
+        if (!changed)
+        {
+            AE_WARN("xl clock \"%s\" has no timer named \"%s\"",
+                            xl_clock_get_name(clock), old_name);
+        }
+    }
+
+    AE_PROFILE_LEAVE();
 }
 
 char** xl_clock_copy_timer_names(xl_clock_t* clock)

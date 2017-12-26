@@ -173,7 +173,7 @@ ptr_in_array(const void* const ptr, const void* const array, const size_t size)
 #define num_is_aligned(number, alignment) ( !((number) & ((alignment) - 1)) )
 
 /* round up to the nearest multiple of align (which must be a power of 2!) */
-#define num_pow2_align(num, align) ( (num + ((align) - 1)) & ~((align) - 1) )
+#define num_pow2_align(num, align) (((num) + ((align) - 1)) & ~((align) - 1))
 
 /*
 ================================================================================
@@ -450,6 +450,8 @@ typedef struct ae_array_t
     ae_array_t;
 
 #define ae_array_append(a, d, s) ae_array_append_ex((a), (d), (s), __FILE__, __FUNCTION__, __LINE__)
+#define ae_array_expand(a, s) ae_array_expand_ex((a), (s), __FILE__, __FUNCTION__, __LINE__)
+
 #define ae_array_resize(a, s) ae_array_resize_ex((a), (s), __FILE__, __FUNCTION__, __LINE__)
 #define ae_array_reserve(a, s) ae_array_reserve_ex((a), (s), __FILE__, __FUNCTION__, __LINE__)
 
@@ -464,6 +466,9 @@ typedef struct ae_array_t
 #define ae_array_free(a) ae_array_free_ex((a), __FILE__, __FUNCTION__, __LINE__)
 
 AE_DECL void AE_CALL ae_array_append_ex(ae_array_t* array, void* data, size_t size,
+                const char* filename, const char* funcname, const int lineno);
+
+AE_DECL void* AE_CALL ae_array_expand_ex(ae_array_t* array, size_t size,
                 const char* filename, const char* funcname, const int lineno);
 
 AE_DECL void AE_CALL ae_array_resize_ex(ae_array_t* array, size_t size,

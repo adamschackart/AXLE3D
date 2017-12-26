@@ -127,6 +127,12 @@ void ae_array_append_ex(ae_array_t* array, void* data, size_t size,
     AE_STUB();
 }
 
+void* ae_array_expand_ex(ae_array_t * array, size_t size, const char* filename,
+                                        const char* funcname, const int lineno)
+{
+    AE_STUB(); return NULL;
+}
+
 void ae_array_resize_ex(ae_array_t * array, size_t size, const char * filename,
                                         const char* funcname, const int lineno)
 {

@@ -611,6 +611,15 @@ void ae_array_append_ex(ae_array_t* array, void* data, size_t size,
     memmove((u8*)array->data + (array->size - size), data, size);
 }
 
+void* ae_array_expand_ex(ae_array_t * array, size_t size, const char* filename,
+                                        const char* funcname, const int lineno)
+{
+    AE_ARRAY_STACK_CHECK();
+
+    ae_array_resize(array, array->size + size); // expand to fit
+    return (void *)((u8 *) array->data + ( array->size - size ));
+}
+
 void ae_array_resize_ex(ae_array_t * array, size_t size, const char * filename,
                                         const char* funcname, const int lineno)
 {

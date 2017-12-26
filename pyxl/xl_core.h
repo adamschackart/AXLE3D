@@ -2166,7 +2166,13 @@ XL_DECL void XL_CALL xl_animation_close_all(void);
 --------------------------------------------------------------------------------
 */
 
-XL_DECL xl_clock_t* XL_CALL xl_clock_create(void);
+XL_DECL xl_clock_t* XL_CALL xl_clock_create(void); // init & clone
+XL_DECL xl_clock_t* XL_CALL xl_clock_copy(xl_clock_t* clock);
+
+XL_DECL size_t XL_CALL xl_clock_buffer_size(xl_clock_t*); // serialization
+
+XL_DECL void XL_CALL xl_clock_buffer_save(u8 * outbuf, xl_clock_t *clock);
+XL_DECL xl_clock_t* XL_CALL xl_clock_buffer_load(u8 * buf, size_t length);
 
 #define XL_CLOCK_PROPERTY_N                                 \
                                                             \
@@ -2269,6 +2275,9 @@ xl_clock_set_timer_paused(xl_clock_t* clock, const char* name, int value);
 
 XL_DECL void XL_CALL
 xl_clock_set_timer_repeat(xl_clock_t* clock, const char* name, int value);
+
+XL_DECL void XL_CALL
+xl_clock_set_timer_name(xl_clock_t* clock, const char* old, const char* new_);
 
 XL_DECL char** XL_CALL
 xl_clock_copy_timer_names(xl_clock_t* clock);

@@ -64,8 +64,10 @@ cdef extern from "ae_polygon.h":
 # ------------------------------------------------------------------------------
 
 cdef class PlaneWinding:
-    """Convex polygon defined by parallel (face) and edge planes. Also contains an
-    arbitrary point on the plane and axis-aligned box for fast collision tests."""
+    """
+    Convex polygon defined by parallel (face) and edge planes. Also contains an
+    arbitrary point on the plane and axis-aligned box for fast collision tests.
+    """
     cdef ae_plane_winding_t winding
 
     # XXX cpython zeroes structure data automatically, do other interpreters?
@@ -78,8 +80,8 @@ cdef class PlaneWinding:
         return "PlaneWinding({} polygon edges)".format(self.winding.count)
 
     # XXX: when this is enabled, it disallows use of PlaneWindings as set members
-    # unless we define __hash__ as well. even if we did that, it would dramatically
-    # slow down the performance of the time-critical "get_windings_in_aabbox_v".
+    # unless we also define __hash__. even if we did that, it would dramatically
+    # slow down the time-critical CollisionMesh method "get_windings_in_aabbox_v".
 
     # def __richcmp__(self, PlaneWinding other, int op):
     #     cdef int cmpv = self.cmp(other)
@@ -239,8 +241,10 @@ cdef class CollisionMesh:
     cdef readonly dict grid
 
     def __init__(self, list windings = [], float interval = 5.0):
-        """Create an empty hash, optionally adding polygons to cells.
-        This is the only place where interval can be safely assigned."""
+        """
+        Create an empty hash, optionally adding a list of polys to grid cells.
+        This is the only place where the grid interval can be safely assigned.
+        """
         assert interval > 0.0, "invalid interval: {}".format(interval)
 
         self.grid, self.interval = {}, interval
@@ -271,9 +275,10 @@ cdef class CollisionMesh:
                                                         float(len(self.grid.values())) )
 
     def add_windings(self, list windings):
-        """Add a list of windings to the spatial hash. Doesn't check if the
-        windings are already in the hash, which would waste time and space."""
-
+        """
+        Add a list of plane windings (convex polygons) to the spatial hash. Does not
+        check if windings are already in the hash, which would waste time and space.
+        """
         cdef void * ctx = ae_profile_enter( "aegame/cvx.pyx",
                                 "CollisionMesh.add_windings")
 
@@ -303,9 +308,10 @@ cdef class CollisionMesh:
         ae_profile_leave(ctx)
 
     def del_windings(self, list windings):
-        """Remove a list of windings from the spatial hash. If a cell is empty after
-        having all of its windings removed, it will not be deleted from the grid."""
-
+        """
+        Remove a list of windings from the spatial hash. If a cell is empty after
+        having all of its windings removed, it will not be deleted from the grid.
+        """
         cdef void * ctx = ae_profile_enter( "aegame/cvx.pyx",
                                 "CollisionMesh.del_windings")
 
@@ -342,9 +348,10 @@ cdef class CollisionMesh:
         ae_profile_leave(ctx)
 
     def clear_empty_cells(self):
-        """Remove all empty cells from the spatial hash. Call this only after
-        del_windings (offline). Returns the total number of cells removed."""
-
+        """
+        Remove all empty cells from the spatial hash. Call this only after
+        del_windings (offline). Returns the total number of cells removed.
+        """
         cdef void * ctx = ae_profile_enter( "aegame/cvx.pyx" ,
                             "CollisionMesh.clear_empty_cells")
 
@@ -387,9 +394,10 @@ cdef class CollisionMesh:
         return self.get_windings_in_aabbox_v(p1.v, p2.v)
 
     def intersect_ellipsoid(self, Ellipsoid ellipsoid):
-        """Get all intersections between ellipsoid and self. Returns a list of
-        (winding, penetration of ellipsoid through winding along face normal)."""
-
+        """
+        Get all intersections between an ellipsoid and self. Returns a list of
+        (winding, penetration of ellipsoid through winding along face normal).
+        """
         cdef void* ctx = ae_profile_enter( "aegame/cvx.pyx",
                         "CollisionMesh.intersect_ellipsoid")
 

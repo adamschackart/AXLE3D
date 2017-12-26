@@ -302,7 +302,27 @@ void GL_BindTexture(unsigned int target, unsigned int texture)
 
 void GL_BlendEquation(unsigned int mode)
 {
-    X(); glBlendEquation(mode);
+    /* TODO: allow this to be reset to NULL on gl_quit */
+    static PFNGLBLENDEQUATIONPROC exBlendEquation = NULL;
+
+    X(); if (exBlendEquation)
+    {
+        exBlendEquation(mode);
+    }
+    else
+    {
+        exBlendEquation = (PFNGLBLENDEQUATIONPROC)
+                        gl_func("glBlendEquation");
+
+        if (exBlendEquation)
+        {
+            exBlendEquation(mode);
+        }
+        else
+        {
+            AE_WARN("glBlendEquation not found");
+        }
+    }
 }
 
 void GL_BlendEquationSeparate(unsigned int modeRGB, unsigned int modeA)
