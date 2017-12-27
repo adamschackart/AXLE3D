@@ -123,6 +123,7 @@ static ae_memory_heap_t ae_image_heap;
 static void *devil_handle, *ilu_handle;
 
 #define _IL_FILE_OVERWRITE  0x0620
+#define _IL_VERSION_NUM     0x0DE2
 #define _IL_IMAGE_WIDTH     0x0DE4
 #define _IL_IMAGE_HEIGHT    0x0DE5
 #define _IL_IMAGE_FORMAT    0x0DEA
@@ -132,6 +133,10 @@ static void *devil_handle, *ilu_handle;
 #define _IL_RGB             0x1907
 #define _IL_RGBA            0x1908
 #define _IL_LUMINANCE       0x1909
+#define _IL_VENDOR          0x1F00
+
+#define _ILU_VERSION_NUM    _IL_VERSION_NUM
+#define _ILU_VENDOR         _IL_VENDOR
 
 #if (_MSC_VER >= 800)           || \
     defined(_STDCALL_SUPPORTED) || \
@@ -242,6 +247,9 @@ static IL_GET_ERROR_FUNC IL_GetError;
 typedef int (_ILAPIENTRY *IL_GET_INTEGER_FUNC)(unsigned int);
 static IL_GET_INTEGER_FUNC IL_GetInteger;
 
+typedef const char* (_ILAPIENTRY *IL_GET_STRING_FUNC)(unsigned int);
+static IL_GET_STRING_FUNC IL_GetString;
+
 typedef void (_ILAPIENTRY *IL_INIT_FUNC)(void);
 static IL_INIT_FUNC IL_Init;
 
@@ -301,6 +309,12 @@ static ILU_FLIP_IMAGE_FUNC ILU_FlipImage;
 
 typedef unsigned char (_ILAPIENTRY *ILU_GAMMA_CORRECT_FUNC)(float Gamma);
 static ILU_GAMMA_CORRECT_FUNC ILU_GammaCorrect;
+
+typedef int (_ILAPIENTRY *ILU_GET_INTEGER_FUNC)(unsigned int);
+static ILU_GET_INTEGER_FUNC ILU_GetInteger;
+
+typedef const char* (_ILAPIENTRY *ILU_GET_STRING_FUNC)(unsigned int);
+static ILU_GET_STRING_FUNC ILU_GetString;
 
 typedef void (_ILAPIENTRY *ILU_INIT_FUNC)(void);
 static ILU_INIT_FUNC ILU_Init;
@@ -375,6 +389,7 @@ static void devil_init(int argc, char** argv)
     IL_GetData = (IL_GET_DATA_FUNC)ae_library_proc(devil_handle, "ilGetData");
     IL_GetError = (IL_GET_ERROR_FUNC)ae_library_proc(devil_handle, "ilGetError");
     IL_GetInteger = (IL_GET_INTEGER_FUNC)ae_library_proc(devil_handle, "ilGetInteger");
+    IL_GetString = (IL_GET_STRING_FUNC)ae_library_proc(devil_handle, "ilGetString");
     IL_Init = (IL_INIT_FUNC)ae_library_proc(devil_handle, "ilInit");
     IL_LoadL = (IL_LOAD_L_FUNC)ae_library_proc(devil_handle, "ilLoadL");
     IL_LoadImage = (IL_LOAD_IMAGE_FUNC)ae_library_proc(devil_handle, "ilLoadImage");
@@ -395,6 +410,8 @@ static void devil_init(int argc, char** argv)
     ILU_ErrorString = (ILU_ERROR_STRING_FUNC)ae_library_proc(ilu_handle, "iluErrorString");
     ILU_FlipImage = (ILU_FLIP_IMAGE_FUNC)ae_library_proc(ilu_handle, "iluFlipImage");
     ILU_GammaCorrect = (ILU_GAMMA_CORRECT_FUNC)ae_library_proc(ilu_handle, "iluGammaCorrect");
+    ILU_GetInteger = (ILU_GET_INTEGER_FUNC)ae_library_proc(ilu_handle, "iluGetInteger");
+    ILU_GetString = (ILU_GET_STRING_FUNC)ae_library_proc(ilu_handle, "iluGetString");
     ILU_Init = (ILU_INIT_FUNC)ae_library_proc(ilu_handle, "iluInit");
     ILU_InvertAlpha = (ILU_INVERT_ALPHA_FUNC)ae_library_proc(ilu_handle, "iluInvertAlpha");
     ILU_Negative = (ILU_NEGATIVE_FUNC)ae_library_proc(ilu_handle, "iluNegative");
@@ -413,6 +430,12 @@ static void devil_init(int argc, char** argv)
     IL_Init();
     ILU_Init();
     IL_Enable(_IL_FILE_OVERWRITE);
+
+    ae_log(IMAGE, "using %s by %s", // DevIL version and vendor info
+        IL_GetString(_IL_VERSION_NUM), IL_GetString(_IL_VENDOR));
+
+    ae_log(IMAGE, "using %s by %s", // utils version and vendor info
+        ILU_GetString(_ILU_VERSION_NUM), ILU_GetString(_ILU_VENDOR));
 }
 
 static void devil_quit(void)

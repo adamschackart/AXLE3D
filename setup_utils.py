@@ -110,11 +110,13 @@ class Extension(Cython.Distutils.Extension):
             # don't catch system exceptions in C++, and make extern "C" funcs faster
             self.extra_compile_args.append('/EHsc')
 
+            self.extra_compile_args.append('/wd4065') # no switch cases
             self.extra_compile_args.append('/wd4101') # unused locals
             self.extra_compile_args.append('/wd4102') # unused labels
-
             self.extra_compile_args.append('/wd4244') # size_t -> int
             self.extra_compile_args.append('/wd4267') # size_t -> long
+            self.extra_compile_args.append('/wd4334') # 32-bit shift
+            self.extra_compile_args.append('/wd4985') # type annotations
         else:
             # for some esoteric, quixotic, idealistic, impractical, ivory tower reason,
             # unix linkers don't search for shared libraries in the application's path

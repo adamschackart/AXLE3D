@@ -479,13 +479,10 @@ void xl_window_set_int(xl_window_t* window, xl_window_property_t property, int v
 
         case XL_WINDOW_PROPERTY_RESIZABLE:
         {
-            // NOTE: this call isn't available on older (< 2.0.5) versions of SDL.
-        #if 0
             if (xl_window_get_open(window))
             {
                 SDL_SetWindowResizable(data->window, value ? SDL_TRUE : SDL_FALSE);
             }
-        #endif
         }
         break;
 
@@ -792,16 +789,13 @@ void xl_window_set_flt(xl_window_t* window, xl_window_property_t property, float
 
         case XL_WINDOW_PROPERTY_OPACITY:
         {
-            // NOTE: this call isn't available on older (< 2.0.5) versions of SDL.
-        #if 0
-            if (xl_window_get_open(window))
+            if (xl_window_get_open(window)) // fade in to window from the desktop
             {
                 if (SDL_SetWindowOpacity(data->window, value) < 0)
                 {
                     AE_WARN("failed to set window opacity: %s", SDL_GetError());
                 }
             }
-        #endif
         }
         break;
 
@@ -840,18 +834,13 @@ float xl_window_get_flt(xl_window_t* window, xl_window_property_t property)
 
         case XL_WINDOW_PROPERTY_OPACITY:
         {
-            if (xl_window_get_open(window))
+            if (xl_window_get_open(window)) // fade in to window from the desktop
             {
-                // NOTE: this call isn't available on pre-2.0.5 versions of SDL.
-            #if 0
                 if (SDL_GetWindowOpacity(data->window, &value) < 0)
                 {
                     AE_WARN("failed to get window opacity: %s", SDL_GetError());
                     value = 1.0f;
                 }
-            #else
-                value = 1.0f;
-            #endif
             }
         }
         break;
@@ -8664,6 +8653,30 @@ xl_event_from_sdl_controller_removed(xl_event_t* dst, SDL_ControllerDeviceEvent*
 }
 
 static void
+xl_event_from_sdl_touch_finger(xl_event_t* dst, SDL_TouchFingerEvent* src)
+{
+    dst->type = XL_EVENT_NOTHING; // TODO
+}
+
+static void
+xl_event_from_sdl_dollar_gesture(xl_event_t* dst, SDL_DollarGestureEvent* src)
+{
+    dst->type = XL_EVENT_NOTHING; // TODO
+}
+
+static void
+xl_event_from_sdl_multi_gesture(xl_event_t* dst, SDL_MultiGestureEvent* src)
+{
+    dst->type = XL_EVENT_NOTHING; // TODO
+}
+
+static void
+xl_event_from_sdl_drop(xl_event_t* dst, SDL_DropEvent* src)
+{
+    dst->type = XL_EVENT_NOTHING; // TODO
+}
+
+static void
 xl_event_from_sdl_audio_device(xl_event_t* dst, SDL_AudioDeviceEvent* src)
 {
     dst->type = XL_EVENT_NOTHING;
@@ -8733,12 +8746,42 @@ static void xl_event_from_sdl(xl_event_t* dst, SDL_Event* src)
         case SDL_CONTROLLERDEVICEREMOVED:
             xl_event_from_sdl_controller_removed(dst, &src->cdevice); break;
 
+        case SDL_FINGERDOWN:
+        case SDL_FINGERUP:
+        case SDL_FINGERMOTION:
+            xl_event_from_sdl_touch_finger(dst, &src->tfinger); break;
+
+        case SDL_DOLLARGESTURE:
+        case SDL_DOLLARRECORD:
+            xl_event_from_sdl_dollar_gesture(dst, &src->dgesture); break;
+
+        case SDL_MULTIGESTURE:
+            xl_event_from_sdl_multi_gesture(dst, &src->mgesture); break;
+
+        case SDL_DROPFILE:
+        case SDL_DROPTEXT:
+        case SDL_DROPBEGIN:
+        case SDL_DROPCOMPLETE:
+            xl_event_from_sdl_drop(dst, &src->drop); break;
+
         case SDL_AUDIODEVICEADDED:
         case SDL_AUDIODEVICEREMOVED:
             xl_event_from_sdl_audio_device(dst, &src->adevice); break;
 
+        /* TODO: close all textures, fonts, and possibly windows in
+         * xl_event_internal (see the TODO at the top of this file).
+         */
+        case SDL_RENDER_TARGETS_RESET:
+        case SDL_RENDER_DEVICE_RESET:
+        {
+            AE_WARN("gl context lost - graphics device unavailable!");
+            dst->type = XL_EVENT_NOTHING;
+        }
+        break;
+
         case SDL_CONTROLLERDEVICEREMAPPED:
         case SDL_KEYMAPCHANGED:
+        case SDL_CLIPBOARDUPDATE:
             dst->type = XL_EVENT_NOTHING; break;
 
         default:
@@ -8767,7 +8810,11 @@ static void xl_event_from_sdl(xl_event_t* dst, SDL_Event* src)
             }
             else
             {
-                ae_log(SDL, "unhandled event %X", (int)src->type);
+                if (src->type < SDL_USEREVENT)
+                {
+                    ae_log(SDL, "unhandled event 0x%X", (int)src->type);
+                }
+
                 dst->type = XL_EVENT_NOTHING;
             }
         }
@@ -9075,8 +9122,24 @@ static void xl_event_internal(xl_event_t* dst, SDL_Event* src)
             xl_internal_mouse_t* data = (xl_internal_mouse_t *)
                                     dst->as_mouse_motion.mouse;
 
+            #if 0
             assert(xl_mouse_get_open(dst->as_mouse_motion.mouse) &&
                                         xl_mouse_count_all() == 1);
+            #else
+            /*
+             * FIXME: handling a weird case on my windows 10 touchscreen laptop where
+             * touching the screen triggers the above assertion. investigate this!!!
+             */
+            if (!xl_mouse_get_open(dst->as_mouse_motion.mouse))
+            {
+                dst->type = XL_EVENT_NOTHING; break;
+            }
+            else
+            {
+                // ensure that the system is in the only state we've accounted for...
+                assert(xl_mouse_count_all() == 1);
+            }
+            #endif
 
             data->current_window = dst->as_mouse_motion.window;
             data->current_x = dst->as_mouse_motion.x;
