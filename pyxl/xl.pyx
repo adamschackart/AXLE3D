@@ -107,6 +107,36 @@ cdef extern from "xl_core.h":
         XL_WINDOW_PROPERTY_NAME
         XL_WINDOW_PROPERTY_ICON
         XL_WINDOW_PROPERTY_OPACITY
+        XL_WINDOW_PROPERTY_SDL_WINDOW
+        XL_WINDOW_PROPERTY_SDL_RENDERER
+        XL_WINDOW_PROPERTY_SDL_RENDERER_INFO
+        XL_WINDOW_PROPERTY_SDL_GL_CONTEXT
+        XL_WINDOW_PROPERTY_DRIVER
+        XL_WINDOW_PROPERTY_NATIVE_DISPLAY
+        XL_WINDOW_PROPERTY_NATIVE_WINDOW
+        XL_WINDOW_PROPERTY_WIN32_WINDOW
+        XL_WINDOW_PROPERTY_WIN32_HDC
+        XL_WINDOW_PROPERTY_WIN32_HINSTANCE
+        XL_WINDOW_PROPERTY_WINRT_WINDOW
+        XL_WINDOW_PROPERTY_X11_DISPLAY
+        XL_WINDOW_PROPERTY_X11_WINDOW
+        XL_WINDOW_PROPERTY_DIRECTFB_INTERFACE
+        XL_WINDOW_PROPERTY_DIRECTFB_WINDOW
+        XL_WINDOW_PROPERTY_DIRECTFB_SURFACE
+        XL_WINDOW_PROPERTY_COCOA_WINDOW
+        XL_WINDOW_PROPERTY_UIKIT_WINDOW
+        XL_WINDOW_PROPERTY_UIKIT_FRAMEBUFFER
+        XL_WINDOW_PROPERTY_UIKIT_COLORBUFFER
+        XL_WINDOW_PROPERTY_UIKIT_RESOLVE_FRAMEBUFFER
+        XL_WINDOW_PROPERTY_WAYLAND_DISPLAY
+        XL_WINDOW_PROPERTY_WAYLAND_SURFACE
+        XL_WINDOW_PROPERTY_WAYLAND_SHELL_SURFACE
+        XL_WINDOW_PROPERTY_MIR_CONNECTION
+        XL_WINDOW_PROPERTY_MIR_SURFACE
+        XL_WINDOW_PROPERTY_ANDROID_WINDOW
+        XL_WINDOW_PROPERTY_ANDROID_SURFACE
+        XL_WINDOW_PROPERTY_VIVANTE_DISPLAY
+        XL_WINDOW_PROPERTY_VIVANTE_WINDOW
         XL_WINDOW_PROPERTY_COUNT
 
     const char* xl_window_property_name[]
@@ -132,6 +162,24 @@ cdef extern from "xl_core.h":
     void xl_window_clear(xl_window_t* window, float r, float g, float b)
     void xl_window_flip(xl_window_t* window)
     void xl_window_screenshot(xl_window_t* window, ae_image_t* image)
+
+    ctypedef enum xl_window_driver_t:
+        XL_WINDOW_DRIVER_UNKNOWN
+        XL_WINDOW_DRIVER_WINDOWS
+        XL_WINDOW_DRIVER_X11
+        XL_WINDOW_DRIVER_DIRECTFB
+        XL_WINDOW_DRIVER_COCOA
+        XL_WINDOW_DRIVER_UIKIT
+        XL_WINDOW_DRIVER_WAYLAND
+        XL_WINDOW_DRIVER_MIR
+        XL_WINDOW_DRIVER_WINRT
+        XL_WINDOW_DRIVER_ANDROID
+        XL_WINDOW_DRIVER_VIVANTE
+        XL_WINDOW_DRIVER_OS2
+        XL_WINDOW_DRIVER_COUNT
+
+    const char* xl_window_driver_name[] # platform strings
+    const char* xl_window_driver_short_name[]
 
     size_t xl_window_count_all()
 
@@ -1648,6 +1696,127 @@ cdef class Window:
 
         def __set__(self, float value):
             xl_window_set_flt(self.window, XL_WINDOW_PROPERTY_OPACITY, value)
+
+    property sdl_window:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_SDL_WINDOW)
+
+    property sdl_renderer:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_SDL_RENDERER)
+
+    property sdl_renderer_info:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_SDL_RENDERER_INFO)
+
+    property sdl_gl_context:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_SDL_GL_CONTEXT)
+
+    property driver:
+        def __get__(self):
+            cdef bytes b = xl_window_get_str(self.window, XL_WINDOW_PROPERTY_DRIVER)
+            return b.decode() if sys.version_info.major > 2 else b
+
+    property native_display:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_NATIVE_DISPLAY)
+
+    property native_window:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_NATIVE_WINDOW)
+
+    property win32_window:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_WIN32_WINDOW)
+
+    property win32_hdc:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_WIN32_HDC)
+
+    property win32_hinstance:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_WIN32_HINSTANCE)
+
+    property winrt_window:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_WINRT_WINDOW)
+
+    property x11_display:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_X11_DISPLAY)
+
+    property x11_window:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_X11_WINDOW)
+
+    property directfb_interface:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_DIRECTFB_INTERFACE)
+
+    property directfb_window:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_DIRECTFB_WINDOW)
+
+    property directfb_surface:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_DIRECTFB_SURFACE)
+
+    property cocoa_window:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_COCOA_WINDOW)
+
+    property uikit_window:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_UIKIT_WINDOW)
+
+    property uikit_framebuffer:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_UIKIT_FRAMEBUFFER)
+
+    property uikit_colorbuffer:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_UIKIT_COLORBUFFER)
+
+    property uikit_resolve_framebuffer:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_UIKIT_RESOLVE_FRAMEBUFFER)
+
+    property wayland_display:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_WAYLAND_DISPLAY)
+
+    property wayland_surface:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_WAYLAND_SURFACE)
+
+    property wayland_shell_surface:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_WAYLAND_SHELL_SURFACE)
+
+    property mir_connection:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_MIR_CONNECTION)
+
+    property mir_surface:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_MIR_SURFACE)
+
+    property android_window:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_ANDROID_WINDOW)
+
+    property android_surface:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_ANDROID_SURFACE)
+
+    property vivante_display:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_VIVANTE_DISPLAY)
+
+    property vivante_window:
+        def __get__(self):
+            return <size_t>xl_window_get_ptr(self.window, XL_WINDOW_PROPERTY_VIVANTE_WINDOW)
 
     def address(self):
         return <size_t>self.window

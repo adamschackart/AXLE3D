@@ -330,6 +330,17 @@ if sys.platform == "win32":
 # ~ [ setup ]
 # ==============================================================================
 
+try: # setup hook for drop-in engines
+    import setup_library
+    setup_library.patch(globals())
+
+except ImportError:
+    try:
+        import setup_engine
+        setup_engine.patch(globals())
+
+    except ImportError: pass
+
 try: # setup hook for drop-in projects
     import setup_game
     setup_game.patch(globals())

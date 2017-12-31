@@ -157,59 +157,93 @@ XL_DECL xl_window_t* XL_CALL xl_primary_window(void);
 /* Window attribute access is constrained to a set of common typed functions.
  * Windows are closed by setting the XL_WINDOW_PROPERTY_OPEN attribute to 0.
  */
-#define XL_WINDOW_PROPERTY_N                                        \
-                                                                    \
-    /* the total number of open windows */                          \
-    N(XL_WINDOW_PROPERTY_TOTAL, int, int, total)                    \
-                                                                    \
-    /* for when a pointer isn't a good enough unique identifier */  \
-    N(XL_WINDOW_PROPERTY_ID, int, int, id)                          \
-                                                                    \
-    /* total number of textures active in GL context's table */     \
-    N(XL_WINDOW_PROPERTY_TEXTURE_COUNT, int, int, texture_count)    \
-                                                                    \
-    /* default copy mode for textures created in this window */     \
-    N(XL_WINDOW_PROPERTY_COPY_TEXTURES, int, int, copy_textures)    \
-                                                                    \
-    /* total number of fonts active in GL context table */          \
-    N(XL_WINDOW_PROPERTY_FONT_COUNT, int, int, font_count)          \
-                                                                    \
-    /* the dimensions of the window */                              \
-    N(XL_WINDOW_PROPERTY_X, int, int, x)                            \
-    N(XL_WINDOW_PROPERTY_Y, int, int, y)                            \
-    N(XL_WINDOW_PROPERTY_WIDTH, int, int, width)                    \
-    N(XL_WINDOW_PROPERTY_HEIGHT, int, int, height)                  \
-                                                                    \
-    /* dimensions of containing monitor */                          \
-    N(XL_WINDOW_PROPERTY_DISPLAY_X, int, int, display_x)            \
-    N(XL_WINDOW_PROPERTY_DISPLAY_Y, int, int, display_y)            \
-    N(XL_WINDOW_PROPERTY_DISPLAY_WIDTH, int, int, display_width)    \
-    N(XL_WINDOW_PROPERTY_DISPLAY_HEIGHT, int, int, display_height)  \
-                                                                    \
-    /* renderer dimensions */                                       \
-    N(XL_WINDOW_PROPERTY_RENDER_WIDTH, int, int, render_width)      \
-    N(XL_WINDOW_PROPERTY_RENDER_HEIGHT, int, int, render_height)    \
-                                                                    \
-    /* boolean properties */                                        \
-    N(XL_WINDOW_PROPERTY_FULLSCREEN, int, int, fullscreen)          \
-    N(XL_WINDOW_PROPERTY_BORDERED, int, int, bordered)              \
-    N(XL_WINDOW_PROPERTY_VISIBLE, int, int, visible)                \
-    N(XL_WINDOW_PROPERTY_RESIZABLE, int, int, resizable)            \
-    N(XL_WINDOW_PROPERTY_ACTIVE, int, int, active)                  \
-    N(XL_WINDOW_PROPERTY_GRABBED, int, int, grabbed)                \
-    N(XL_WINDOW_PROPERTY_OPENGL, int, int, opengl)                  \
-    N(XL_WINDOW_PROPERTY_VSYNC, int, int, vsync)                    \
-    N(XL_WINDOW_PROPERTY_PRIMARY, int, int, primary)                \
-    N(XL_WINDOW_PROPERTY_OPEN, int, int, open)                      \
-                                                                    \
-    /* miscellaneous properties */                                  \
-    N(XL_WINDOW_PROPERTY_STATUS, const char*, str, status)          \
-    N(XL_WINDOW_PROPERTY_TITLE, const char*, str, title)            \
-    N(XL_WINDOW_PROPERTY_NAME, const char*, str, name)              \
-    N(XL_WINDOW_PROPERTY_ICON, ae_image_t*, img, icon)              \
-    N(XL_WINDOW_PROPERTY_OPACITY, float, flt, opacity)              \
-                                                                    \
-    N(XL_WINDOW_PROPERTY_COUNT, int, int, _)                        \
+#define XL_WINDOW_PROPERTY_N                                                                \
+                                                                                            \
+    /* the total number of open windows */                                                  \
+    N(XL_WINDOW_PROPERTY_TOTAL, int, int, total)                                            \
+                                                                                            \
+    /* for when a pointer isn't a good enough unique identifier */                          \
+    N(XL_WINDOW_PROPERTY_ID, int, int, id)                                                  \
+                                                                                            \
+    /* total number of textures active in GL context's table */                             \
+    N(XL_WINDOW_PROPERTY_TEXTURE_COUNT, int, int, texture_count)                            \
+                                                                                            \
+    /* default copy mode for textures created in this window */                             \
+    N(XL_WINDOW_PROPERTY_COPY_TEXTURES, int, int, copy_textures)                            \
+                                                                                            \
+    /* total number of fonts active in GL context table */                                  \
+    N(XL_WINDOW_PROPERTY_FONT_COUNT, int, int, font_count)                                  \
+                                                                                            \
+    /* the dimensions of the window */                                                      \
+    N(XL_WINDOW_PROPERTY_X, int, int, x)                                                    \
+    N(XL_WINDOW_PROPERTY_Y, int, int, y)                                                    \
+    N(XL_WINDOW_PROPERTY_WIDTH, int, int, width)                                            \
+    N(XL_WINDOW_PROPERTY_HEIGHT, int, int, height)                                          \
+                                                                                            \
+    /* dimensions of containing monitor */                                                  \
+    N(XL_WINDOW_PROPERTY_DISPLAY_X, int, int, display_x)                                    \
+    N(XL_WINDOW_PROPERTY_DISPLAY_Y, int, int, display_y)                                    \
+    N(XL_WINDOW_PROPERTY_DISPLAY_WIDTH, int, int, display_width)                            \
+    N(XL_WINDOW_PROPERTY_DISPLAY_HEIGHT, int, int, display_height)                          \
+                                                                                            \
+    /* renderer dimensions */                                                               \
+    N(XL_WINDOW_PROPERTY_RENDER_WIDTH, int, int, render_width)                              \
+    N(XL_WINDOW_PROPERTY_RENDER_HEIGHT, int, int, render_height)                            \
+                                                                                            \
+    /* boolean properties */                                                                \
+    N(XL_WINDOW_PROPERTY_FULLSCREEN, int, int, fullscreen)                                  \
+    N(XL_WINDOW_PROPERTY_BORDERED, int, int, bordered)                                      \
+    N(XL_WINDOW_PROPERTY_VISIBLE, int, int, visible)                                        \
+    N(XL_WINDOW_PROPERTY_RESIZABLE, int, int, resizable)                                    \
+    N(XL_WINDOW_PROPERTY_ACTIVE, int, int, active)                                          \
+    N(XL_WINDOW_PROPERTY_GRABBED, int, int, grabbed)                                        \
+    N(XL_WINDOW_PROPERTY_OPENGL, int, int, opengl)                                          \
+    N(XL_WINDOW_PROPERTY_VSYNC, int, int, vsync)                                            \
+    N(XL_WINDOW_PROPERTY_PRIMARY, int, int, primary)                                        \
+    N(XL_WINDOW_PROPERTY_OPEN, int, int, open)                                              \
+                                                                                            \
+    /* miscellaneous properties */                                                          \
+    N(XL_WINDOW_PROPERTY_STATUS, const char*, str, status)                                  \
+    N(XL_WINDOW_PROPERTY_TITLE, const char*, str, title)                                    \
+    N(XL_WINDOW_PROPERTY_NAME, const char*, str, name)                                      \
+    N(XL_WINDOW_PROPERTY_ICON, ae_image_t*, img, icon)                                      \
+    N(XL_WINDOW_PROPERTY_OPACITY, float, flt, opacity)                                      \
+                                                                                            \
+    /* platform-specific backdoors */                                                       \
+    N(XL_WINDOW_PROPERTY_SDL_WINDOW, void*, ptr, sdl_window)                                \
+    N(XL_WINDOW_PROPERTY_SDL_RENDERER, void*, ptr, sdl_renderer)                            \
+    N(XL_WINDOW_PROPERTY_SDL_RENDERER_INFO, void*, ptr, sdl_renderer_info)                  \
+    N(XL_WINDOW_PROPERTY_SDL_GL_CONTEXT, void*, ptr, sdl_gl_context)                        \
+                                                                                            \
+    N(XL_WINDOW_PROPERTY_DRIVER, int, int, driver) /* xl_window_driver_t */                 \
+    N(XL_WINDOW_PROPERTY_NATIVE_DISPLAY, void*, ptr, native_display)                        \
+    N(XL_WINDOW_PROPERTY_NATIVE_WINDOW, void*, ptr, native_window)                          \
+                                                                                            \
+    N(XL_WINDOW_PROPERTY_WIN32_WINDOW, void*, ptr, win32_window)                            \
+    N(XL_WINDOW_PROPERTY_WIN32_HDC, void*, ptr, win32_hdc)                                  \
+    N(XL_WINDOW_PROPERTY_WIN32_HINSTANCE, void*, ptr, win32_histance)                       \
+    N(XL_WINDOW_PROPERTY_WINRT_WINDOW, void*, ptr, winrt_window)                            \
+    N(XL_WINDOW_PROPERTY_X11_DISPLAY, void*, ptr, x11_display)                              \
+    N(XL_WINDOW_PROPERTY_X11_WINDOW, void*, ptr, x11_window)                                \
+    N(XL_WINDOW_PROPERTY_DIRECTFB_INTERFACE, void*, ptr, directfb_interface)                \
+    N(XL_WINDOW_PROPERTY_DIRECTFB_WINDOW, void*, ptr, directfb_window)                      \
+    N(XL_WINDOW_PROPERTY_DIRECTFB_SURFACE, void*, ptr, directfb_surface)                    \
+    N(XL_WINDOW_PROPERTY_COCOA_WINDOW, void*, ptr, cocoa_window)                            \
+    N(XL_WINDOW_PROPERTY_UIKIT_WINDOW, void*, ptr, uikit_window)                            \
+    N(XL_WINDOW_PROPERTY_UIKIT_FRAMEBUFFER, void*, ptr, uikit_framebuffer)                  \
+    N(XL_WINDOW_PROPERTY_UIKIT_COLORBUFFER, void*, ptr, uikit_colorbuffer)                  \
+    N(XL_WINDOW_PROPERTY_UIKIT_RESOLVE_FRAMEBUFFER, void*, ptr, uikit_resolve_framebuffer)  \
+    N(XL_WINDOW_PROPERTY_WAYLAND_DISPLAY, void*, ptr, wayland_display)                      \
+    N(XL_WINDOW_PROPERTY_WAYLAND_SURFACE, void*, ptr, wayland_surface)                      \
+    N(XL_WINDOW_PROPERTY_WAYLAND_SHELL_SURFACE, void*, ptr, wayland_shell_surface)          \
+    N(XL_WINDOW_PROPERTY_MIR_CONNECTION, void*, ptr, mir_connection)                        \
+    N(XL_WINDOW_PROPERTY_MIR_SURFACE, void*, ptr, mir_surface)                              \
+    N(XL_WINDOW_PROPERTY_ANDROID_WINDOW, void*, ptr, android_window)                        \
+    N(XL_WINDOW_PROPERTY_ANDROID_SURFACE, void*, ptr, android_surface)                      \
+    N(XL_WINDOW_PROPERTY_VIVANTE_DISPLAY, void*, ptr, vivante_display)                      \
+    N(XL_WINDOW_PROPERTY_VIVANTE_WINDOW, void*, ptr, vivante_window)                        \
+                                                                                            \
+    N(XL_WINDOW_PROPERTY_COUNT, int, int, _)                                                \
 
 typedef enum xl_window_property_t
 {
@@ -294,6 +328,56 @@ XL_DECL void XL_CALL xl_window_flip(xl_window_t* window);
 
 // Copies the contents of the window to an image (window sized, not renderer sized).
 XL_DECL void XL_CALL xl_window_screenshot(xl_window_t* window, ae_image_t* image);
+
+/* This is something most users won't need, but it's required for stuff like BGFX etc.
+ */
+#define XL_WINDOW_DRIVER_N  \
+                            \
+    N(UNKNOWN,  unknown)    \
+    N(WINDOWS,  windows)    \
+    N(X11,      x11)        \
+    N(DIRECTFB, directfb)   \
+    N(COCOA,    cocoa)      \
+    N(UIKIT,    uikit)      \
+    N(WAYLAND,  wayland)    \
+    N(MIR,      mir)        \
+    N(WINRT,    winrt)      \
+    N(ANDROID,  android)    \
+    N(VIVANTE,  vivante)    \
+    N(OS2,      os2)        \
+    N(COUNT,    _)          \
+
+typedef enum xl_window_driver_t
+{
+    #define N(hi, lo) XL_WINDOW_DRIVER_ ## hi,
+    XL_WINDOW_DRIVER_N
+    #undef N
+} \
+    xl_window_driver_t;
+
+static const char* xl_window_driver_name[] =
+{
+    #define N(hi, lo) AE_STRINGIFY(XL_WINDOW_DRIVER_ ## hi),
+    XL_WINDOW_DRIVER_N
+    #undef N
+};
+
+static const char* xl_window_driver_short_name[] =
+{
+    #define N(hi, lo) #lo,
+    XL_WINDOW_DRIVER_N
+    #undef N
+};
+
+#define N(hi, lo)                                                       \
+                                                                        \
+    static c_inline int xl_window_driver_is_ ## lo (xl_window_t* win)   \
+    {                                                                   \
+        return xl_window_get_driver(win) == XL_WINDOW_DRIVER_ ## hi;    \
+    }                                                                   \
+
+XL_WINDOW_DRIVER_N
+#undef N
 
 static c_inline size_t xl_window_count_all(void)
 {

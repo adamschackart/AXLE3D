@@ -630,49 +630,49 @@ xl_keyboard_t* xl_primary_keyboard(void)
 }
 
 void
-xl_keyboard_set_int(xl_keyboard_t* keyboard, xl_keyboard_property_t prop, int value)
+xl_keyboard_set_int(xl_keyboard_t* keyboard, xl_keyboard_property_t property, int value)
 {
     AE_STUB();
 }
 
 int
-xl_keyboard_get_int(xl_keyboard_t* keyboard, xl_keyboard_property_t prop)
+xl_keyboard_get_int(xl_keyboard_t* keyboard, xl_keyboard_property_t property)
 {
     AE_STUB(); return 0;
 }
 
 void
-xl_keyboard_set_dbl(xl_keyboard_t* keyboard, xl_keyboard_property_t prop, double value)
+xl_keyboard_set_dbl(xl_keyboard_t* keyboard, xl_keyboard_property_t property, double value)
 {
     AE_STUB();
 }
 
 double
-xl_keyboard_get_dbl(xl_keyboard_t* keyboard, xl_keyboard_property_t prop)
+xl_keyboard_get_dbl(xl_keyboard_t* keyboard, xl_keyboard_property_t property)
 {
     AE_STUB(); return 0.0;
 }
 
 void
-xl_keyboard_set_str(xl_keyboard_t* keyboard, xl_keyboard_property_t prop, const char* value)
+xl_keyboard_set_str(xl_keyboard_t* keyboard, xl_keyboard_property_t property, const char* value)
 {
     AE_STUB();
 }
 
 const char*
-xl_keyboard_get_str(xl_keyboard_t* keyboard, xl_keyboard_property_t prop)
+xl_keyboard_get_str(xl_keyboard_t* keyboard, xl_keyboard_property_t property)
 {
     AE_STUB(); return "";
 }
 
 void
-xl_keyboard_set_ptr(xl_keyboard_t* keyboard, xl_keyboard_property_t prop, void* value)
+xl_keyboard_set_ptr(xl_keyboard_t* keyboard, xl_keyboard_property_t property, void* value)
 {
     AE_STUB();
 }
 
 void*
-xl_keyboard_get_ptr(xl_keyboard_t* keyboard, xl_keyboard_property_t prop)
+xl_keyboard_get_ptr(xl_keyboard_t* keyboard, xl_keyboard_property_t property)
 {
     AE_STUB(); return NULL;
 }
@@ -727,49 +727,49 @@ xl_mouse_t* xl_primary_mouse(void)
 }
 
 void
-xl_mouse_set_int(xl_mouse_t* mouse, xl_mouse_property_t prop, int value)
+xl_mouse_set_int(xl_mouse_t* mouse, xl_mouse_property_t property, int value)
 {
     AE_STUB();
 }
 
 int
-xl_mouse_get_int(xl_mouse_t* mouse, xl_mouse_property_t prop)
+xl_mouse_get_int(xl_mouse_t* mouse, xl_mouse_property_t property)
 {
     AE_STUB(); return 0;
 }
 
 void
-xl_mouse_set_dbl(xl_mouse_t* mouse, xl_mouse_property_t prop, double value)
+xl_mouse_set_dbl(xl_mouse_t* mouse, xl_mouse_property_t property, double value)
 {
     AE_STUB();
 }
 
 double
-xl_mouse_get_dbl(xl_mouse_t* mouse, xl_mouse_property_t prop)
+xl_mouse_get_dbl(xl_mouse_t* mouse, xl_mouse_property_t property)
 {
     AE_STUB(); return 0.0;
 }
 
 void
-xl_mouse_set_str(xl_mouse_t* mouse, xl_mouse_property_t prop, const char* value)
+xl_mouse_set_str(xl_mouse_t* mouse, xl_mouse_property_t property, const char* value)
 {
     AE_STUB();
 }
 
 const char*
-xl_mouse_get_str(xl_mouse_t* mouse, xl_mouse_property_t prop)
+xl_mouse_get_str(xl_mouse_t* mouse, xl_mouse_property_t property)
 {
     AE_STUB(); return "";
 }
 
 void
-xl_mouse_set_ptr(xl_mouse_t* mouse, xl_mouse_property_t prop, void* value)
+xl_mouse_set_ptr(xl_mouse_t* mouse, xl_mouse_property_t property, void* value)
 {
     AE_STUB();
 }
 
 void*
-xl_mouse_get_ptr(xl_mouse_t* mouse, xl_mouse_property_t prop)
+xl_mouse_get_ptr(xl_mouse_t* mouse, xl_mouse_property_t property)
 {
     AE_STUB(); return NULL;
 }
@@ -819,49 +819,49 @@ xl_controller_t* xl_primary_controller(void)
 }
 
 void
-xl_controller_set_int(xl_controller_t* controller, xl_controller_property_t prop, int value)
+xl_controller_set_int(xl_controller_t* controller, xl_controller_property_t property, int value)
 {
     AE_STUB();
 }
 
 int
-xl_controller_get_int(xl_controller_t* controller, xl_controller_property_t prop)
+xl_controller_get_int(xl_controller_t* controller, xl_controller_property_t property)
 {
     AE_STUB(); return 0;
 }
 
 void
-xl_controller_set_flt(xl_controller_t* controller, xl_controller_property_t prop, float value)
+xl_controller_set_flt(xl_controller_t* controller, xl_controller_property_t property, float value)
 {
     AE_STUB();
 }
 
 float
-xl_controller_get_flt(xl_controller_t* controller, xl_controller_property_t prop)
+xl_controller_get_flt(xl_controller_t* controller, xl_controller_property_t property)
 {
     AE_STUB(); return 0.0f;
 }
 
 void
-xl_controller_set_dbl(xl_controller_t* controller, xl_controller_property_t prop, double value)
+xl_controller_set_dbl(xl_controller_t* controller, xl_controller_property_t property, double value)
 {
     AE_STUB();
 }
 
 double
-xl_controller_get_dbl(xl_controller_t* controller, xl_controller_property_t prop)
+xl_controller_get_dbl(xl_controller_t* controller, xl_controller_property_t property)
 {
     AE_STUB(); return 0.0;
 }
 
 void
-xl_controller_set_str(xl_controller_t* controller, xl_controller_property_t prop, const char* value)
+xl_controller_set_str(xl_controller_t* controller, xl_controller_property_t property, const char* value)
 {
     AE_STUB();
 }
 
 const char*
-xl_controller_get_str(xl_controller_t* controller, xl_controller_property_t prop)
+xl_controller_get_str(xl_controller_t* controller, xl_controller_property_t property)
 {
     AE_STUB(); return "";
 }
@@ -1098,37 +1098,37 @@ xl_clock_t* xl_clock_buffer_load(u8* buffer, size_t length)
 }
 
 void
-xl_clock_set_int(xl_clock_t* clock, xl_clock_property_t prop, int value)
+xl_clock_set_int(xl_clock_t* clock, xl_clock_property_t property, int value)
 {
     AE_STUB();
 }
 
 int
-xl_clock_get_int(xl_clock_t* clock, xl_clock_property_t prop)
+xl_clock_get_int(xl_clock_t* clock, xl_clock_property_t property)
 {
     AE_STUB(); return 0;
 }
 
 void
-xl_clock_set_dbl(xl_clock_t* clock, xl_clock_property_t prop, double value)
+xl_clock_set_dbl(xl_clock_t* clock, xl_clock_property_t property, double value)
 {
     AE_STUB();
 }
 
 double
-xl_clock_get_dbl(xl_clock_t* clock, xl_clock_property_t prop)
+xl_clock_get_dbl(xl_clock_t* clock, xl_clock_property_t property)
 {
     AE_STUB(); return 0.0;
 }
 
 void
-xl_clock_set_str(xl_clock_t* clock, xl_clock_property_t prop, const char* value)
+xl_clock_set_str(xl_clock_t* clock, xl_clock_property_t property, const char* value)
 {
     AE_STUB();
 }
 
 const char*
-xl_clock_get_str(xl_clock_t* clock, xl_clock_property_t prop)
+xl_clock_get_str(xl_clock_t* clock, xl_clock_property_t property)
 {
     AE_STUB(); return "";
 }

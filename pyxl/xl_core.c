@@ -21,6 +21,8 @@
 --- TODO: track last time any input action was taken (max of press and release)
 --- TODO: xl_touchscreen_t - handle touch input events similar to other devices
 --- TODO: get the average of controller or mouse inputs within a sliding window
+--- TODO: string property overload for object id - add int to hex string to AE
+--- TODO: xl_webcam_t (capture to image probably requires YUV decompress code!)
 ----------------------------------------------------------------------------- */
 #ifndef __XL_CORE_H__
 #include <xl_core.h>
@@ -38,6 +40,28 @@ XL_OBJECT_TYPE_N
 #include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL.h>
+
+/* FIXME: we include a local copy of the SDL headers, which assume that we're
+ * building on windows. this breaks the platform-specific window backdoors!!!
+ *
+ * this also has the potential of breaking the ABI (different compiled and
+ * linked versions mean that structure sizes are incorrectly assumed here).
+ */
+#if !_WIN32
+#undef SDL_VIDEO_DRIVER_WINDOWS
+
+/* XXX: this is also quite problematic, as it's not valid on all *nix systems.
+ */
+#define SDL_VIDEO_DRIVER_X11
+#endif
+#if __APPLE__
+#undef SDL_VIDEO_DRIVER_X11
+
+/* XXX: also a potentially invalid assumption - we might be using uikit here.
+ */
+#define SDL_VIDEO_DRIVER_COCOA
+#endif
+#include <SDL2/SDL_syswm.h>
 
 static void xl_event_from_sdl(xl_event_t*, SDL_Event*);
 static void xl_event_internal(xl_event_t*, SDL_Event*);
@@ -119,6 +143,7 @@ TODO: get currently grabbed window, mouse focused window, & input focused window
 TODO: function that applies argv to window properties (e.g. -window-width=1920)
 TODO: log more window information (monitor name?) on window creation and closing
 TODO: refresh_rate property (hertz) that calls SDL_DisplayMode to cap framerate
+TODO: initialization option to enable MSAA (multisampled antialiasing) on OpenGL
 --------------------------------------------------------------------------------
 */
 
@@ -758,6 +783,58 @@ int xl_window_get_int(xl_window_t* window, xl_window_property_t property)
         }
         break;
 
+        case XL_WINDOW_PROPERTY_DRIVER:
+        {
+            // TODO: call SDL_GetWindowWMInfo and translate the subsystem type
+            if (xl_window_get_open(window))
+            {
+                #if defined(SDL_VIDEO_DRIVER_WINDOWS)
+                return (int)XL_WINDOW_DRIVER_WINDOWS;
+                #endif
+
+                #if defined(SDL_VIDEO_DRIVER_X11)
+                return (int)XL_WINDOW_DRIVER_X11;
+                #endif
+
+                #if defined(SDL_VIDEO_DRIVER_DIRECTFB)
+                return (int)XL_WINDOW_DRIVER_DIRECTFB;
+                #endif
+
+                #if defined(SDL_VIDEO_DRIVER_COCOA)
+                return (int)XL_WINDOW_DRIVER_COCOA;
+                #endif
+
+                #if defined(SDL_VIDEO_DRIVER_UIKIT)
+                return (int)XL_WINDOW_DRIVER_UIKIT;
+                #endif
+
+                #if defined(SDL_VIDEO_DRIVER_WAYLAND)
+                return (int)XL_WINDOW_DRIVER_WAYLAND;
+                #endif
+
+                #if defined(SDL_VIDEO_DRIVER_MIR)
+                return (int)XL_WINDOW_DRIVER_MIR;
+                #endif
+
+                #if defined(SDL_VIDEO_DRIVER_WINRT)
+                return (int)XL_WINDOW_DRIVER_WINRT;
+                #endif
+
+                #if defined(SDL_VIDEO_DRIVER_ANDROID)
+                return (int)XL_WINDOW_DRIVER_ANDROID;
+                #endif
+
+                #if defined(SDL_VIDEO_DRIVER_VIVANTE)
+                return (int)XL_WINDOW_DRIVER_VIVANTE;
+                #endif
+
+                #if defined(SDL_VIDEO_DRIVER_OS2)
+                return (int)XL_WINDOW_DRIVER_OS2;
+                #endif
+            }
+        }
+        break;
+
         default:
         {
             AE_WARN("%s in %s", xl_window_property_name[property], __FUNCTION__);
@@ -937,6 +1014,15 @@ const char* xl_window_get_str(xl_window_t* window, xl_window_property_t property
         }
         break;
 
+        case XL_WINDOW_PROPERTY_DRIVER:
+        {
+            if (xl_window_get_open(window))
+            {
+                return xl_window_driver_short_name[xl_window_get_driver(window)];
+            }
+        }
+        break;
+
         default:
         {
             AE_WARN("%s in %s", xl_window_property_name[property], __FUNCTION__);
@@ -954,11 +1040,406 @@ void xl_window_set_ptr(xl_window_t* window, xl_window_property_t property, void*
 
 void* xl_window_get_ptr(xl_window_t* window, xl_window_property_t property)
 {
-    // this will be for getting native window handles (win32 HWND, cocoa NSWindow, etc).
-    // we should make SDL handles available too... we'll be using them for a long time.
-    // this will also eventually be used to set the render target (xl_texture_t pointer),
-    // which should also be settable as a texture boolean (true makes texture active).
-    AE_STUB(); return NULL;
+    /* TODO: this will eventually be used to set the render target (xl_texture_t ptr),
+     * which should also be settable as a texture boolean (true makes texture active).
+     * TODO: GLFW backdoors, which might be another possible platform implementation.
+     */
+    xl_internal_window_t* data = (xl_internal_window_t*)window;
+
+    // Structure full of platform-specific information for backdoor functions. Not all
+    // of these are actually pointers, but they should all be able to resolve to ints.
+    // If not (in the case of structs), simply take the address and cast it to void *.
+    SDL_SysWMinfo info = AE_ZERO_STRUCT;
+
+    // If the platform-specific backdoor is unavailable on this OS, issue a warning.
+    int platform_warning = 0;
+
+    // Post events to windows. Should work even if SDL isn't initialized.
+    SDL_PumpEvents();
+
+    // XXX: Just call this here to save code space. Not the most efficient thing ever.
+    if (xl_window_get_open(window))
+    {
+        SDL_VERSION(&info.version); // SDL safety checks against the compiled version.
+
+        if (SDL_GetWindowWMInfo(data->window, &info) == SDL_FALSE)
+        {
+            AE_WARN("failed to get platform window info: %s", SDL_GetError());
+        }
+    }
+
+    ae_switch (property, xl_window_property, XL_WINDOW_PROPERTY, suffix)
+    {
+        case XL_WINDOW_PROPERTY_NATIVE_DISPLAY:
+        {
+            ae_switch (xl_window_get_driver(window), xl_window_driver, XL_WINDOW_DRIVER, suffix)
+            {
+                case XL_WINDOW_DRIVER_X11:      return xl_window_get_x11_display    (window);
+                case XL_WINDOW_DRIVER_WAYLAND:  return xl_window_get_wayland_display(window);
+                case XL_WINDOW_DRIVER_VIVANTE:  return xl_window_get_vivante_display(window);
+
+                default: break;
+            }
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_NATIVE_WINDOW:
+        {
+            ae_switch (xl_window_get_driver(window), xl_window_driver, XL_WINDOW_DRIVER, suffix)
+            {
+                case XL_WINDOW_DRIVER_WINDOWS:  return xl_window_get_win32_window   (window);
+                case XL_WINDOW_DRIVER_X11:      return xl_window_get_x11_window     (window);
+                case XL_WINDOW_DRIVER_DIRECTFB: return xl_window_get_directfb_window(window);
+                case XL_WINDOW_DRIVER_COCOA:    return xl_window_get_cocoa_window   (window);
+                case XL_WINDOW_DRIVER_UIKIT:    return xl_window_get_uikit_window   (window);
+                case XL_WINDOW_DRIVER_WINRT:    return xl_window_get_winrt_window   (window);
+                case XL_WINDOW_DRIVER_ANDROID:  return xl_window_get_android_window (window);
+                case XL_WINDOW_DRIVER_VIVANTE:  return xl_window_get_vivante_window (window);
+
+                default: break;
+            }
+        }
+        break;
+
+        /* NOTE: check the xl_implementation string to make sure SDL 2 is supported!
+         */
+        case XL_WINDOW_PROPERTY_SDL_WINDOW:
+        {
+            if (xl_window_get_open(window)) return (void*)data->window;
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_SDL_RENDERER:
+        {
+            if (xl_window_get_open(window)) return (void*)data->renderer;
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_SDL_RENDERER_INFO:
+        {
+            if (xl_window_get_open(window)) return (void*)&data->renderer_info;
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_SDL_GL_CONTEXT:
+        {
+            if (xl_window_get_open(window)) return (void*)data->gl_context;
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_WIN32_WINDOW:
+        {
+            #if defined(SDL_VIDEO_DRIVER_WINDOWS) && SDL_VERSION_ATLEAST(2, 0, 0)
+            {
+                assert (info.subsystem == SDL_SYSWM_WINDOWS);
+                return (void *)info.info.win.window;
+            }
+            #else
+                platform_warning = 1;
+            #endif
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_WIN32_HDC:
+        {
+            #if defined(SDL_VIDEO_DRIVER_WINDOWS) && SDL_VERSION_ATLEAST(2, 0, 4)
+            {
+                assert (info.subsystem == SDL_SYSWM_WINDOWS);
+                return (void *)info.info.win.hdc;
+            }
+            #else
+                platform_warning = 1;
+            #endif
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_WIN32_HINSTANCE:
+        {
+            #if defined(SDL_VIDEO_DRIVER_WINDOWS) && SDL_VERSION_ATLEAST(2, 0, 6)
+            {
+                assert (info.subsystem == SDL_SYSWM_WINDOWS);
+                return (void *)info.info.win.hinstance;
+            }
+            #else
+                platform_warning = 1;
+            #endif
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_WINRT_WINDOW:
+        {
+            #if defined(SDL_VIDEO_DRIVER_WINRT) && SDL_VERSION_ATLEAST(2, 0, 3)
+            {
+                assert (info.subsystem == SDL_SYSWM_WINRT);
+                return (void *)info.info.winrt.window;
+            }
+            #else
+                platform_warning = 1;
+            #endif
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_X11_DISPLAY:
+        {
+            #if defined(SDL_VIDEO_DRIVER_X11) && SDL_VERSION_ATLEAST(2, 0, 0)
+            {
+                assert (info.subsystem == SDL_SYSWM_X11);
+                return (void *)info.info.x11.display;
+            }
+            #else
+                platform_warning = 1;
+            #endif
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_X11_WINDOW:
+        {
+            #if defined(SDL_VIDEO_DRIVER_X11) && SDL_VERSION_ATLEAST(2, 0, 0)
+            {
+                assert (info.subsystem == SDL_SYSWM_X11);
+                return (void *)info.info.x11.window;
+            }
+            #else
+                platform_warning = 1;
+            #endif
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_DIRECTFB_INTERFACE:
+        {
+            #if defined(SDL_VIDEO_DRIVER_DIRECTFB) && SDL_VERSION_ATLEAST(2, 0, 0)
+            {
+                assert (info.subsystem == SDL_SYSWM_DIRECTFB);
+                return (void *)info.info.dfb.dfb;
+            }
+            #else
+                platform_warning = 1;
+            #endif
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_DIRECTFB_WINDOW:
+        {
+            #if defined(SDL_VIDEO_DRIVER_DIRECTFB) && SDL_VERSION_ATLEAST(2, 0, 0)
+            {
+                assert (info.subsystem == SDL_SYSWM_DIRECTFB);
+                return (void *)info.info.dfb.window;
+            }
+            #else
+                platform_warning = 1;
+            #endif
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_DIRECTFB_SURFACE:
+        {
+            #if defined(SDL_VIDEO_DRIVER_DIRECTFB) && SDL_VERSION_ATLEAST(2, 0, 0)
+            {
+                assert (info.subsystem == SDL_SYSWM_DIRECTFB);
+                return (void *)info.info.dfb.surface;
+            }
+            #else
+                platform_warning = 1;
+            #endif
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_COCOA_WINDOW:
+        {
+            #if defined(SDL_VIDEO_DRIVER_COCOA) && SDL_VERSION_ATLEAST(2, 0, 0)
+            {
+                assert (info.subsystem == SDL_SYSWM_COCOA);
+                return (void *)info.info.cocoa.window;
+            }
+            #else
+                platform_warning = 1;
+            #endif
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_UIKIT_WINDOW:
+        {
+            #if defined(SDL_VIDEO_DRIVER_UIKIT) && SDL_VERSION_ATLEAST(2, 0, 0)
+            {
+                assert (info.subsystem == SDL_SYSWM_UIKIT);
+                return (void *)info.info.uikit.window;
+            }
+            #else
+                platform_warning = 1;
+            #endif
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_UIKIT_FRAMEBUFFER:
+        {
+            #if defined(SDL_VIDEO_DRIVER_UIKIT) && SDL_VERSION_ATLEAST(2, 0, 4)
+            {
+                assert (info.subsystem == SDL_SYSWM_UIKIT);
+                return (void *)info.info.uikit.framebuffer;
+            }
+            #else
+                platform_warning = 1;
+            #endif
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_UIKIT_COLORBUFFER:
+        {
+            #if defined(SDL_VIDEO_DRIVER_UIKIT) && SDL_VERSION_ATLEAST(2, 0, 4)
+            {
+                assert (info.subsystem == SDL_SYSWM_UIKIT);
+                return (void *)info.info.uikit.colorbuffer;
+            }
+            #else
+                platform_warning = 1;
+            #endif
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_UIKIT_RESOLVE_FRAMEBUFFER:
+        {
+            #if defined(SDL_VIDEO_DRIVER_UIKIT) && SDL_VERSION_ATLEAST(2, 0, 4)
+            {
+                assert (info.subsystem == SDL_SYSWM_UIKIT);
+                return (void *)info.info.uikit.resolveFramebuffer;
+            }
+            #else
+                platform_warning = 1;
+            #endif
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_WAYLAND_DISPLAY:
+        {
+            #if defined(SDL_VIDEO_DRIVER_WAYLAND) && SDL_VERSION_ATLEAST(2, 0, 2)
+            {
+                assert (info.subsystem == SDL_SYSWM_WAYLAND);
+                return (void *)info.info.wl.display;
+            }
+            #else
+                platform_warning = 1;
+            #endif
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_WAYLAND_SURFACE:
+        {
+            #if defined(SDL_VIDEO_DRIVER_WAYLAND) && SDL_VERSION_ATLEAST(2, 0, 2)
+            {
+                assert (info.subsystem == SDL_SYSWM_WAYLAND);
+                return (void *)info.info.wl.surface;
+            }
+            #else
+                platform_warning = 1;
+            #endif
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_WAYLAND_SHELL_SURFACE:
+        {
+            #if defined(SDL_VIDEO_DRIVER_WAYLAND) && SDL_VERSION_ATLEAST(2, 0, 2)
+            {
+                assert (info.subsystem == SDL_SYSWM_WAYLAND);
+                return (void *)info.info.wl.shell_surface;
+            }
+            #else
+                platform_warning = 1;
+            #endif
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_MIR_CONNECTION:
+        {
+            #if defined(SDL_VIDEO_DRIVER_MIR) && SDL_VERSION_ATLEAST(2, 0, 2)
+            {
+                assert (info.subsystem == SDL_SYSWM_MIR);
+                return (void *)info.info.mir.connection;
+            }
+            #else
+                platform_warning = 1;
+            #endif
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_MIR_SURFACE:
+        {
+            #if defined(SDL_VIDEO_DRIVER_MIR) && SDL_VERSION_ATLEAST(2, 0, 2)
+            {
+                assert (info.subsystem == SDL_SYSWM_MIR);
+                return (void *)info.info.mir.surface;
+            }
+            #else
+                platform_warning = 1;
+            #endif
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_ANDROID_WINDOW:
+        {
+            #if defined(SDL_VIDEO_DRIVER_ANDROID) && SDL_VERSION_ATLEAST(2, 0, 4)
+            {
+                assert (info.subsystem == SDL_SYSWM_ANDROID);
+                return (void *)info.info.android.window;
+            }
+            #else
+                platform_warning = 1;
+            #endif
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_ANDROID_SURFACE:
+        {
+            #if defined(SDL_VIDEO_DRIVER_ANDROID) && SDL_VERSION_ATLEAST(2, 0, 4)
+            {
+                assert (info.subsystem == SDL_SYSWM_ANDROID);
+                return (void *)info.info.android.surface;
+            }
+            #else
+                platform_warning = 1;
+            #endif
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_VIVANTE_DISPLAY:
+        {
+            #if defined(SDL_VIDEO_DRIVER_VIVANTE) && SDL_VERSION_ATLEAST(2, 0, 5)
+            {
+                assert (info.subsystem == SDL_SYSWM_VIVANTE);
+                return (void *)info.info.vivante.display;
+            }
+            #else
+                platform_warning = 1;
+            #endif
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_VIVANTE_WINDOW:
+        {
+            #if defined(SDL_VIDEO_DRIVER_VIVANTE) && SDL_VERSION_ATLEAST(2, 0, 5)
+            {
+                assert (info.subsystem == SDL_SYSWM_VIVANTE);
+                return (void *)info.info.vivante.window;
+            }
+            #else
+                platform_warning = 1;
+            #endif
+        }
+        break;
+
+        default:
+        {
+            AE_WARN("%s in %s", xl_window_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
+
+    if (platform_warning)
+    {
+        AE_WARN("%s is not available on %s", xl_window_property_name[property] +
+                            strlen("XL_WINDOW_PROPERTY_"), ae_platform_name());
+    }
+
+    return NULL;
 }
 
 void xl_window_set_img(xl_window_t* window, xl_window_property_t property, ae_image_t* value)
@@ -5155,6 +5636,7 @@ sticks, dance pads, rock band guitars / drumkits, and flight simulator throttles
 --------------------------------------------------------------------------------
 TODO: handle battery level and rumble effects (don't rumble if battery is < 30%)
 TODO: apply automatic easing to stick & shoulder inputs (default mode is linear)
+TODO: shoulder trigger deadzone (set the initial deadzone to something very low)
 TODO: should we pass stick and trigger deltas with events? (tons of event data!)
 --------------------------------------------------------------------------------
 */
@@ -7333,6 +7815,13 @@ void xl_clock_buffer_save(u8* out, xl_clock_t* clock)
         const char * name = xl_clock_get_name(clock);
         u32 name_length = strlen(name);
 
+        // FIXME nag message to get myself to Do The Right Thing
+        #if defined(AE_DEBUG)
+
+        AE_WARN("using temporary serialization implementation for xl clock \"%s\"!",
+                xl_clock_get_name(clock));
+        #endif
+
         // header version id
         *(u16*)out = 0; out += sizeof(u16);
 
@@ -9340,21 +9829,25 @@ static void xl_log_ttf_version_info(void)
 
 static void xl_set_sdl_hints(void)
 {
+    // Ensure that our window client rect size is represented in pixels.
     if (SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "1") == SDL_FALSE)
     {
         AE_WARN("SDL_HINT_VIDEO_HIGHDPI_DISABLED failed to register");
     }
 
+    // This is a prototype implementation - allow use of `deprecated` GL.
     if (SDL_SetHint(SDL_HINT_RENDER_OPENGL_SHADERS, "0") == SDL_FALSE)
     {
         AE_WARN("SDL_HINT_RENDER_OPENGL_SHADERS failed to register as 0");
     }
 
+    // SDL creates a DirectX renderer by default on Win32, Metal on OSX.
     if (SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl") == SDL_FALSE)
     {
         AE_WARN("SDL_HINT_RENDER_DRIVER failed to register as opengl");
     }
 
+    // Synchronize window flip with the monitor's vertical refresh rate.
     if (SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1") == SDL_FALSE)
     {
         AE_WARN("SDL_HINT_RENDER_VSYNC hint failed to register as 1");

@@ -4372,11 +4372,13 @@ cdef class Light:
     """
     cdef gl_light_t* light
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         if 'reference' in kwargs:
             self.light = <gl_light_t*>(<size_t>kwargs['reference'])
         else:
             self.light = gl_light_create() # set default properties
+
+            if args: self.name = args[0] # easy init (Light("foo"))
             for key, val in kwargs.items(): setattr(self, key, val)
 
     def __repr__(self):

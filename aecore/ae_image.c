@@ -8,6 +8,7 @@ TODO: define STBI_NO_STDIO and use memory versions of codecs for file versions
 TODO: Adam's Raw Texture files; raw pixel data dump with info in 16-byte header
 TODO: "barrel shifting" of images - pixels translated out of rects wrap around
 TODO: rotate images around a given point, with optional bilinear interpolation
+TODO: 16bit pixels - 5 bits per color channel (32 steps) and 1 transparency bit
 TODO: alpha-blended angled line blitting using bresenham's midpoint algorithm
 TODO: draw bezier curves with straight lines using in-out cubic easing methods
 TODO: quantize images using user-provided palettes, generate palette for image

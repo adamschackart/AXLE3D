@@ -99,6 +99,24 @@ AE_DECL double AE_CALL ae_frame_delta(void);
 
 /*
 ================================================================================
+ * ~~ [ display & stringification ] ~~ *
+--------------------------------------------------------------------------------
+*/
+
+AE_DECL void AE_CALL // for showing total level or game play time
+ae_seconds_to_display(double t, int* hours, int* mins, int* secs);
+
+AE_DECL double AE_CALL // inverse function
+ae_display_to_seconds(int hours, int mins, int secs);
+
+AE_DECL const char* AE_CALL // easy string path
+ae_seconds_to_string(double t, int show_hours);
+
+AE_DECL double AE_CALL // inverse function
+ae_string_to_seconds(const char * string);
+
+/*
+================================================================================
  * ~~ [ profiler ] ~~ *
 --------------------------------------------------------------------------------
 ~ NOTE: The original idea behind this was that we would just accumulate timing

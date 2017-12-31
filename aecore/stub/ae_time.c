@@ -61,6 +61,26 @@ double ae_frame_delta(void)
     AE_STUB(); return 0.0;
 }
 
+void ae_seconds_to_display(double t, int* hours, int* minutes, int* seconds)
+{
+    AE_STUB();
+}
+
+double ae_display_to_seconds(int hours, int minutes, int seconds)
+{
+    AE_STUB(); return 0.0;
+}
+
+const char* ae_seconds_to_string(double t, int show_hours)
+{
+    AE_STUB(); return "";
+}
+
+double ae_string_to_seconds(const char* string)
+{
+    AE_STUB(); return 0.0;
+}
+
 void* ae_profile_enter(const char* file_n, const char* func_n)
 {
     /*AE_STUB();*/ return NULL;

@@ -433,6 +433,92 @@ double ae_frame_delta(void)
 
 /*
 ================================================================================
+ * ~~ [ display & stringification ] ~~ *
+--------------------------------------------------------------------------------
+NOTE: displaying time with hours is for showing total gameplay time in a stats
+menu ("elder scrolls" mode), and time without hours is for end-of-level reports
+("goldeneye" mode for speedrunners). if you want days, roll your own function.
+--------------------------------------------------------------------------------
+*/
+
+void ae_seconds_to_display(double t, int* hours, int* minutes, int* seconds)
+{
+    ae_if (hours != NULL)
+    {
+        *hours = 0;
+
+        while (t >= 60.0 * 60.0)
+        {
+            t -= 60.0 * 60.0; *hours += 1;
+        }
+    }
+
+    ae_if (minutes != NULL)
+    {
+        *minutes = 0;
+
+        while (t >= 60.0)
+        {
+            t -= 60.0; *minutes += 1;
+        }
+    }
+
+    ae_if (seconds != NULL)
+    {
+        *seconds = (int)floor(t);
+    }
+}
+
+double ae_display_to_seconds(int hours, int minutes, int seconds)
+{
+    double t = 0.0;
+
+    while (hours)
+    {
+        t += 60.0 * 60.0; hours--;
+    }
+
+    while (minutes)
+    {
+        t += 60.0; minutes--;
+    }
+
+    return t + (double)seconds;
+}
+
+const char* ae_seconds_to_string(double t, int show_hours)
+{
+    static char time_string[1024*1];
+    int h, m, s, r;
+
+    ae_if (show_hours)
+    {
+        ae_seconds_to_display(t, &h, &m, &s);
+        r = AE_SNPRINTF(time_string, "%02ih:%02im:%02is", h, m, s);
+    }
+    else
+    {
+        ae_seconds_to_display(t, NULL, &m, &s);
+        r = AE_SNPRINTF(time_string, "%02im:%02is", m, s);
+    }
+
+    if (r < 0)
+    {
+        AE_WARN("%u-byte buffer is not big enough for time string",
+                                (unsigned int)sizeof(time_string));
+        return "?";
+    }
+
+    return (const char*)time_string;
+}
+
+double ae_string_to_seconds(const char* string)
+{
+    AE_STUB(); return 0.0;
+}
+
+/*
+================================================================================
  * ~~ [ profiler ] ~~ *
 --------------------------------------------------------------------------------
 TODO: each thread needs to have its own profiler (this isn't threadsafe at all)
