@@ -1,3 +1,7 @@
+from aegame import *
+from pyxl import *
+from mash3D import *
+
 from math import sin, cos, radians
 
 from pyglet import clock
@@ -5,9 +9,6 @@ from pyglet import font
 
 from pyglet.window import mouse
 from pyglet.window import key
-
-from mash3D import Texture, Coord3D, Light, gl
-from aegame import *
 
 from . import menu
 from . import obj
@@ -85,19 +86,19 @@ class Character(object):
 
         return PlaneFrustum().from_model_view_projection_matrix(mvp)
 
-class FPS(game.ThreeD):
+class FPS(game.Scene):
     MOUSE_SENSITIVITY = 0.3
     FOV = 70.
     KEYMAP = {
-        key.W: 'forward',
-        key.A: 'left',
-        key.S: 'backward',
-        key.D: 'right',
-        key.SPACE: 'jump',
+        'w': 'forward',
+        'a': 'left',
+        's': 'backward',
+        'd': 'right',
+        'space': 'jump',
     }
 
     BUTTONMAP = {
-        mouse.LEFT: 'fire',
+        'left': 'fire',
     }
 
     @profile("fps.py", "FPS.__init__")
@@ -132,6 +133,9 @@ class FPS(game.ThreeD):
 
     @profile("fps.py", "FPS.update")
     def update(self, dt):
+        # This allows the fps display counter to work
+        clock.tick()
+
         # AI, game state
         self.level.update(dt)
         if self.level.has_exit:
@@ -168,6 +172,17 @@ class FPS(game.ThreeD):
         # Trigger game over
         if self.level.dead:
             self.queued_state = menu.GameMenu(self)
+
+        # Weapon firing
+        if self.player.movement['fire'] and self.level.on_fire():
+            self.beam_opacity = 1.
+
+            ray = self.player.get_facing_ray()
+            ray.p.y += self.player.eye_height
+
+            for baddie in self.level.baddies:
+                if baddie.collision.intersect_ray3(ray):
+                    self.level.on_hit_baddie(baddie, ray)
 
     @profile("fps.py", "FPS.update_character")
     def update_character(self, dt, character):
@@ -248,10 +263,7 @@ class FPS(game.ThreeD):
             p.freefall = True
 
     @profile("fps.py", "FPS.draw")
-    def draw(self):
-        gl.ClearColor(1, 1, 1, 1)
-        gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
+    def draw(self, window):
         Texture.draw_skybox(self.level.skybox, self.player.get_coord(False))
 
         self.player.apply_camera()
@@ -314,66 +326,52 @@ class FPS(game.ThreeD):
             gl.PopAttrib()
             gl.PopMatrix()
 
-        self.begin2d()
+        with gl.util.Scene2D(self._width, self._height):
+            x = (self._width  - self.level.crosshair.width ) / 2
+            y = (self._height - self.level.crosshair.height) / 2
 
-        x = (self._width  - self.level.crosshair.width ) / 2
-        y = (self._height - self.level.crosshair.height) / 2
+            self.level.crosshair.blit(x, y)
 
-        self.level.crosshair.blit(x, y)
+            if self.level.game_text:
+                self.game_label.text = self.level.game_text
+                self.game_label.x = (self._width - self.game_label.width) / 2
+                self.game_label.y = self._height / 3.5
+                self.game_label.draw()
 
-        if self.level.game_text:
-            self.game_label.text = self.level.game_text
-            self.game_label.x = (self._width - self.game_label.width) / 2
-            self.game_label.y = self._height / 3.5
-            self.game_label.draw()
+            if self.level.fade_to_black:
+                gl.util.rect(FloatRect(0, 0, self._width, self._height),
+                                Vec4(0, 0, 0, self.level.fade_to_black))
 
-        if self.level.fade_to_black:
-            self.draw_fade(0, 0, 0, self.level.fade_to_black)
-        elif self.level.fade_to_damage:
-            self.draw_fade(.5, 0, 0, self.level.fade_to_damage)
+            elif self.level.fade_to_damage:
+                gl.util.rect(FloatRect(0, 0, self._width, self._height),
+                            Vec4(0.5, 0, 0, self.level.fade_to_damage))
 
-        if self.clock_display:
-            self.clock_display.draw()
+            if self.clock_display:
+                self.clock_display.draw()
 
-        self.end2d()
-
-        if self.player.movement['fire'] and self.level.on_fire():
-            self.beam_opacity = 1.
-
-            ray = self.player.get_facing_ray()
-            ray.p.y += self.player.eye_height
-
-            for baddie in self.level.baddies:
-                if baddie.collision.intersect_ray3(ray):
-                    self.level.on_hit_baddie(baddie, ray)
-
-    def on_mouse_motion(self, x, y, dx, dy):
-        self.player.pitch += dy * self.MOUSE_SENSITIVITY
+    def on_mouse_motion(self, mouse, window, buttons, x, y, dx, dy):
+        self.player.pitch   += dy * self.MOUSE_SENSITIVITY
         self.player.heading -= dx * self.MOUSE_SENSITIVITY
 
         self.player.pitch = min(max(self.player.pitch, -80), 80)
 
-    def on_mouse_drag(self, x, y, dx, dy, button, modifiers):
-        self.on_mouse_motion(x, y, dx, dy)
-
-    def on_mouse_press(self, x, y, button, modifiers):
+    def on_mouse_button(self, mouse, button, pressed):
         if button in self.BUTTONMAP:
-            self.player.movement[self.BUTTONMAP[button]] = True
+            self.player.movement[self.BUTTONMAP[button]] = pressed
 
-    def on_mouse_release(self, x, y, button, modifiers):
-        if button in self.BUTTONMAP:
-            self.player.movement[self.BUTTONMAP[button]] = False
+    def on_keyboard_key(self, keyboard, mods, key, pressed):
+        if pressed:
+            if key in self.KEYMAP:
+                self.player.movement[self.KEYMAP[key]] = True
 
-    def on_key_press(self, symbol, modifiers):
-        if symbol in self.KEYMAP:
-            self.player.movement[self.KEYMAP[symbol]] = True
-        elif symbol == key.ESCAPE:
-            self.queued_state = menu.GameMenu(self)
-        elif symbol == key.T and key.MOD_CTRL & modifiers and key.MOD_SHIFT & modifiers and __debug__:
-            self.queued_state = menu.CheatMenu(self)
+            # FIXME: resizing the window somehow leads to a white screen here!!!
+            #elif key == 'f11':
+            #    super(FPS, self).on_keyboard_key(keyboard, mods, key, pressed)
 
-        return True
-
-    def on_key_release(self, symbol, modifiers):
-        if symbol in self.KEYMAP:
-            self.player.movement[self.KEYMAP[symbol]] = False
+            elif key == 'escape':
+                self.queued_state = menu.GameMenu(self)
+            elif key == 't' and 'control' in mods and 'shift' in mods and __debug__:
+                self.queued_state = menu.CheatMenu(self)
+        else:
+            if key in self.KEYMAP:
+                self.player.movement[self.KEYMAP[key]] = False

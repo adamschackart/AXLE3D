@@ -449,7 +449,7 @@ void ae_hash_init(int argc, char** argv)
 {
    u32 i, j, s;
 
-   for (i = 0; i < 256; i++) // build the crc table
+   for (i = 0; i < 256; i++) // build crc32 table
    {
       for (s = i, j = 0; j < 8; ++j)
       {
@@ -461,5 +461,5 @@ void ae_hash_init(int argc, char** argv)
 
 void ae_hash_quit(void)
 {
-   //
+   memset(ae_crc_table, 0, sizeof(ae_crc_table));
 }

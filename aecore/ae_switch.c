@@ -1,6 +1,8 @@
 /* -----------------------------------------------------------------------------
 --- Copyright (c) 2012-2017 Adam Schackart / "AJ Hackman", all rights reserved.
 --- Distributed under the BSD license v2 (opensource.org/licenses/BSD-3-Clause)
+--------------------------------------------------------------------------------
+--- TODO: function to write total report (all categories) to a file in home dir
 ----------------------------------------------------------------------------- */
 #ifndef __AE_CORE_H__
 #include <ae_core.h>

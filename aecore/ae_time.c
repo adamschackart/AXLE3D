@@ -524,6 +524,7 @@ double ae_string_to_seconds(const char* string)
 TODO: each thread needs to have its own profiler (this isn't threadsafe at all)
 TODO: could handle C++ overloading easier if we took line numbers (big change!)
 TODO: track depths of functions in the profiler callstack (min, max, & average)
+TODO: function to write total report (all categories) to a file in the home dir
 --------------------------------------------------------------------------------
 */
 

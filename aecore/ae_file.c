@@ -15,6 +15,7 @@
  * TODO: read and write text files for proper cross-platform newline handling.
  * TODO: functional equivalent to python's os.path.join (use variable arguments?)
  * TODO: enumerate files in a directory, with and without nested subdirectories.
+ * TODO: get path to user's home, documents, pictures, videos, and downloads dirs.
  */
 void ae_file_init(int argc, char** argv) {}
 void ae_file_quit(void) {}

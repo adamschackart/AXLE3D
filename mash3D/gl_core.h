@@ -55,6 +55,9 @@ The enum constants these functions rely on are not exposed in this header file.
 */
 
 GL_DECL void GL_CALL
+GL_ActiveTexture(unsigned int texture);
+
+GL_DECL void GL_CALL
 GL_AlphaFunc(unsigned int func, float ref);
 
 GL_DECL void GL_CALL

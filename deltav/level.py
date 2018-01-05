@@ -1,12 +1,12 @@
+from aegame import *
+from pyxl import *
+from mash3D import *
+
 from . import cutscene
 from . import fps
 from . import obj
 from . import game
 
-from aegame import profile, Vec3
-from mash3D import gl
-
-import aegame
 import math
 import sys
 
@@ -213,7 +213,7 @@ class Level(object):
         self.fade_to_damage = 0
 
     def debug(self, msg):
-        aegame.log("MISC", msg)
+        utl.log("MISC", msg)
 
     @profile("level.py", "Level.restart")
     def restart(self):

@@ -1,8 +1,8 @@
-import pyglet # disable fake gl context
-pyglet.options['shadow_window'] = False
+import sys, pyxl, mainmenu
+pyxl.Window(
 
-import sys # import everything else after pyglet hinting
-from . import game, mainmenu
+    title='Delta-V',
+    fullscreen='-fullscreen' in sys.argv,
+    vsync='-vsync' in sys.argv
 
-game.GameWindow(width=1920 // 2, height=1080 // 2,
-    vsync='-vsync' in sys.argv).run(mainmenu.MainMenu())
+).run(mainmenu.MainMenu())

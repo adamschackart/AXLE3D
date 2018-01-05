@@ -225,7 +225,30 @@ static void* gl_func(const char* name)
 
 // TODO: GL_ActiveShaderProgram
 
-// TODO: GL_ActiveTexture
+void GL_ActiveTexture(unsigned int texture)
+{
+    /* TODO: allow this to be reset to NULL on gl_quit */
+    static PFNGLACTIVETEXTUREPROC exActiveTexture = NULL;
+
+    X(); if (exActiveTexture)
+    {
+        exActiveTexture(texture);
+    }
+    else
+    {
+        exActiveTexture = (PFNGLACTIVETEXTUREPROC)
+                        gl_func("glActiveTexture");
+
+        if (exActiveTexture)
+        {
+            exActiveTexture(texture);
+        }
+        else
+        {
+            AE_WARN("glActiveTexture not found");
+        }
+    }
+}
 
 void GL_AlphaFunc(unsigned int func, float ref)
 {
@@ -2835,7 +2858,18 @@ void gl_enter3D(int width, int height, double FOV, double znear, double zfar)
     AE_PROFILE_SCOPE();
     gl_init();
 
+    // FIXME: this assert fires on win32 debug builds, so we have to hack it.
+    #if 0
     ae_assert(width && height, "%i %i", width, height);
+    #else
+    if (width == 0 || height == 0)
+    {
+        AE_WARN("%s got bad viewport dimensions: %ix%i - using qHD fallback",
+                                                __FUNCTION__, width, height);
+        width  = 1920 / 2;
+        height = 1080 / 2;
+    }
+    #endif
     GL_PushAttrib(GL_ALL_ATTRIB_BITS);
 
     GL_Viewport(0, 0, width, height);

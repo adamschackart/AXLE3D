@@ -11,11 +11,11 @@ Just type
 and then
 
     python -m deltav
-    
+
 to run the test game.
 
     python -O setup.py build
-    
+
 creates an optimized release build.
 
 Mac OSX, iOS, WebGL/Emscripten, package installation, and compiling Cython modules as C++ are currently unsupported.
@@ -44,4 +44,4 @@ DELTA-V
 
 ![Alt text](https://i.imgur.com/zijDoGg.png "Delta-V pause menu")
 
-An example first-person shooter game utilizing Mash3D, originally developed by Alex Holkner for PyWeek. Eventually, Pyglet will be replaced by PYXL as the windowing, input, and 2D font rendering solution.
+An example first-person shooter game utilizing Mash3D, originally developed by Alex Holkner for PyWeek. Eventually, Pyglet will be replaced by PYXL as the 2D font rendering solution.

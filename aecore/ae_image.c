@@ -16,6 +16,7 @@ TODO: consider splitting IMAGE log category into IMAGE_CODEC and IMAGE_FILTER?
 TODO: memory block is PNG, JPEG, GIF, TGA, TIF, PSD, PNM, RAW, block is image
 TODO: asynchronous image load, with the same thread pool that filters will use
 TODO: "colour" defines for limeys (this will ruin our beloved grep-ability!!!)
+TODO: success messages are spamming the log - AE_IMAGE_TRACE #ifdef around logs
 ----------------------------------------------------------------------------- */
 #ifndef __AE_CORE_H__
 #include <ae_core.h>

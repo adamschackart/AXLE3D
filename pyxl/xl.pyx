@@ -952,6 +952,7 @@ cdef extern from "xl_core.h":
         XL_CLOCK_PROPERTY_ID
         XL_CLOCK_PROPERTY_NUM_TIMERS
         XL_CLOCK_PROPERTY_DT
+        XL_CLOCK_PROPERTY_FPS
         XL_CLOCK_PROPERTY_AUTO_UPDATE
         XL_CLOCK_PROPERTY_PAUSED
         XL_CLOCK_PROPERTY_STATUS
@@ -4549,6 +4550,10 @@ cdef class Clock:
     property dt:
         def __get__(self):
             return xl_clock_get_dbl(self.clock, XL_CLOCK_PROPERTY_DT)
+
+    property fps:
+        def __get__(self):
+            return xl_clock_get_dbl(self.clock, XL_CLOCK_PROPERTY_FPS)
 
     property auto_update:
         def __get__(self):

@@ -1454,6 +1454,19 @@ ae_image_t* xl_window_get_img(xl_window_t* window, xl_window_property_t property
     AE_STUB(); return NULL;
 }
 
+static void xl_activate_renderer(xl_window_t* window); // 3D drawing
+static void xl_window_clear_depth_buffer(xl_internal_window_t* data)
+{
+    AE_PROFILE_ENTER();
+
+    // FIXME: this can't be used here until we have a valid implementation of it.
+    // xl_activate_renderer((xl_window_t*)data);
+
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    AE_PROFILE_LEAVE();
+}
+
 void xl_window_clear(xl_window_t* window, float r, float g, float b)
 {
     // TODO: This function should increment a window frame counter. A value of
@@ -1483,6 +1496,9 @@ void xl_window_clear(xl_window_t* window, float r, float g, float b)
         {
             ae_error("failed to clear renderer: %s", SDL_GetError());
         }
+
+        // Automatically clear the depth buffer for 3-dimensional scenes.
+        xl_window_clear_depth_buffer(data);
 
         AE_PROFILE_LEAVE();
     }
@@ -7693,6 +7709,8 @@ and especially space (clock timer strings occupy an enormous amount of memory).
 in addition, the precision of this timing is directly affected by the framerate
 of the game, so things like vsync and fixed framerates can kinda mess this up.
 --------------------------------------------------------------------------------
+TODO: total time elapsed property (cumulative time) - serialize in header data.
+--------------------------------------------------------------------------------
 */
 
 static u32 xl_timer_event_type; // custom sdl user event type - fired on timers
@@ -8064,6 +8082,13 @@ xl_clock_get_dbl(xl_clock_t* clock, xl_clock_property_t property)
         case XL_CLOCK_PROPERTY_DT:
         {
             if (xl_clock_get_open(clock)) return data->dt;
+        }
+        break;
+
+        case XL_CLOCK_PROPERTY_FPS:
+        {
+            // compilers complain about direct float comparison, even against zero
+            if (xl_clock_get_open(clock) && data->dt > 0.0) return 1.0 / data->dt;
         }
         break;
 

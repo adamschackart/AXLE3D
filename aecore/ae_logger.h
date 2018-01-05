@@ -34,10 +34,12 @@ AE_DECL void AE_CALL ae_log_clear_stdout(void);
     N(AE_LOG_CATEGORY_RECAST),  \
     N(AE_LOG_CATEGORY_DETOUR),  \
     N(AE_LOG_CATEGORY_BULLET),  \
+    N(AE_LOG_CATEGORY_GLFW),    \
     N(AE_LOG_CATEGORY_SDL),     \
     N(AE_LOG_CATEGORY_OPENGL),  \
     N(AE_LOG_CATEGORY_VULKAN),  \
     N(AE_LOG_CATEGORY_D3D),     \
+    N(AE_LOG_CATEGORY_OPENAL),  \
                                 \
     /* aecore categories */     \
                                 \

@@ -30,6 +30,7 @@ cdef extern from "gl_core.h":
     # ~ [ OpenGL wrapper ]
     # ==========================================================================
 
+    void GL_ActiveTexture(unsigned int texture)
     void GL_AlphaFunc(unsigned int func, float ref)
     void GL_Begin(unsigned int mode)
     void GL_BindTexture(unsigned int target, unsigned int texture)
@@ -2854,6 +2855,9 @@ if 1:
     QUERY_BUFFER_BINDING                    = 0x9193
     QUERY_RESULT_NO_WAIT                    = 0x9194
     MIRROR_CLAMP_TO_EDGE                    = 0x8743
+
+def ActiveTexture(unsigned int texture):
+    GL_ActiveTexture(texture)
 
 def AlphaFunc(unsigned int func, float ref):
     GL_AlphaFunc(func, ref)

@@ -38,6 +38,11 @@ void gl_quit(void)
 --------------------------------------------------------------------------------
 */
 
+void GL_ActiveTexture(unsigned int texture)
+{
+    AE_STUB();
+}
+
 void GL_AlphaFunc(unsigned int func, float ref)
 {
     AE_STUB();

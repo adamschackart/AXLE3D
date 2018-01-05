@@ -1,19 +1,18 @@
 from mash3D import Coord3D, Texture, gl
-from aegame import Vec3
+from aegame import profile, Vec3
 from pyglet import font
 
 from . import game
 
-class CutScene(game.ThreeD):
+class CutScene(game.Scene):
     znear = 0.5
     zfar = 100000.0
 
     def __init__(self, level):
         self.level = level
 
-    def draw(self):
-        gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-
+    @profile("cutscene.py", "CutScene.draw")
+    def draw(self, window):
         c = Coord3D()
         c.heading = self.camera_heading
         c.pitch = self.camera_pitch
@@ -30,9 +29,8 @@ class CutScene(game.ThreeD):
         for emitter in self.level.cut_scene_emitters:
             emitter.draw()
 
-    def on_key_press(self, symbol, modifiers):
+    def on_keyboard_key(self, keyboard, mods, key, pressed):
         if self.time > 1: self.has_exit = True
-        return True
 
 class CutScene1(CutScene):
     def __init__(self, level):
@@ -51,6 +49,7 @@ class CutScene1(CutScene):
 
         self.time = 0
 
+    @profile("cutscene.py", "CutScene1.update")
     def update(self, dt):
         self.station_accel.iadd_vec(self.station_accel_accel.mul_flt(dt))
         self.station_vel.iadd_vec(self.station_accel.mul_flt(dt))
@@ -85,6 +84,7 @@ class CutScene2(CutScene):
 
         self.time = 0
 
+    @profile("cutscene.py", "CutScene2.update")
     def update(self, dt):
         self.station_accel.iadd_vec(self.station_accel_accel.mul_flt(dt))
         self.station_vel.iadd_vec(self.station_accel.mul_flt(dt))
@@ -142,6 +142,7 @@ class CutScene3(CutScene):
         label2_font = font.load('Arial', 24., bold=True)
         self.label2 = font.Text(label2_font, '', color=(1, 1, 1, 1))
 
+    @profile("cutscene.py", "CutScene3.update")
     def update(self, dt):
         self.level.has_exit = True
 
@@ -186,10 +187,10 @@ class CutScene3(CutScene):
             #self.subcredit_line < len(self.subcredits)-1:
             self.label2.color = (1, 1, 1, self.subcredit_time / .5)
 
-    def draw(self):
-        super(CutScene3, self).draw()
+    @profile("cutscene.py", "CutScene3.draw")
+    def draw(self, window):
+        super(CutScene3, self).draw(window)
 
-        self.begin2d()
-        self.label1.draw()
-        self.label2.draw()
-        self.end2d()
+        with gl.util.Scene2D(self._width, self._height):
+            self.label1.draw()
+            self.label2.draw()

@@ -1,4 +1,5 @@
-from aegame import FloatRect, Vec4
+from aegame import *
+from pyxl import *
 from mash3D import *
 
 from pyglet import clock
@@ -6,7 +7,7 @@ from pyglet import font
 
 from . import game
 
-class Menu(game.ThreeD):
+class Menu(game.Scene):
     options = []
     text_color = (0, 0, 0, 1)
 
@@ -14,7 +15,7 @@ class Menu(game.ThreeD):
         self.selected_option = None
         self.selected_hot = False
 
-        self.label_font = font.load('Arial', 24., bold=True)
+        self.label_font = font.load('Arial', 24.0, bold=True)
         self.labels = []
 
         width = height = 0
@@ -43,12 +44,10 @@ class Menu(game.ThreeD):
         self.x = (window.width - self.width) / 2
         self.y = (window.height - self.height) / 2
 
-        window.set_exclusive_mouse(False)
+        Mouse.get_primary().relative = False
 
-    def update(self, dt):
-        pass
-
-    def draw(self):
+    @profile("menu.py", "Menu.draw")
+    def draw(self, window):
         with gl.util.Scene2D(self._width, self._height):
             self.draw_background()
 
@@ -59,12 +58,13 @@ class Menu(game.ThreeD):
     def draw_background(self):
         pass
 
-    def on_key_press(self, symbol, modifiers):
-        self.has_exit = True
-        return True
-
-    def on_key_release(self, symbol, modifiers):
-        return True
+    def on_keyboard_key(self, keyboard, mods, key, pressed):
+        if pressed:
+            if key == 'f11':
+               w = Window.get_primary()
+               w.fullscreen = not w.fullscreen
+            else:
+                self.has_exit = True
 
     def get_selected(self, x, y):
         if x > self.x and x < self.x + self.width:
@@ -75,30 +75,27 @@ class Menu(game.ThreeD):
                     return label
         return None
 
-    def on_mouse_motion(self, x, y, dx, dy):
+    def on_mouse_motion(self, mouse, window, buttons, x, y, dx, dy):
         self.selected_option = self.get_selected(x, y)
-        return True
 
-    def on_mouse_drag(self, x, y, dx, dy, button, modifiers):
-        return self.on_mouse_motion(x, y, dx, dy)
+    def on_mouse_button(self, mouse, button, pressed):
+        if pressed:
+            if self.selected_option:
+                self.selected_hot = True
+        else:
+            selected = self.get_selected(mouse.x, mouse.y)
 
-    def on_mouse_press(self, x, y, button, modifiers):
-        if self.selected_option:
-            self.selected_hot = True
-        return True
+            if selected is not None:
+                self.on_select(selected)
 
-    def on_mouse_release(self, x, y, button, modifiers):
-        selected = self.get_selected(x, y)
-        if selected is not None:
-            self.on_select(selected)
-        self.selected_hot = False
-        return True
+            self.selected_hot = False
 
 class PopupMenu(Menu):
     def __init__(self, fps):
         super(PopupMenu, self).__init__()
         self.fps = fps
 
+    @profile("menu.py", "PopupMenu.draw_background")
     def draw_background(self):
         gl.util.rect(FloatRect(0, 0, self._width, self._height), Vec4(0, 0, 0, 0.5))
 
@@ -122,9 +119,15 @@ class PopupMenu(Menu):
                                     self.width + pad * 2,
                                     label.height + 10), c)
 
-    def draw(self):
-        self.fps.draw()
-        super(PopupMenu, self).draw()
+    @profile("menu.py", "PopupMenu.draw")
+    def draw(self, window):
+        #
+        # FIXME: why do we need to re-submit this transform? it happens in self.activate!
+        #
+        with gl.util.Scene3D(self._width, self._height, self.FOV, self.znear, self.zfar):
+            self.fps.draw(window)
+
+        super(PopupMenu, self).draw(window)
 
 class GameMenu(PopupMenu):
     options = [

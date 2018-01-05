@@ -1,7 +1,8 @@
-import warnings, os
-
 from aegame import *
+from pyxl import *
 from mash3D import *
+
+import warnings, os
 
 def load_texture(filename):
     return Texture().load(os.path.join(base_path(), 'data', filename))

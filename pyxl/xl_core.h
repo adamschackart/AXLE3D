@@ -2264,6 +2264,7 @@ XL_DECL xl_clock_t* XL_CALL xl_clock_buffer_load(u8 * buf, size_t length);
     N(XL_CLOCK_PROPERTY_ID, int, int, id)                   \
     N(XL_CLOCK_PROPERTY_NUM_TIMERS, int, int, num_timers)   \
     N(XL_CLOCK_PROPERTY_DT, double, dbl, dt)                \
+    N(XL_CLOCK_PROPERTY_FPS, double, dbl, fps)              \
     N(XL_CLOCK_PROPERTY_AUTO_UPDATE, int, int, auto_update) \
     N(XL_CLOCK_PROPERTY_PAUSED, int, int, paused)           \
     N(XL_CLOCK_PROPERTY_STATUS, const char*, str, status)   \
