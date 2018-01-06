@@ -5,6 +5,10 @@
 --- TODO: void ae_sleep(double seconds); will actually be tough to implement!!!
 --- TODO: ae_datetime: fill struct with ints - year, month, day, hour, min, sec
 --- TODO: ae_current_united_states_holiday and ae_current_international_holiday
+--------------------------------------------------------------------------------
+--- TODO: benchmark function that prints the name of the function passed to it,
+--- as well as inner and outer loop counts (times are printed in the outer loop).
+--- it should also track and display min and max times etc. like the profiler.
 ----------------------------------------------------------------------------- */
 #ifndef __AE_CORE_H__
 #include <ae_core.h>

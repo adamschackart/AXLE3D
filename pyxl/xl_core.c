@@ -1039,7 +1039,19 @@ const char* xl_window_get_str(xl_window_t* window, xl_window_property_t property
 
 void xl_window_set_ptr(xl_window_t* window, xl_window_property_t property, void* value)
 {
-    AE_STUB();
+    xl_internal_window_t* data = (xl_internal_window_t*)window;
+
+    // Post events to windows. Should work even if SDL isn't initialized.
+    SDL_PumpEvents();
+
+    ae_switch (property, xl_window_property, XL_WINDOW_PROPERTY, suffix)
+    {
+        default:
+        {
+            AE_WARN("%s in %s", xl_window_property_name[property], __FUNCTION__);
+        }
+        break;
+    }
 }
 
 void* xl_window_get_ptr(xl_window_t* window, xl_window_property_t property)
@@ -1449,13 +1461,13 @@ void* xl_window_get_ptr(xl_window_t* window, xl_window_property_t property)
 void xl_window_set_img(xl_window_t* window, xl_window_property_t property, ae_image_t* value)
 {
     // this will be for setting the window icon (TODO: ae_image to SDL surface function)
-    AE_STUB();
+    AE_CASE_STUB(property, xl_window_property, XL_WINDOW_PROPERTY, suffix);
 }
 
 ae_image_t* xl_window_get_img(xl_window_t* window, xl_window_property_t property)
 {
     // TODO: SDL doesn't keep the window icon, so we'll have to keep a local window copy
-    AE_STUB(); return NULL;
+    AE_CASE_STUB(property, xl_window_property, XL_WINDOW_PROPERTY, suffix); return NULL;
 }
 
 static void xl_activate_renderer(xl_window_t* window); // 3D drawing
