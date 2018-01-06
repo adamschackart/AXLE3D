@@ -110,6 +110,36 @@ AE_DECL void AE_CALL ae_log_str(const char* category, const char* fmt, ...)
 #define AE_STUB() AE_WARN("stub function \"%s\" (file \"%s\" line %i)", \
                                         __FUNCTION__, __FILE__, __LINE__)
 
+/* warning for a switch case that has yet to be implemented - this is designed
+ * to work with enums declared in our style, which have automatically-defined
+ * string tables for easy debugging, rather than printing integral enum values.
+ *
+ *      (ae_)   (image_format)  (_t)
+ *
+ *      /\      /\              /\
+ *      prefix  name            suffix
+ *
+ *      type is the optional prefix and name joined together without the suffix.
+ *      caps is the "caps name" for values in the enum, ie. AE_IMAGE_FORMAT.
+ *      suffix mode (either a bare suffix or nosuffix identifier) appends a _t.
+ */
+#define AE_CASE_STUB(value, type, caps, suffix_mode)                        \
+        ae_case_stub_ ## suffix_mode((value), type, caps)
+
+#define ae_case_stub_suffix(value, type, caps)                              \
+        ae_case_stub_ex((value), type, type ## _t, caps)
+
+#define ae_case_stub_nosuffix(value, type, caps)                            \
+        ae_case_stub_ex((value), type, type, caps)
+
+#define ae_case_stub_ex(value, type, suffix_type, caps)                     \
+                                                                            \
+        /* NOTE: caps is passed to keep compatibility with ae_switch */     \
+        AE_WARN("stub \"%s\" case %s (func \"%s\" file \"%s\" line %i)",    \
+                                                                            \
+                AE_STRINGIFY(suffix_type), type ## _name[(int) (value)],    \
+                                (__FUNCTION__), (__FILE__), (__LINE__))
+
 /*
 ================================================================================
  * ~~ [ logging control ] ~~ *

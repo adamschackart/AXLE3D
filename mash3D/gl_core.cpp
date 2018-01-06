@@ -3166,13 +3166,13 @@ gl_texture_set_int(gl_texture_t* texture, gl_texture_property_t property, int va
     {
         case GL_TEXTURE_PROPERTY_DEFAULT_COPY:
         {
-            AE_STUB();
+            AE_CASE_STUB(property, gl_texture_property, GL_TEXTURE_PROPERTY, suffix);
         }
         break;
 
         case GL_TEXTURE_PROPERTY_COPY_ENABLED:
         {
-            AE_STUB();
+            AE_CASE_STUB(property, gl_texture_property, GL_TEXTURE_PROPERTY, suffix);
         }
         break;
 
@@ -3258,13 +3258,13 @@ gl_texture_get_int(gl_texture_t* texture, gl_texture_property_t property)
 
         case GL_TEXTURE_PROPERTY_DEFAULT_COPY:
         {
-            AE_STUB();
+            AE_CASE_STUB(property, gl_texture_property, GL_TEXTURE_PROPERTY, suffix);
         }
         break;
 
         case GL_TEXTURE_PROPERTY_COPY_ENABLED:
         {
-            AE_STUB();
+            AE_CASE_STUB(property, gl_texture_property, GL_TEXTURE_PROPERTY, suffix);
         }
         break;
 
@@ -3462,10 +3462,7 @@ gl_texture_get_img(gl_texture_t* texture, gl_texture_property_t property)
     {
         case GL_TEXTURE_PROPERTY_IMAGE:
         {
-            if (gl_texture_get_open(texture))
-            {
-                AE_STUB();
-            }
+            AE_CASE_STUB(property, gl_texture_property, GL_TEXTURE_PROPERTY, suffix);
         }
         break;
 
@@ -4496,7 +4493,7 @@ gl_light_set_str(gl_light_t* light, gl_light_property_t property, const char* va
     {
         case GL_LIGHT_PROPERTY_NAME:
         {
-            AE_STUB();
+            AE_CASE_STUB(property, gl_light_property, GL_LIGHT_PROPERTY, suffix);
         }
         break;
 
@@ -4522,7 +4519,7 @@ gl_light_get_str(gl_light_t* light, gl_light_property_t property)
 
         case GL_LIGHT_PROPERTY_NAME:
         {
-            AE_STUB();
+            AE_CASE_STUB(property, gl_light_property, GL_LIGHT_PROPERTY, suffix);
         }
         break;
 
@@ -5158,13 +5155,13 @@ gl_buffer_set_str(gl_buffer_t* buffer, gl_buffer_property_t property, const char
 
         case GL_BUFFER_PROPERTY_PATH:
         {
-            AE_STUB();
+            AE_CASE_STUB(property, gl_buffer_property, GL_BUFFER_PROPERTY, suffix);
         }
         break;
 
         case GL_BUFFER_PROPERTY_NAME:
         {
-            AE_STUB();
+            AE_CASE_STUB(property, gl_buffer_property, GL_BUFFER_PROPERTY, suffix);
         }
         break;
 
@@ -5232,13 +5229,13 @@ gl_buffer_get_str(gl_buffer_t* buffer, gl_buffer_property_t property)
 
         case GL_BUFFER_PROPERTY_PATH:
         {
-            AE_STUB();
+            AE_CASE_STUB(property, gl_buffer_property, GL_BUFFER_PROPERTY, suffix);
         }
         break;
 
         case GL_BUFFER_PROPERTY_NAME:
         {
-            AE_STUB();
+            AE_CASE_STUB(property, gl_buffer_property, GL_BUFFER_PROPERTY, suffix);
         }
         break;
 
@@ -7292,8 +7289,10 @@ void gl_particle_emitter_center_at_origin(gl_particle_emitter_t* emitter)
 gl_particle_emitter_velgen_mode_t
 gl_particle_emitter_velgen_mode_from_short_name(const char* name)
 {
-    size_t i = 0, n = GL_PARTICLE_EMITTER_VELGEN_MODE_COUNT;
+    // TODO: this could be sped up with a hashtable (short name -> index)
+    AE_PROFILE_SCOPE();
 
+    size_t i = 0, n = GL_PARTICLE_EMITTER_VELGEN_MODE_COUNT;
     for (; i < n; i++)
     {
         if (!strcmp(gl_particle_emitter_velgen_mode_short_name[i], name))

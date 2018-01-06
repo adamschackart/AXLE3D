@@ -194,6 +194,9 @@ static xl_window_t* xl_window_from_sdl_window_id(Uint32 id)
 
 xl_window_t* xl_window_create(int initially_visible)
 {
+    // This call can hang for multiple seconds on some operating systems.
+    AE_PROFILE_ENTER();
+
     Uint32 window_flags = SDL_WINDOW_RESIZABLE;
 
     xl_internal_window_t* window;
@@ -340,6 +343,7 @@ xl_window_t* xl_window_create(int initially_visible)
     // Write after init, in case we want to view the logfile in-game.
     ae_log_flush();
 
+    AE_PROFILE_LEAVE(); // wrap
     return (xl_window_t*)window;
 }
 
@@ -1497,7 +1501,7 @@ void xl_window_clear(xl_window_t* window, float r, float g, float b)
             ae_error("failed to clear renderer: %s", SDL_GetError());
         }
 
-        // Automatically clear the depth buffer for 3-dimensional scenes.
+        // TODO: xl_window_clear_depth boolean int property (true by default).
         xl_window_clear_depth_buffer(data);
 
         AE_PROFILE_LEAVE();
@@ -4772,6 +4776,16 @@ xl_keyboard_get_str(xl_keyboard_t* keyboard, xl_keyboard_property_t property)
         }
         break;
 
+        case XL_KEYBOARD_PROPERTY_DOWN_MODS:
+        case XL_KEYBOARD_PROPERTY_UP_MODS:
+        case XL_KEYBOARD_PROPERTY_DOWN_KEYS:
+        case XL_KEYBOARD_PROPERTY_UP_KEYS:
+        {
+            // TODO: build static string of mod and key short names separated by spaces
+            AE_CASE_STUB(property, xl_keyboard_property, XL_KEYBOARD_PROPERTY, suffix);
+        }
+        break;
+
         case XL_KEYBOARD_PROPERTY_STATUS:
         {
             // TODO: return a status string with some more information (name etc.)
@@ -5469,6 +5483,14 @@ xl_mouse_get_str(xl_mouse_t* mouse, xl_mouse_property_t property)
         case XL_MOUSE_PROPERTY_LAST_RELEASED_BUTTON:
         {
             return xl_mouse_button_short_name[xl_mouse_get_last_released_button(mouse)];
+        }
+        break;
+
+        case XL_MOUSE_PROPERTY_DOWN_BUTTONS:
+        case XL_MOUSE_PROPERTY_UP_BUTTONS:
+        {
+            // TODO: build static string of button short names separated by spaces
+            AE_CASE_STUB(property, xl_mouse_property, XL_MOUSE_PROPERTY, suffix);
         }
         break;
 
@@ -6350,6 +6372,14 @@ const char* xl_controller_get_str(xl_controller_t* controller,
         }
         break;
 
+        case XL_CONTROLLER_PROPERTY_DOWN_BUTTONS:
+        case XL_CONTROLLER_PROPERTY_UP_BUTTONS:
+        {
+            // TODO: build static string of up/down button short names separated by spaces
+            AE_CASE_STUB(property, xl_controller_property, XL_CONTROLLER_PROPERTY, suffix);
+        }
+        break;
+
         case XL_CONTROLLER_PROPERTY_STATUS:
         {
             if (xl_controller_get_open(controller))
@@ -6968,7 +6998,8 @@ xl_animation_set_int(xl_animation_t* animation, xl_animation_property_t property
 
         case XL_ANIMATION_PROPERTY_FINISHED:
         {
-            AE_STUB();
+            // TODO: seek the animation to the end (should we fire the completion event?)
+            AE_CASE_STUB(property, xl_animation_property, XL_ANIMATION_PROPERTY, suffix);
         }
         break;
 
