@@ -1,4 +1,6 @@
-import sys, pyxl, mainmenu
+from . import mainmenu
+import sys, pyxl
+
 pyxl.Window(
 
     title='Delta-V',

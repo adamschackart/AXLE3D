@@ -343,6 +343,9 @@ cdef class Logger:
 
         ae_log_str(<char*>cat_b, "%s", <char*>msg_b); return self
 
+    # this is just a convenience method for logging to the warning category.
+    def warn(self, str msg): return self("WARNING", msg)
+
     # this hack enables replacing the standard output stream with our logger.
     # TODO "print A, B" will show A and B on two different lines, so we need
     # to be a little smarter here, and buffer input until a newline is found.
