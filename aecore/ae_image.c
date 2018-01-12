@@ -2518,6 +2518,7 @@ void ae_image_flip_x(ae_image_t* image, int* rect, int r, int g, int b, int a)
 
 void ae_image_flip_y(ae_image_t* image, int* rect, int r, int g, int b, int a)
 {
+    // FIXME: test this function on monochrome (single-channel) images!
     AE_PROFILE_ENTER();
 
     int c = (int)ae_image_format_components[image->format];
@@ -2588,6 +2589,11 @@ void ae_image_flip_y(ae_image_t* image, int* rect, int r, int g, int b, int a)
 
         case AE_IMAGE_TYPE_FLT:
         {
+            /* FIXME: generic memswap-based implementation that takes component
+             * size into account - only switch on the type if one or more color
+             * channels are omitted. this recursion hack also creates a problem
+             * with the accuracy of profiler data (one call is inside another).
+             */
             ae_image_t temp;
 
             ae_image_alloc_temp(&temp, image->width, image->height,

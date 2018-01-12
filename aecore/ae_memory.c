@@ -75,6 +75,7 @@ static void ae_argv_copy_quit(void)
  * ~~ [ misc. utilities ] ~~ *
 --------------------------------------------------------------------------------
 TODO: early fast path for pointer-sized memswap and memiszero; benchmark changes
+TODO: memshift - move a block of memory "right" or "left" via signed integer arg
 --------------------------------------------------------------------------------
 */
 
@@ -587,6 +588,7 @@ void* ae_realloc_ex(void* ptr, size_t size, const char* filename,
  * ~~ [ dynamic arrays ] ~~ *
 --------------------------------------------------------------------------------
 TODO: AE_ARRAY_TRACE, which would require the addition of an ARRAY log category
+TODO: ae_array_insert - make space for a memory block by memshifting, then copy
 --------------------------------------------------------------------------------
 */
 

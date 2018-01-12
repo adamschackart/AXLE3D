@@ -20,6 +20,7 @@
 --- TODO: handle the system clipboard (through keyboard?) - events, get buffer
 --- TODO: track last time any input action was taken (max of press and release)
 --- TODO: xl_touchscreen_t - handle touch input events similar to other devices
+--- TODO: display insert / remove events (just do insert during initialization)
 --- TODO: get the average of controller or mouse inputs within a sliding window
 --- TODO: string property overload for object id - add int to hex string to AE
 --- TODO: xl_webcam_t (capture to image probably requires YUV decompress code!)
@@ -2085,11 +2086,17 @@ xl_texture_set_int(xl_texture_t* texture, xl_texture_property_t property, int va
         {
             if (xl_texture_get_open(texture))
             {
-                data->copy_enabled = value; // purge copy memory on disable
-                if (!value)
+                ae_if (value)
                 {
-                    ae_image_free(&data->image);
+                    // TODO: allocate image and copy pixel data from this texture -
+                    // call xl_texture_get_image once that TODO is taken care of...
                 }
+                else
+                {
+                    ae_image_free(&data->image); // purge copy memory on disabling
+                }
+
+                data->copy_enabled = value;
             }
         }
         break;
@@ -5166,6 +5173,7 @@ static xl_keyboard_key_index_t xl_keyboard_key_index_from_sdl(SDL_Scancode code)
 TODO: get the global mouse position (display/monitor coordinates) as double prop
 TODO: should we add window and position to mouse button and maybe scroll events?
 TODO: set the cursor shape (system defaults, monochrome bitmap, and color image)
+TODO: handle haptic / force feedback / rumble-enabled mice just like controllers
 --------------------------------------------------------------------------------
 */
 
@@ -5794,6 +5802,10 @@ static xl_controller_stick_coord_t xl_controller_apply_deadzone(s16 x, s16 y,
     // where the analog thumbsticks actually have a square area to move around in, making
     // gameplay feel consistent and smooth for any random controller the user might try.
     // the area of a square thumbstick we throw away can be called the "outer deadzone".
+
+    // fun fact: lots of legacy 3D games (especially Rare titles such as Goldeneye and
+    // Perfect Dark) only used cartesian stick coordinates, so diagonal motion is faster
+    // than axial motion - something lots of speedrunners have used to their advantage.
 
     #define COMPUTE_POLAR()                                             \
         coord.magnitude = sqrt(coord.x * coord.x + coord.y * coord.y);  \

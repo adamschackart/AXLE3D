@@ -326,12 +326,17 @@ cdef class Logger:
             # see the comments above re: the log suppressing fatal exceptions.
             sys.stdout = self
 
-    def __call__(self, str cat, str msg):
+    def __call__(self, str cat, str msg, *args):
         cdef bytes cat_b
         cdef bytes msg_b
 
         # the python print statement writes the newline separately
         if msg == '\n': return self
+
+        # allow printf-style format arguments. str.format is still preferable,
+        # as it automatically converts objects to strings (type agnosticism).
+        # FIXME: this blows up in python 2 when any string params are unicode!
+        msg = msg % args
 
         # strings could be unicode, so convert them back to ascii
         if sys.version_info.major > 2:

@@ -670,6 +670,7 @@ static c_inline double ease_bounce_inout_dbl(double t, double b, double c, doubl
  * ~~ [ ease by mode ] ~~ *
 --------------------------------------------------------------------------------
 TODO: square/snap easing mode - inout mode would consist of (t < d / 2) ? b : c
+TODO: define a templated easing class in C++ builds with static specializations
 --------------------------------------------------------------------------------
 */
 
@@ -746,7 +747,7 @@ static const char* ae_ease_mode_short_name[] =
 static c_inline ae_ease_mode_t // find ease mode by string name
                 ae_ease_mode_from_short_name(const char* name)
 {
-    size_t i = 0;
+    size_t i = 0; // TODO: move to the C file, hashtable speedup
     for (; i < AE_EASE_MODE_COUNT; i++)
     {
         if (strcmp(ae_ease_mode_short_name[i], name) == 0)

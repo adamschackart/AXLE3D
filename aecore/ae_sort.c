@@ -3,6 +3,7 @@
 --- Distributed under the BSD license v2 (opensource.org/licenses/BSD-3-Clause)
 --------------------------------------------------------------------------------
 --- NOTE: why do we make all these weird old sorts available? mostly for fun!!!
+--- TODO: sorted array insertion (find the array index where an item should go)
 ----------------------------------------------------------------------------- */
 #ifndef __AE_CORE_H__
 #include <ae_core.h>

@@ -529,6 +529,7 @@ TODO: each thread needs to have its own profiler (this isn't threadsafe at all)
 TODO: could handle C++ overloading easier if we took line numbers (big change!)
 TODO: track depths of functions in the profiler callstack (min, max, & average)
 TODO: function to write total report (all categories) to a file in the home dir
+TODO: "immediate mode" - print the function time immediately for benchmarks etc
 --------------------------------------------------------------------------------
 */
 
