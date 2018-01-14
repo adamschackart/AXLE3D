@@ -330,7 +330,7 @@ class FPS(game.Scene):
             x = (self._width  - self.level.crosshair.width ) / 2
             y = (self._height - self.level.crosshair.height) / 2
 
-            self.level.crosshair.blit(x, y)
+            self.level.crosshair.draw(x, y)
 
             if self.level.game_text:
                 self.game_label.text = self.level.game_text

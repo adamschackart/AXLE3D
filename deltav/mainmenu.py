@@ -67,11 +67,11 @@ class MainMenu(game.Scene):
             Texture.draw_skybox(self.skybox, c)
 
         with gl.util.Scene2D(self._width, self._height):
-            self.menu.blit(self.menu_x, self.menu_y)
+            self.menu.draw(self.menu_x, self.menu_y)
 
             if self.selected_option:
                 o_x, o_y = self.options[self.selected_option]
-                self.cursor.blit(
+                self.cursor.draw(
                  self.menu_x + o_x - self.cursor.width,
                  self.menu_y + o_y + (self.option_height - self.cursor.height) / 2)
 
@@ -79,12 +79,12 @@ class MainMenu(game.Scene):
                 gl.util.rect(FloatRect(0, 0, self._width, self._height), Vec4(0, 0, 0, self.loading_time * 2))
 
                 if self.loading_time > .5:
-                    self.one_moment.blit_ex(
+                    self.one_moment.draw_ex(
                         (self._width  - self.one_moment.width ) / 2,
                         (self._height - self.one_moment.height) / 2,
                         Vec4(1, 1, 1, (self.loading_time - .5) * 2))
 
-            self.title.blit(0, 0)
+            self.title.draw(0, 0)
 
     @profile("mainmenu.py", "MainMenu.select")
     def select(self, x, y):

@@ -2970,8 +2970,10 @@ void gl_leave2D(void)
     gl_debug_log_error_state();
 }
 
-void gl_rect_ex(float* rect, float* btmlf, float* btmrt, float* toprt, float* toplf,
-                int line, float line_width)
+/* ===== [ 2D shapes ] ====================================================== */
+
+void gl_rect_ex(float* rect, const float* bl, const float* br, const float* tr,
+                            const float* tl, int is_outline, float line_width)
 {
     AE_PROFILE_SCOPE();
     gl_init();
@@ -2984,29 +2986,29 @@ void gl_rect_ex(float* rect, float* btmlf, float* btmrt, float* toprt, float* to
         GL_Enable(GL_BLEND);
         GL_BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        GL_Begin(line ? GL_LINE_STRIP : GL_QUADS);
+        GL_Begin(is_outline ? GL_LINE_STRIP : GL_QUADS);
         {
             const float x = rect[0];
             const float y = rect[1];
             const float w = rect[2];
             const float h = rect[3];
 
-            GL_Color4fv(btmlf); // bottom left
+            GL_Color4fv(bl); // bottom left vertex
             GL_Vertex2f(x + 0, y + 0);
 
-            GL_Color4fv(btmrt); // bottom right
+            GL_Color4fv(br); // bottom right vertex
             GL_Vertex2f(x + w, y + 0);
 
-            GL_Color4fv(toprt); // top right
+            GL_Color4fv(tr); // top right vertex
             GL_Vertex2f(x + w, y + h);
 
-            GL_Color4fv(toplf); // top left
+            GL_Color4fv(tl); // top left vertex
             GL_Vertex2f(x + 0, y + h);
 
-            ae_if (line)
+            ae_if (is_outline)
             {
                 // close it off
-                GL_Color4fv(btmlf); GL_Vertex2f(x, y);
+                GL_Color4fv(bl); GL_Vertex2f(x, y);
             }
         }
         GL_End();
@@ -3016,17 +3018,19 @@ void gl_rect_ex(float* rect, float* btmlf, float* btmrt, float* toprt, float* to
     gl_debug_log_error_state();
 }
 
-void gl_outline(float* rect, float* rgba)
+void gl_outline(float* rect, const float* rgba)
 {
     gl_rect_ex(rect, rgba, rgba, rgba, rgba, 1, 1.0f);
 }
 
-void gl_rect(float* rect, float* rgba)
+void gl_rect(float* rect, const float* rgba)
 {
     gl_rect_ex(rect, rgba, rgba, rgba, rgba, 0, 1.0f);
 }
 
-void gl_aabbox_ex(float* minv, float* maxv, float* rgba, float line_width)
+/* ===== [ 3D shapes ] ====================================================== */
+
+void gl_aabbox_ex(float* minv, float* maxv, const float* rgba, float line_width)
 {
     AE_PROFILE_SCOPE();
     gl_init();
@@ -3081,12 +3085,12 @@ void gl_aabbox_ex(float* minv, float* maxv, float* rgba, float line_width)
     gl_debug_log_error_state();
 }
 
-void gl_aabbox(float* minv, float* maxv, float* rgba)
+void gl_aabbox(float* minv, float* maxv, const float* rgba)
 {
     gl_aabbox_ex(minv, maxv, rgba, 1.0f);
 }
 
-void gl_ellipsoid(float* center, float* extent, float* rgba)
+void gl_ellipsoid(float* center, float* extent, const float* rgba)
 {
     AE_PROFILE_SCOPE();
 
@@ -3115,7 +3119,7 @@ void gl_ellipsoid(float* center, float* extent, float* rgba)
     gl_buffer_close(buf);
 }
 
-void gl_sphere(float* center, float radius, float* rgba)
+void gl_sphere(float* center, float radius, const float* rgba)
 {
     AE_PROFILE_SCOPE();
 
@@ -3666,7 +3670,7 @@ void gl_texture_bind(gl_texture_t* texture)
     gl_debug_log_error_state();
 }
 
-void gl_texture_blit_ex(gl_texture_t* texture, float x, float y, float rgba[4])
+void gl_texture_draw_ex(gl_texture_t* texture, float x, float y, const float rgba[4])
 {
     AE_PROFILE_SCOPE();
 
@@ -3714,10 +3718,9 @@ void gl_texture_blit_ex(gl_texture_t* texture, float x, float y, float rgba[4])
     }
 }
 
-void gl_texture_blit(gl_texture_t* texture, float x, float y)
+void gl_texture_draw(gl_texture_t* texture, float x, float y)
 {
-    static const float white[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-    gl_texture_blit_ex(texture, x, y, (float*)white);
+    gl_texture_draw_ex(texture, x, y, ae_color_white);
 }
 
 void gl_texture_draw_skybox(gl_texture_t* front,
@@ -4293,7 +4296,7 @@ gl_material_t* gl_material_create(void)
     return material;
 }
 
-void gl_material_set_all(gl_material_t* material, float* value)
+void gl_material_set_all(gl_material_t* material, const float* value)
 {
     if (ae_likely(gl_material_get_open(material)))
     {
@@ -4755,7 +4758,7 @@ gl_light_t* gl_light_create(void)
     return light;
 }
 
-void gl_light_set_all(gl_light_t* light, float* value) // ambient and diffuse
+void gl_light_set_all(gl_light_t* light, const float* value)
 {
     if (ae_likely(gl_light_get_open(light)))
     {
@@ -6212,6 +6215,16 @@ void gl_buffer_draw_ex(gl_buffer_t* buffer, gl_material_t* material)
 
         GL_PopAttrib();
         GL_PopClientAttrib();
+
+        // TODO: GL_DEBUG, draw these only if it's #defined, color/enabled properties
+        #if 0
+        {
+            static const u32 s = ae_random_bounded_u32(AE_COLOR_COUNT);
+            static const u32 e = ae_random_bounded_u32(AE_COLOR_COUNT);
+
+            gl_buffer_draw_normals_ex(buffer, ae_color_flt[s], ae_color_flt[e], 1.0f);
+        }
+        #endif
     }
 
     gl_debug_log_error_state();
@@ -6222,8 +6235,8 @@ void gl_buffer_draw(gl_buffer_t* buffer)
     gl_buffer_draw_ex(buffer, NULL);
 }
 
-void gl_buffer_draw_normals_ex(gl_buffer_t* buffer, float* start_color,
-                                    float* end_color, float line_width)
+void gl_buffer_draw_normals_ex(gl_buffer_t* buffer, const float* start_color,
+                                    const float* end_color, float line_width)
 {
     AE_PROFILE_SCOPE();
     gl_init();
@@ -6275,7 +6288,7 @@ void gl_buffer_draw_normals_ex(gl_buffer_t* buffer, float* start_color,
     gl_debug_log_error_state();
 }
 
-void gl_buffer_draw_normals(gl_buffer_t* buffer, float* rgba)
+void gl_buffer_draw_normals(gl_buffer_t* buffer, const float* rgba)
 {
     gl_buffer_draw_normals_ex(buffer, rgba, rgba, 1.0f);
 }
@@ -8230,6 +8243,10 @@ void gl_particle_emitter_draw(gl_particle_emitter_t* emitter)
          * growing and shrinking to ridiculous sizes in seemingly random ways...
          * we should probably check for some missing extension and try a fallback.
          * my initial suspicion is something involving PointParameter* functions.
+         *
+         * after some further testing on my linux machine, this bizarre flickering
+         * behavior also seems to be affecting line rendering mode... it appears
+         * that any opengl usage beyond the beaten path is subject to glitchiness.
          */
         GL_DepthMask(GL_FALSE);
         {
@@ -8267,12 +8284,23 @@ void gl_particle_emitter_draw(gl_particle_emitter_t* emitter)
         }
         GL_DepthMask(GL_TRUE);
 
+        // TODO: GL_DEBUG, draw only if it's #defined, color/enabled props
+        #if 0
+        {
+            static const u32 s = ae_random_bounded_u32(AE_COLOR_COUNT);
+            static const u32 e = ae_random_bounded_u32(AE_COLOR_COUNT);
+
+            gl_particle_emitter_draw_velocity_ex(emitter,
+                                ae_color_flt[s], ae_color_flt[e], 1.0f);
+        }
+        #endif
+
         gl_debug_log_error_state();
     }
 }
 
 void gl_particle_emitter_draw_velocity_ex( gl_particle_emitter_t * emitter,
-                    float* start_color, float* end_color, float line_width)
+        const float* start_color, const float* end_color, float line_width)
 {
     AE_PROFILE_SCOPE();
 
@@ -8313,7 +8341,8 @@ void gl_particle_emitter_draw_velocity_ex( gl_particle_emitter_t * emitter,
     }
 }
 
-void gl_particle_emitter_draw_velocity(gl_particle_emitter_t* emitter, float* rgba)
+void gl_particle_emitter_draw_velocity(gl_particle_emitter_t* emitter,
+                                                    const float* rgba)
 {
     gl_particle_emitter_draw_velocity_ex(emitter, rgba, rgba, 1.0f);
 }

@@ -472,22 +472,27 @@ GL_DECL void GL_CALL gl_leave3D(void);
 GL_DECL void GL_CALL gl_enter2D(int w, int h);
 GL_DECL void GL_CALL gl_leave2D(void);
 
-GL_DECL void GL_CALL gl_rect_ex(float* rect, float* bl, float* br,
-                float* tr, float* tl, int line, float line_width);
+/* ===== [ 2D shapes ] ====================================================== */
 
-GL_DECL void GL_CALL gl_outline(float* rect, float* rgba);
-GL_DECL void GL_CALL gl_rect(float* rect, float* rgba);
+GL_DECL void GL_CALL gl_rect_ex(float* rect, const float* bl, const float* br,
+                const float* tr, const float* tl, int line, float line_width);
 
-GL_DECL void GL_CALL // render a 3-dimensional bounding box outline
-gl_aabbox_ex(float* minv, float* maxv, float* rgba, float width);
+GL_DECL void GL_CALL gl_outline(float* rect, const float* rgba);
+GL_DECL void GL_CALL gl_rect(float* rect, const float* rgba);
 
-GL_DECL void GL_CALL gl_aabbox(float* minv, float* maxv, float* rgba);
+/* ===== [ 3D shapes ] ====================================================== */
 
-// render a 3-dimensional capsule shape in wireframe mode
-GL_DECL void GL_CALL gl_ellipsoid(float* center, float* extent, float* rgba);
+GL_DECL void GL_CALL // render a 3-dimensional bounding box outline (debug bounds)
+gl_aabbox_ex(float* minv, float* maxv, const float* rgba, float width);
 
-// render a 3-dimensional spherical shape in wireframe mode
-GL_DECL void GL_CALL gl_sphere(float* center, float radius, float* rgba);
+// render a 3-dimensional bounding box outline with a line width of 1.0
+GL_DECL void GL_CALL gl_aabbox(float* minv, float* maxv, const float* rgba);
+
+// render a 3-dimensional capsule shape in wireframe mode (debug bounds)
+GL_DECL void GL_CALL gl_ellipsoid(float* center, float* extent, const float* rgba);
+
+// render a 3-dimensional spherical shape in wireframe mode (debug bounds)
+GL_DECL void GL_CALL gl_sphere(float* center, float radius, const float* rgba);
 
 /*
 ================================================================================
@@ -855,10 +860,10 @@ gl_texture_load_ex(const char* filename, ae_image_error_t* error_status);
 GL_DECL void GL_CALL gl_texture_bind(gl_texture_t* texture);
 
 /* Draw a texture at (x, y) --- origin is the texture's lower left corner. */
-GL_DECL void GL_CALL gl_texture_blit(gl_texture_t* texture, float x, float y);
+GL_DECL void GL_CALL gl_texture_draw(gl_texture_t* texture, float x, float y);
 
 GL_DECL void GL_CALL /* Draw a translucent, color-modulated texture. */
-gl_texture_blit_ex(gl_texture_t* texture, float x, float y, float rgba[4]);
+gl_texture_draw_ex(gl_texture_t* tex, float x, float y, const float rgba[4]);
 
 GL_DECL void GL_CALL gl_texture_draw_skybox(gl_texture_t* front,
                                             gl_texture_t* back,
@@ -1003,8 +1008,8 @@ static c_inline void gl_material_close(gl_material_t* material)
 // Create a new material with default properties and no texture.
 GL_DECL gl_material_t* GL_CALL gl_material_create(void);
 
-// Set diffuse, ambient, specular, and emissive components to the same value.
-GL_DECL void GL_CALL gl_material_set_all(gl_material_t* material, float* v);
+// Sets the diffuse, ambient, specular, and emissive components to the same value.
+GL_DECL void GL_CALL gl_material_set_all(gl_material_t* material, const float* v);
 
 GL_DECL void GL_CALL // interpolate properties of A and B into dst (for animation)
 gl_material_lerp(gl_material_t* dst, gl_material_t* a, gl_material_t* b, float t);
@@ -1125,7 +1130,7 @@ static c_inline void gl_light_close(gl_light_t* light)
 GL_DECL gl_light_t* GL_CALL gl_light_create(void);
 
 // Set ambient and diffuse properties; set the light to a solid color profile.
-GL_DECL void GL_CALL gl_light_set_all(gl_light_t* light, float* value);
+GL_DECL void GL_CALL gl_light_set_all(gl_light_t* light, const float* value);
 
 // Interpolate the properties of lights A and B into the destination light.
 GL_DECL void GL_CALL
@@ -1379,13 +1384,14 @@ GL_DECL void GL_CALL // reverse windings
 gl_buffer_invert_faces(gl_buffer_t* buffer);
 
 // emit GL calls
-GL_DECL void GL_CALL gl_buffer_draw_ex(gl_buffer_t* buffer, gl_material_t*);
+GL_DECL void GL_CALL gl_buffer_draw_ex(gl_buffer_t* buffer, gl_material_t* mtl);
 GL_DECL void GL_CALL gl_buffer_draw(gl_buffer_t* buffer);
 
 GL_DECL void GL_CALL gl_buffer_draw_normals_ex(gl_buffer_t* buffer, // debugging
-                        float* start_color, float* end_color, float line_width);
+            const float* start_color, const float* end_color, float line_width);
 
-GL_DECL void GL_CALL gl_buffer_draw_normals(gl_buffer_t* buffer, float* rgba);
+GL_DECL void GL_CALL gl_buffer_draw_normals(gl_buffer_t* buffer,
+                                            const float* color);
 
 static c_inline size_t gl_buffer_count_all(void)
 {
@@ -1652,11 +1658,11 @@ GL_DECL void GL_CALL gl_particle_emitter_draw_all(void); // render particles
 GL_DECL void GL_CALL gl_particle_emitter_draw(gl_particle_emitter_t* emitter);
 
 GL_DECL void GL_CALL
-gl_particle_emitter_draw_velocity_ex(gl_particle_emitter_t* emitter,
-            float* start_color, float* end_color, float line_width);
+gl_particle_emitter_draw_velocity_ex( gl_particle_emitter_t * emitter,
+    const float* start_rgba, const float* end_rgba, float line_width);
 
-GL_DECL void GL_CALL
-gl_particle_emitter_draw_velocity(gl_particle_emitter_t* emitter, float* rgba);
+GL_DECL void GL_CALL // draw a line at each particle to visualize its velocity
+gl_particle_emitter_draw_velocity(gl_particle_emitter_t* e, const float* rgba);
 
 static c_inline size_t gl_particle_emitter_count_all(void)
 {

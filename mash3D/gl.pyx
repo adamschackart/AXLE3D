@@ -159,16 +159,21 @@ cdef extern from "gl_core.h":
     void gl_enter2D(int width, int height)
     void gl_leave2D()
 
-    void gl_rect_ex(float*, float*, float*, float*, float*, int, float)
+    # ===== [ 2D shapes ] ======================================================
 
-    void gl_outline(float* rect, float* rgba)
-    void gl_rect(float* rect, float* rgba)
+    void gl_rect_ex(float* rect, const float* bl, const float* br, const float* tr,
+                                const float* tl, int is_outline, float line_width)
 
-    void gl_aabbox_ex(float* minv, float* maxv, float* rgba, float line_width)
-    void gl_aabbox(float* minv, float* maxv, float* rgba)
+    void gl_outline(float* rect, const float* rgba)
+    void gl_rect(float* rect, const float* rgba)
 
-    void gl_ellipsoid(float* center, float* extent, float* rgba)
-    void gl_sphere(float* center, float radius, float* rgba)
+    # ===== [ 3D shapes ] ======================================================
+
+    void gl_aabbox_ex(float* minv, float* maxv, const float* rgba, float width)
+    void gl_aabbox(float* minv, float* maxv, const float* rgba)
+
+    void gl_ellipsoid(float* center, float* extent, const float* rgba)
+    void gl_sphere(float* center, float radius, const float* rgba)
 
     # ==========================================================================
     # ~ [ Gl state logging ]
@@ -355,9 +360,8 @@ cdef extern from "gl_core.h":
 
     void gl_texture_bind(gl_texture_t* texture)
 
-    # shameful false implication of software blitting, for pyglet compatibility
-    void gl_texture_blit(gl_texture_t* texture, float x, float y)
-    void gl_texture_blit_ex(gl_texture_t* tex, float x, float y, float rgba[4])
+    void gl_texture_draw(gl_texture_t* texture, float x, float y) # blit
+    void gl_texture_draw_ex(gl_texture_t*, float, float, const float[4])
 
     void gl_texture_draw_skybox(gl_texture_t* front,
                                 gl_texture_t* back,
@@ -421,7 +425,7 @@ cdef extern from "gl_core.h":
     gl_material_t* gl_material_create()
 
     # set all material properties (ambient, diffuse, etc.) to the same value
-    void gl_material_set_all(gl_material_t* material, float* value)
+    void gl_material_set_all(gl_material_t* material, const float* value)
 
     # interpolate A and B properties into a destination material (for animation)
     void gl_material_lerp(gl_material_t*, gl_material_t*, gl_material_t*, float)
@@ -477,7 +481,7 @@ cdef extern from "gl_core.h":
     gl_light_t* gl_light_create()
 
     # set ambient and diffuse properties; set the light to a solid color profile
-    void gl_light_set_all(gl_light_t* light, float* value)
+    void gl_light_set_all(gl_light_t* light, const float* value)
 
     # interpolate the properties of lights A and B into the destination light
     void gl_light_lerp(gl_light_t* light, gl_light_t* a, gl_light_t* b, float t)
@@ -620,10 +624,10 @@ cdef extern from "gl_core.h":
     void gl_buffer_draw_ex(gl_buffer_t* buffer, gl_material_t* material)
     void gl_buffer_draw(gl_buffer_t* buffer)
 
-    void gl_buffer_draw_normals_ex(gl_buffer_t* buffer, float* start_color,
-                                        float* end_color, float line_width)
+    void gl_buffer_draw_normals_ex(gl_buffer_t* buffer, const float* start_color,
+                                        const float* end_color, float line_width)
 
-    void gl_buffer_draw_normals(gl_buffer_t* buffer, float* rgba)
+    void gl_buffer_draw_normals(gl_buffer_t* buffer, const float* color)
 
     size_t gl_buffer_count_all()
 
@@ -804,9 +808,10 @@ cdef extern from "gl_core.h":
     void gl_particle_emitter_draw(gl_particle_emitter_t* emitter)
 
     void gl_particle_emitter_draw_velocity_ex( gl_particle_emitter_t * emitter,
-                        float* start_color, float* end_color, float line_width)
+            const float* start_color, const float* end_color, float line_width)
 
-    void gl_particle_emitter_draw_velocity(gl_particle_emitter_t*, float* rgba)
+    void gl_particle_emitter_draw_velocity(gl_particle_emitter_t* emitter,
+                                                        const float* rgba)
 
     size_t gl_particle_emitter_count_all()
 
@@ -3382,11 +3387,13 @@ class util(object):
         def __exit__(self, *a):
             GL_PopMatrix()
 
+    # ===== [ 2D shapes ] ======================================================
+
     @staticmethod
     def rect_ex(FloatRect rect, Vec4 bl, Vec4 br, Vec4 tr, Vec4 tl,
                 bint line, float line_width):
         """
-        Make the standard "Hello OpenGL" gradient quadrilateral, or something.
+        Draw the standard "Hello OpenGL" gradient quadrilateral, or something.
         """
         gl_rect_ex(rect.rect, bl.v, br.v, tr.v, tl.v, line, line_width)
 
@@ -3403,6 +3410,8 @@ class util(object):
         Draw an alpha-blended 2-dimensional quad.
         """
         gl_rect(rect.rect, rgba.v)
+
+    # ===== [ 3D shapes ] ======================================================
 
     @staticmethod
     def aabbox(Vec3 minv, Vec3 maxv, Vec4 rgba, float line_width=1.0):
@@ -4108,17 +4117,17 @@ cdef class Texture:
         """
         gl_texture_bind(self.texture); return self
 
-    def blit(self, float x, float y):
+    def draw(self, float x, float y):
         """
         Draw a texture at (x, y). The origin is the texture's lower left corner.
         """
-        gl_texture_blit(self.texture, x, y); return self
+        gl_texture_draw(self.texture, x, y); return self
 
-    def blit_ex(self, float x, float y, Vec4 rgba):
+    def draw_ex(self, float x, float y, Vec4 rgba):
         """
         Draw a translucent, color-modulated texture at (x, y). Lower-left origin.
         """
-        gl_texture_blit_ex(self.texture, x, y, rgba.v); return self
+        gl_texture_draw_ex(self.texture, x, y, rgba.v); return self
 
     @staticmethod
     def draw_skybox(list textures, Coord3D coord):

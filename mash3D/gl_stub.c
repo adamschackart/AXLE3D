@@ -648,38 +648,42 @@ void gl_leave2D(void)
     AE_STUB();
 }
 
-void gl_rect_ex(float* rect, float* bl, float* br, float* tr, float* tl,
-                int line, float line_width)
+/* ===== [ 2D shapes ] ====================================================== */
+
+void gl_rect_ex(float* rect, const float* bl, const float* br, const float* tr,
+                            const float* tl, int is_outline, float line_width)
 {
     AE_STUB();
 }
 
-void gl_outline(float* rect, float* rgba)
+void gl_outline(float* rect, const float* rgba)
 {
     AE_STUB();
 }
 
-void gl_rect(float* rect, float* rgba)
+void gl_rect(float* rect, const float* rgba)
 {
     AE_STUB();
 }
 
-void gl_aabbox_ex(float* minv, float* maxv, float* rgba, float line_width)
+/* ===== [ 3D shapes ] ====================================================== */
+
+void gl_aabbox_ex(float* minv, float* maxv, const float* rgba, float line_width)
 {
     AE_STUB();
 }
 
-void gl_aabbox(float* minv, float* maxv, float* rgba)
+void gl_aabbox(float* minv, float* maxv, const float* rgba)
 {
     AE_STUB();
 }
 
-void gl_ellipsoid(float* center, float* extent, float* rgba)
+void gl_ellipsoid(float* center, float* extent, const float* rgba)
 {
     AE_STUB();
 }
 
-void gl_sphere(float* center, float radius, float* rgba)
+void gl_sphere(float* center, float radius, const float* rgba)
 {
     AE_STUB();
 }
@@ -914,12 +918,12 @@ void gl_texture_bind(gl_texture_t* texture)
     AE_STUB();
 }
 
-void gl_texture_blit_ex(gl_texture_t* texture, float x, float y, float rgba[4])
+void gl_texture_draw_ex(gl_texture_t* texture, float x, float y, const float rgba[4])
 {
     AE_STUB();
 }
 
-void gl_texture_blit(gl_texture_t* texture, float x, float y)
+void gl_texture_draw(gl_texture_t* texture, float x, float y)
 {
     AE_STUB();
 }
@@ -1028,7 +1032,7 @@ gl_material_t* gl_material_create(void)
     AE_STUB(); return NULL;
 }
 
-void gl_material_set_all(gl_material_t* material, float* value)
+void gl_material_set_all(gl_material_t* material, const float* value)
 {
     AE_STUB();
 }
@@ -1117,7 +1121,7 @@ gl_light_t* gl_light_create(void)
     AE_STUB(); return NULL;
 }
 
-void gl_light_set_all(gl_light_t* light, float* value)
+void gl_light_set_all(gl_light_t* light, const float* value)
 {
     AE_STUB();
 }
@@ -1426,13 +1430,13 @@ void gl_buffer_draw(gl_buffer_t* buffer)
     AE_STUB();
 }
 
-void gl_buffer_draw_normals_ex(gl_buffer_t* buffer, float* start_color,
-                                    float* end_color, float line_width)
+void gl_buffer_draw_normals_ex(gl_buffer_t* buffer, const float* start_color,
+                                    const float* end_color, float line_width)
 {
     AE_STUB();
 }
 
-void gl_buffer_draw_normals(gl_buffer_t* buffer, float* rgba)
+void gl_buffer_draw_normals(gl_buffer_t* buffer, const float* rgba)
 {
     AE_STUB();
 }
@@ -1720,12 +1724,13 @@ void gl_particle_emitter_draw(gl_particle_emitter_t* emitter)
 }
 
 void gl_particle_emitter_draw_velocity_ex( gl_particle_emitter_t * emitter,
-                    float* start_color, float* end_color, float line_width)
+        const float* start_color, const float* end_color, float line_width)
 {
     AE_STUB();
 }
 
-void gl_particle_emitter_draw_velocity(gl_particle_emitter_t* emitter, float* rgba)
+void gl_particle_emitter_draw_velocity(gl_particle_emitter_t* emitter,
+                                                    const float* rgba)
 {
     AE_STUB();
 }
