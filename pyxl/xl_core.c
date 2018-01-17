@@ -1486,6 +1486,7 @@ static void xl_window_clear_depth_buffer(xl_internal_window_t* data)
 
 void xl_window_clear(xl_window_t* window, float r, float g, float b)
 {
+    // TODO: This function should take a const float* arg for use with ae_color.
     // TODO: This function should increment a window frame counter. A value of
     // zero would indicate nothing has run yet, and the first frame would be 1.
     if (xl_window_get_open(window))
@@ -1500,6 +1501,7 @@ void xl_window_clear(xl_window_t* window, float r, float g, float b)
         g = ae_fclampf(g, 0.0f, 1.0f);
         b = ae_fclampf(b, 0.0f, 1.0f);
 
+        // TODO: do we need to convert floats to u8s in a gamma-correct manner?
         if (SDL_SetRenderDrawColor( data->renderer,
                                     (u8)(r * 255),
                                     (u8)(g * 255),
@@ -1710,6 +1712,8 @@ void xl_window_close_fonts(xl_window_t* window)
 /*
 ================================================================================
  * ~~ [ shape renderer ] ~~ *
+--------------------------------------------------------------------------------
+TODO: color args should be const so we can use ae_color constants without casts
 --------------------------------------------------------------------------------
 */
 
@@ -4572,6 +4576,7 @@ void xl_sound_close_all(void)
  * ~~ [ keyboard input ] ~~ *
 --------------------------------------------------------------------------------
 TODO: onscreen keyboard support for mobile (open when onscreen, closed when off)
+TODO: onscreen keyboard should be usable with a selected game controller as well
 TODO: handle SDL unicode text editing and input events, with the global keyboard
 TODO: key repeat event separate from press/release - check flag in SDL structure
 TODO: keyboard tribools: up+down, left+right, a+d, w+s, left and right modifiers

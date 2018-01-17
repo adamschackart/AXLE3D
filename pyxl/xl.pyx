@@ -1920,8 +1920,8 @@ cdef class Window:
         Execute an application using a stack-like state machine. Each application
         state (object of any type) can contain the following optional properties:
 
-            - activate(window) method for when the state is brought to stack top
-            - deactivate(window) method for when the state is popped or buried
+            - on_enter(window) method for when the state is brought to stack top
+            - on_leave(window) method for when the state is popped (or buried)
 
             - queued_state is the next state, that we want to push onto the stack
             - has_exit indicates that we want to finish this state and remove it
@@ -1932,6 +1932,9 @@ cdef class Window:
         States can also have event handling methods (i.e. on_controller_button).
         See xl.event.poll() for a listing of the various event handler methods.
         """
+        # TODO: this executes in a stack-like manner, which is best for programs
+        # like games that want to push and pop pause menus etc - create an option
+        # to run in a queue-like manner for slideshow programs and other exotica.
         cdef list state_stack = []
 
         # Don't call activation code on the initial state if the window is invalid.
@@ -1952,16 +1955,16 @@ cdef class Window:
                 state_repr = b'{}'.format(state) # oldschool ascii string
 
             if state_stack:
-                if hasattr(state_stack[-1], 'deactivate'):
-                    state_stack[-1].deactivate(self)
+                if hasattr(state_stack[-1], 'on_leave'):
+                    state_stack[-1].on_leave(self)
 
                 state_stack[-1].queued_state = None
 
             ae_log_str('MISC', 'state push: %s', <const char*>state_repr)
             state_stack.append(state)
 
-            if hasattr(state, 'activate'):
-                state.activate(self)
+            if hasattr(state, 'on_enter'):
+                state.on_enter(self)
 
         def pop_state():
             """
@@ -1974,14 +1977,14 @@ cdef class Window:
             else:
                 state_repr = b'{}'.format(state_stack[-1]) # utf or ascii
 
-            if (hasattr(state_stack[-1], 'deactivate')):
-                state_stack[-1].deactivate(self)
+            if (hasattr(state_stack[-1], 'on_leave')):
+                state_stack[-1].on_leave(self)
 
             ae_log_str('MISC', 'state pop: %s', <const char*>state_repr)
             state_stack.pop()
 
-            if (state_stack and hasattr(state_stack[-1], 'activate')):
-                state_stack[-1].activate(self)
+            if (state_stack and hasattr(state_stack[-1], 'on_enter')):
+                state_stack[-1].on_enter(self)
 
         def emit_frame(double dt):
             """
@@ -5072,7 +5075,7 @@ class event(object):
     # NOTE: this hack is here to allow this to work with window.run()
     log_handler.has_exit = False
     log_handler.queued_state = None
-    log_handler.activate = lambda window: None
-    log_handler.deactivate = lambda window: None
+    log_handler.on_enter = lambda window: None
+    log_handler.on_leave = lambda window: None
     log_handler.update = lambda dt: None
     log_handler.draw = lambda window: None

@@ -55,6 +55,9 @@ The enum constants these functions rely on are not exposed in this header file.
 */
 
 GL_DECL void GL_CALL
+GL_Accum(unsigned int op, float value);
+
+GL_DECL void GL_CALL
 GL_ActiveTexture(unsigned int texture);
 
 GL_DECL void GL_CALL
@@ -83,7 +86,16 @@ GL_DECL void GL_CALL
 GL_Clear(unsigned int mask);
 
 GL_DECL void GL_CALL
+GL_ClearAccum(float r, float g, float b, float a);
+
+GL_DECL void GL_CALL
 GL_ClearColor(float r, float g, float b, float a);
+
+GL_DECL void GL_CALL
+GL_ClearDepth(double depth);
+
+GL_DECL void GL_CALL
+GL_ClearIndex(float c);
 
 GL_DECL void GL_CALL
 GL_Color3f(float r, float g, float b);
@@ -182,6 +194,9 @@ GL_DECL void GL_CALL
 GL_GetLightfv(unsigned int light, unsigned int pname, float* params);
 
 GL_DECL void GL_CALL
+GL_GetLightiv(unsigned int light, unsigned int pname, int* params);
+
+GL_DECL void GL_CALL
 GL_GetMaterialfv(unsigned int face, unsigned int pname, float* params);
 
 GL_DECL const char* GL_CALL
@@ -207,6 +222,9 @@ GL_GetTexParameterfv(unsigned int target, unsigned int pname, float* params);
 
 GL_DECL void GL_CALL
 GL_GetTexParameteriv(unsigned int target, unsigned int pname, int* params);
+
+GL_DECL void GL_CALL
+GL_Hint(unsigned int target, unsigned int mode);
 
 GL_DECL void GL_CALL
 GL_InterleavedArrays(unsigned int format, int stride, const void* pointer);
@@ -384,6 +402,46 @@ GL_VertexPointer(int size, unsigned int type, int stride, const void* data);
 GL_DECL void GL_CALL
 GL_Viewport(int x, int y, int width, int height);
 
+/* ===== [ C++ scopes ] ===================================================== */
+
+#if defined(__cplusplus)
+    // server (GPU) attribute stack
+    #define GL_ATTRIB(...) glAttrib _gl_attrib(__VA_ARGS__)
+
+    struct glAttrib
+    {
+        glAttrib(unsigned int mask) { GL_PushAttrib(mask); }
+        ~glAttrib() { GL_PopAttrib(); }
+    };
+
+    // client (CPU) attribute stack
+    #define GL_CLIENT_ATTRIB(...) glClientAttrib _gl_client_attrib(__VA_ARGS__)
+
+    struct glClientAttrib
+    {
+        glClientAttrib(unsigned int mask) { GL_PushClientAttrib(mask); }
+        ~glClientAttrib() { GL_PopClientAttrib(); }
+    };
+
+    // oldschool vertex specification (not a stack!)
+    #define GL_IMMEDIATE(...) glImmediate _gl_immediate(__VA_ARGS__)
+
+    struct glImmediate
+    {
+        glImmediate(unsigned int mode) { GL_Begin(mode); }
+        ~glImmediate() { GL_End(); }
+    };
+
+    // matrix stack
+    #define GL_MATRIX(...) glMatrix _gl_matrix(__VA_ARGS__)
+
+    struct glMatrix
+    {
+        glMatrix() { GL_PushMatrix(); }
+        ~glMatrix() { GL_PopMatrix(); }
+    };
+#endif
+
 /*
 ================================================================================
  * ~~ [ GL state logging ] ~~ *
@@ -471,6 +529,42 @@ GL_DECL void GL_CALL gl_leave3D(void);
 
 GL_DECL void GL_CALL gl_enter2D(int w, int h);
 GL_DECL void GL_CALL gl_leave2D(void);
+
+#if defined(__cplusplus)
+    /*
+        This leaves the 2D/3D scene automatically at a scope exit. Note that on
+        many C++ compilers, the constructor is always executed at scope entry,
+        not where you actually declare the object (use funcs for custom blocks).
+    */
+    #define GL_SCENE3D(...) glScene3D _gl_scene3D(__VA_ARGS__)
+    #define GL_SCENE2D(...) glScene2D _gl_scene2D(__VA_ARGS__)
+
+    struct glScene3D
+    {
+        glScene3D(int w, int h, double FOV, double znear, double zfar)
+        {
+            gl_enter3D(w, h, FOV, znear, zfar);
+        }
+
+        ~glScene3D()
+        {
+            gl_leave3D();
+        }
+    };
+
+    struct glScene2D
+    {
+        glScene2D(int w, int h)
+        {
+            gl_enter2D(w, h);
+        }
+
+        ~glScene2D()
+        {
+            gl_leave2D();
+        }
+    };
+#endif
 
 /* ===== [ 2D shapes ] ====================================================== */
 

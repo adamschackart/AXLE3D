@@ -797,27 +797,47 @@ static c_inline void xl_font_close(xl_font_t* font)
     xl_font_set_open(font, 0);
 }
 
+/* Get the dimensions of the string as it would be rendered to image or texture.
+ */
 XL_DECL void XL_CALL xl_font_text_size(xl_font_t * font, int * w, int * h,
                             const char* format, ...) AE_PRINTF_ARGS(3, 4);
 
+/* Allocate a new software image and render the given string into it.
+ */
 XL_DECL void XL_CALL xl_font_render_image(xl_font_t * font, ae_image_t* image,
                                 const char* format, ...) AE_PRINTF_ARGS(2, 3);
 
+/* Create a new hardware texture and render the given string into it.
+ */
 XL_DECL xl_texture_t* XL_CALL xl_font_render_texture(xl_font_t * font,
                         const char* format, ...) AE_PRINTF_ARGS(1, 2);
 
+/* Render the string into a target software image. Rendering is anchored at the
+ * bottom-left corner of strings, and specific color channels can be bypassed.
+ * For custom clipping and effects, render to image and call your drawing code.
+ */
 XL_DECL void XL_CALL xl_font_blit(xl_font_t* font, ae_image_t* image, int x, int y,
         int r, int g, int b, int a, const char* format, ...) AE_PRINTF_ARGS(8, 9);
 
+/* Render the string into the current framebuffer. Rendering is anchored at the
+ * bottom-left corner of the string, and no texture stretching or clipping is
+ * performed. To do so, call xl_font_render_texture and use the returned object.
+ */
 XL_DECL void XL_CALL xl_font_draw(xl_font_t* font, float xy[2],
                 const char* format, ...) AE_PRINTF_ARGS(2, 3);
 
+/* Load a font from a file in memory. Calls ae_error with a message on failure.
+ */
 XL_DECL xl_font_t* XL_CALL xl_font_load_from_memory( xl_window_t * window,
                                 void* ptr, size_t length, int point_size);
 
+/* Load a font from a file on disk. Calls ae_error with a message on failure.
+ */
 XL_DECL xl_font_t* XL_CALL xl_font_load( xl_window_t * window,
                         const char* filename, int point_size);
 
+/* Load the default system code font. Calls ae_error with a message on failure.
+ */
 XL_DECL xl_font_t* XL_CALL xl_font_load_system_monospace(xl_window_t* window,
                                                             int point_size);
 
@@ -2497,6 +2517,9 @@ xl_timer_set_repeat(const char* name, int repeat);
     N(XL_EVENT_LONG_FRAME, long_frame, double dt;)                                  \
                                                                                     \
     N(XL_EVENT_COUNT, count, char _pad;)                                            \
+
+// convenience macro for tracking cases sent to event handlers; takes type
+#define xl_event_switch(t) ae_switch((t), xl_event_type, XL_EVENT, suffix)
 
 typedef enum xl_event_type_t
 {

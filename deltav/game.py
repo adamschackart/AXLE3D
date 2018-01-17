@@ -8,7 +8,7 @@ class Scene(object):
     zfar = 1000.0
     exclusive_mouse = True
 
-    def activate(self, window):
+    def on_enter(self, window):
         Mouse.get_primary().relative = self.exclusive_mouse
 
         self._width = window.width
@@ -16,7 +16,7 @@ class Scene(object):
 
         gl.util.enter3D(self._width, self._height, self.FOV, self.znear, self.zfar)
 
-    def deactivate(self, window):
+    def on_leave(self, window):
         Mouse.get_primary().relative = False
         gl.util.leave3D()
 
@@ -26,8 +26,8 @@ class Scene(object):
     def on_window_resize(self, window, width, height):
         window.render_size = (width, height)
 
-        self.deactivate(window)
-        self.activate(window)
+        self.on_leave(window)
+        self.on_enter(window)
 
     def on_keyboard_key(self, keyboard, mods, key, pressed):
         if pressed:

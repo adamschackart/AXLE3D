@@ -38,8 +38,8 @@ class Menu(game.Scene):
 
         self.has_exit = False
 
-    def activate(self, window):
-        super(Menu, self).activate(window)
+    def on_enter(self, window):
+        super(Menu, self).on_enter(window)
 
         self.x = (window.width - self.width) / 2
         self.y = (window.height - self.height) / 2
@@ -122,7 +122,7 @@ class PopupMenu(Menu):
     @profile("menu.py", "PopupMenu.draw")
     def draw(self, window):
         #
-        # FIXME: why do we need to re-submit this transform? it happens in self.activate!
+        # FIXME: why do we need to re-submit this transform? it happens in self.on_enter!
         #
         with gl.util.Scene3D(self._width, self._height, self.FOV, self.znear, self.zfar):
             self.fps.draw(window)

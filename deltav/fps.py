@@ -121,9 +121,9 @@ class FPS(game.Scene):
         self.level.restart()
         self.player = self.level.player # convenience
 
-    @profile("fps.py", "FPS.activate")
-    def activate(self, window):
-        super(FPS, self).activate(window)
+    @profile("fps.py", "FPS.on_enter")
+    def on_enter(self, window):
+        super(FPS, self).on_enter(window)
         self.beam_opacity = 0.0
 
         for k in self.player.movement.keys():
@@ -284,14 +284,15 @@ class FPS(game.Scene):
         for emitter in self.level.emitters:
             emitter.draw()
 
-        c = Coord3D()
-        c.pos = Vec3(.2, -.4, -.35)
-        c.push_object_ex(True)
+        if '-nogun' not in sys.argv:
+            c = Coord3D()
+            c.pos = Vec3(.2, -.4, -.35)
+            c.push_object_ex(True)
 
-        for mesh in self.level.weapon_meshes:
-            mesh.draw()
+            for mesh in self.level.weapon_meshes:
+                mesh.draw()
 
-        c.pop_object()
+            c.pop_object()
 
         if self.beam_opacity:
             gl.PushMatrix()

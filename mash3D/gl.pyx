@@ -30,6 +30,7 @@ cdef extern from "gl_core.h":
     # ~ [ OpenGL wrapper ]
     # ==========================================================================
 
+    void GL_Accum(unsigned int op, float value)
     void GL_ActiveTexture(unsigned int texture)
     void GL_AlphaFunc(unsigned int func, float ref)
     void GL_Begin(unsigned int mode)
@@ -42,7 +43,10 @@ cdef extern from "gl_core.h":
                                 unsigned int srcA, unsigned int dstA)
 
     void GL_Clear(unsigned int mask)
+    void GL_ClearAccum(float r, float g, float b, float a)
     void GL_ClearColor(float r, float g, float b, float a)
+    void GL_ClearDepth(double depth)
+    void GL_ClearIndex(float c)
     void GL_Color3f(float r, float g, float b)
     void GL_Color3fv(const float* rgb)
     void GL_Color4f(float r, float g, float b, float a)
@@ -75,6 +79,7 @@ cdef extern from "gl_core.h":
     void GL_GetFloatv(unsigned int pname, float* data)
     void GL_GetIntegerv(unsigned int pname, int* data)
     void GL_GetLightfv(unsigned int light, unsigned int pname, float* params)
+    void GL_GetLightiv(unsigned int light, unsigned int pname, int* params)
     void GL_GetMaterialfv(unsigned int face, unsigned int pname, float* params)
     const char* GL_GetString(unsigned int name)
     void GL_GetTexEnvfv(unsigned int target, unsigned int pname, float* params)
@@ -84,6 +89,7 @@ cdef extern from "gl_core.h":
     void GL_GetTexGeniv(unsigned int coord, unsigned int pname, int* params)
     void GL_GetTexParameterfv(unsigned int target, unsigned int pname, float* params)
     void GL_GetTexParameteriv(unsigned int target, unsigned int pname, int* params)
+    void GL_Hint(unsigned int target, unsigned int mode)
     void GL_InterleavedArrays(unsigned int format, int stride, const void* pointer)
     unsigned char GL_IsEnabled(unsigned int cap)
     unsigned char GL_IsTexture(unsigned int texture)
@@ -2861,6 +2867,9 @@ if 1:
     QUERY_RESULT_NO_WAIT                    = 0x9194
     MIRROR_CLAMP_TO_EDGE                    = 0x8743
 
+def Accum(unsigned int op, float value):
+    GL_Accum(op, value)
+
 def ActiveTexture(unsigned int texture):
     GL_ActiveTexture(texture)
 
@@ -2888,8 +2897,17 @@ def BlendFuncSeparate(unsigned sRGB, unsigned dRGB, unsigned sA, unsigned dA):
 def Clear(unsigned int mask):
     GL_Clear(mask)
 
+def ClearAccum(float r, float g, float b, float a):
+    GL_ClearAccum(r, g, b, a)
+
 def ClearColor(float r, float g, float b, float a):
     GL_ClearColor(r, g, b, a)
+
+def ClearDepth(double depth):
+    GL_ClearDepth(depth)
+
+def ClearIndex(float c):
+    GL_ClearIndex(c)
 
 def Color3f(float r, float g, float b):
     GL_Color3f(r, g, b)
@@ -2987,6 +3005,9 @@ def GetIntegerv(unsigned int pname, size_t data):
 def GetLightfv(unsigned int light, unsigned int pname, size_t params):
     GL_GetLightfv(light, pname, <float*>params)
 
+def GetLightiv(unsigned int light, unsigned int pname, size_t params):
+    GL_GetLightiv(light, pname, <int*>params)
+
 def GetMaterialfv(unsigned int face, unsigned int pname, size_t params):
     GL_GetMaterialfv(face, pname, <float*>params)
 
@@ -3014,6 +3035,9 @@ def GetTexParameterfv(unsigned int target, unsigned int pname, size_t params):
 
 def GetTexParameteriv(unsigned int target, unsigned int pname, size_t params):
     GL_GetTexParameteriv(target, pname, <int*>params)
+
+def Hint(unsigned int target, unsigned int mode):
+    GL_Hint(target, mode)
 
 def InterleavedArrays(unsigned int format, int stride, size_t data):
     GL_InterleavedArrays(format, stride, <const void*>data)

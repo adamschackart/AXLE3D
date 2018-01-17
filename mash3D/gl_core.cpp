@@ -221,7 +221,10 @@ static void* gl_func(const char* name)
 
 #define X() AE_PROFILE_SCOPE()
 
-// TODO: GL_Accum
+void GL_Accum(unsigned int op, float value)
+{
+    X(); glAccum(op, value);
+}
 
 // TODO: GL_ActiveShaderProgram
 
@@ -433,6 +436,11 @@ void GL_Clear(unsigned int mask)
     X(); glClear(mask);
 }
 
+void GL_ClearAccum(float r, float g, float b, float a)
+{
+    X(); glClearAccum(r, g, b, a);
+}
+
 // TODO: GL_ClearBufferData
 
 // TODO: GL_ClearBufferSubData
@@ -445,7 +453,22 @@ void GL_Clear(unsigned int mask)
 
 // TODO: GL_ClearBufferuiv
 
+void GL_ClearColor(float r, float g, float b, float a)
+{
+    X(); glClearColor(r, g, b, a);
+}
+
+void GL_ClearDepth(double depth)
+{
+    X(); glClearDepth(depth);
+}
+
 // TODO: GL_ClearDepthf
+
+void GL_ClearIndex(float c)
+{
+    X(); glClearIndex(c);
+}
 
 // TODO: GL_ClearTexImage
 
@@ -456,17 +479,6 @@ void GL_Clear(unsigned int mask)
 // TODO: GL_ClientWaitSync
 
 // TODO: GL_ClipPlane
-
-// TODO: GL_ClearAccum
-
-void GL_ClearColor(float r, float g, float b, float a)
-{
-    X(); glClearColor(r, g, b, a);
-}
-
-// TODO: GL_ClearDepth
-
-// TODO: GL_ClearIndex
 
 void GL_Color3f(float r, float g, float b)
 {
@@ -948,7 +960,10 @@ void GL_GetLightfv(unsigned int light, unsigned int pname, float* params)
     X(); glGetLightfv(light, pname, params);
 }
 
-// TODO: GL_GetLightiv
+void GL_GetLightiv(unsigned int light, unsigned int pname, int* params)
+{
+    X(); glGetLightiv(light, pname, params);
+}
 
 void GL_GetMaterialfv(unsigned int face, unsigned int pname, float* params)
 {
@@ -1127,7 +1142,10 @@ void GL_GetTexParameteriv(unsigned int target, unsigned int pname, int* params)
 
 // TODO: GL_GetVertexAttribiv
 
-// TODO: GL_Hint
+void GL_Hint(unsigned int target, unsigned int mode)
+{
+    X(); glHint(target, mode);
+}
 
 // TODO: GL_Histogram
 
@@ -6176,11 +6194,13 @@ void gl_buffer_draw_ex(gl_buffer_t* buffer, gl_material_t* material)
 
         gl_material_apply_ex(material, buffer);
 
+        // XXX: assumes we're in default fill mode in order to minimize state changes
         if (X(buffer)->line_mode)
         {
             GL_PolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         }
 
+        // XXX: assumes we're in default smooth shading to minimize OpenGL API calls
         if (!X(buffer)->smooth_shading)
         {
             GL_ShadeModel(GL_FLAT);

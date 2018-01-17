@@ -5,10 +5,10 @@
 # TODOS:
 #  - allow setup.py to apply global attributes/config to all extensions and libs
 #  - give build_shared some options (use shared_lib.debug instead of __debug__)
-#  - only rebuild shared libraries if sources are modified (check timestamps)
-#  - bundle debug libraries (python27_d.dll etc) with cx_freeze exe on win32
+#  - only rebuild shared libs & EXEs if sources are modified (check timestamps)
+#  - NativeExecutable option to dynamically link the CRT or copy the dynamic lib
+#  - bundle debug libraries (python27_d.dll etc) with cx_freeze EXE on win32 dbg
 #  - disable C++ exception handling, iterator debugging, and RTTI on all builds
-#  - allow this to work if cx_freeze isn't installed (unsupported on python 3)
 #  - small code build (Oi is smaller than Os on MSVC, but issues warning D9025)
 # ------------------------------------------------------------------------------
 from __future__ import print_function
@@ -29,10 +29,22 @@ import time
 import sys
 import os
 
+# ==============================================================================
+# ~ [ utils ]
+# ==============================================================================
+
+if sys.platform != 'win32':
+    class WindowsLineEndingsFile(file):
+        """File object that forces CRLF (Win32-style) line endings on write."""
+        def write(self, s):
+            super(WindowsLineEndingsFile, self).write(s.replace('\n', '\r\n'))
+else:
+    WindowsLineEndingsFile = file
+
 def headerize(path, src, dst, verbose=True):
     """Convert textfiles to string literals that can be #included in C code."""
-    src_file = open(os.path.join(path, src), 'r')
-    dst_file = open(os.path.join(path, dst), 'w')
+    src_file = WindowsLineEndingsFile(os.path.join(path, src), 'r')
+    dst_file = WindowsLineEndingsFile(os.path.join(path, dst), 'w')
 
     # TODO: make this (along with headerize_binary) a full-fledged distutils
     # command that runs before any C code is generated, compiled, or linked.
@@ -93,6 +105,7 @@ class Distribution(distutils.dist.Distribution):
     def __init__(self, attrs):
         self.executables = [] # cached by the constructor
         self.shared_libs = [] # shared libraries to build
+        self.native_exes = [] # native C(++) applications
 
         distutils.dist.Distribution.__init__(self, attrs)
 
@@ -162,6 +175,13 @@ class Extension(Cython.Distutils.Extension):
 class SharedLibrary(Extension):
     pass
 
+class NativeExecutable(Extension):
+    def __init__(self, *args, **kwargs):
+        Extension.__init__(self, *args, **kwargs) # can't super()
+
+        if 'windows_subsystem' in kwargs: # windows, or console
+            self.windows_subsystem = kwargs['windows_subsystem']
+
 class Executable(cx_Freeze.Executable):
     pass
 
@@ -210,6 +230,62 @@ class build_shared(distutils.core.Command):
 
             for obj in objects: os.remove(obj)
 
+class build_native(distutils.core.Command):
+    user_options = [] # TODO: populate with options (see TODO list above)
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        # TODO: common path! this is mostly copied + pasted from shared lib
+        compiler = distutils.ccompiler.new_compiler(verbose=self.verbose,
+                                dry_run=self.dry_run, force=self.force)
+
+        # apply platform-specific configuration from environment variables
+        distutils.sysconfig.customize_compiler(compiler)
+
+        for native_exe in self.distribution.native_exes:
+            native_exe.apply_global_config() # apply our global attributes
+
+            macros = native_exe.define_macros[:] # build (un-)defines list
+            for undef in native_exe.undef_macros: macros.append((undef,))
+
+            language = (native_exe.language or # detect required language
+                            compiler.detect_language(native_exe.sources))
+
+            objects = compiler.compile(native_exe.sources, macros=macros,
+                    include_dirs=native_exe.include_dirs, debug=__debug__,
+                    extra_postargs=native_exe.extra_compile_args or [])
+
+            # we want to specify non-console mode by default on windows apps
+            # XXX: there is probably a more elegant place to shoehorn this.
+            # also note that this requires the use of WinMain on win32 apps!
+            if native_exe.extra_link_args is None:
+                native_exe.extra_link_args = []
+
+            if sys.platform == 'win32':
+                try:
+                    s = native_exe.windows_subsystem.upper()
+                except AttributeError:
+                    s = 'CONSOLE' if __debug__ else 'WINDOWS'
+
+                native_exe.extra_link_args.append('/SUBSYSTEM:{}'.format(s))
+
+            compiler.link_executable(
+                objects,
+                native_exe.name,
+                libraries=native_exe.libraries,
+                library_dirs=native_exe.library_dirs,
+                runtime_library_dirs=native_exe.runtime_library_dirs,
+                extra_postargs=native_exe.extra_link_args,
+                debug=__debug__,
+                target_lang=language)
+
+            for obj in objects: os.remove(obj)
+
 class build_ext(Cython.Distutils.build_ext):
     def build_extension(self, ext):
         Cython.Distutils.build_ext.build_extension(self, ext.apply_global_config())
@@ -218,6 +294,9 @@ class build(cx_Freeze.build):
     def get_sub_commands(self):
         # only build exes with the "build_exe" command (it can take a few seconds)
         commands = distutils.command.build.build.get_sub_commands(self)
+
+        # we want to build native executables after the shared libraries they use
+        if self.distribution.native_exes: commands.insert(0, 'build_native')
 
         # we want to build shared libraries before the c extensions that use them
         if self.distribution.shared_libs: commands.insert(0, 'build_shared')
@@ -260,13 +339,20 @@ class clean(distutils.command.clean.clean):
         else:
             for name in glob("*.so"): os.remove(name)
 
+        # clean up after build_native. only windows programs have file extensions!
+        for name in [exe.name for exe in self.distribution.native_exes]:
+            if sys.platform == 'win32': name += '.exe'
+
+            # TODO: figure out a better way of determining platform EXE extension
+            if os.path.exists(name): os.remove(name)
+
         # delete serialized python bytecode files throughout the entire source tree,
         # and clean up shared library build metadata left behind by visual studio.
         for dirpath, dirnames, filenames in os.walk('.'):
 
             # python 2 puts serialized bytecode files inline with package .py files.
             for filename in filenames:
-                if (filename.endswith('.dll.manifest') or
+                if (filename.endswith('.manifest') or
                     filename.endswith('.pyc') or
                     filename.endswith('.pyo') ):
                     os.remove(os.path.join(dirpath, filename))
@@ -289,6 +375,7 @@ def setup(**options):
 
     kwargs['cmdclass'].setdefault('build_shared', build_shared)
     kwargs['cmdclass'].setdefault('build_ext', build_ext)
+    kwargs['cmdclass'].setdefault('build_native', build_native)
     kwargs['cmdclass'].setdefault('build', build)
     kwargs['cmdclass'].setdefault('build_exe', build_exe)
     kwargs['cmdclass'].setdefault('clean', clean)
@@ -296,6 +383,7 @@ def setup(**options):
     # avoid trying to iterate over Nones where we expect these attrs to be lists
     kwargs.setdefault('ext_modules', [])
     kwargs.setdefault('shared_libs', [])
+    kwargs.setdefault('native_exes', [])
 
     kwargs.setdefault('options', {})
 

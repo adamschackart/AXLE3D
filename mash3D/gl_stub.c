@@ -38,6 +38,11 @@ void gl_quit(void)
 --------------------------------------------------------------------------------
 */
 
+void GL_Accum(unsigned int op, float value)
+{
+    AE_STUB();
+}
+
 void GL_ActiveTexture(unsigned int texture)
 {
     AE_STUB();
@@ -84,7 +89,22 @@ void GL_Clear(unsigned int mask)
     AE_STUB();
 }
 
+void GL_ClearAccum(float r, float g, float b, float a)
+{
+    AE_STUB();
+}
+
 void GL_ClearColor(float r, float g, float b, float a)
+{
+    AE_STUB();
+}
+
+void GL_ClearDepth(double depth)
+{
+    AE_STUB();
+}
+
+void GL_ClearIndex(float c)
 {
     AE_STUB();
 }
@@ -249,6 +269,11 @@ void GL_GetLightfv(unsigned int light, unsigned int pname, float* params)
     AE_STUB();
 }
 
+void GL_GetLightiv(unsigned int light, unsigned int pname, int* params)
+{
+    AE_STUB();
+}
+
 void GL_GetMaterialfv(unsigned int face, unsigned int pname, float* params)
 {
     AE_STUB();
@@ -290,6 +315,11 @@ void GL_GetTexParameterfv(unsigned int target, unsigned int pname, float* params
 }
 
 void GL_GetTexParameteriv(unsigned int target, unsigned int pname, int* params)
+{
+    AE_STUB();
+}
+
+void GL_Hint(unsigned int target, unsigned int mode)
 {
     AE_STUB();
 }

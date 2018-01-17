@@ -5,6 +5,7 @@
 from setup_utils import *
 
 shared_libs = []
+native_exes = []
 ext_modules = []
 executables = []
 setup_kwarg = {}
@@ -359,6 +360,7 @@ except ImportError:
 
 setup(
     shared_libs = shared_libs,
+    native_exes = native_exes,
     ext_modules = ext_modules,
     executables = executables,
 

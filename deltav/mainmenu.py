@@ -31,8 +31,8 @@ class MainMenu(game.Scene):
         self.loading = False
         self.loading_time = 0.0
 
-    def activate(self, window):
-        super(MainMenu, self).activate(window)
+    def on_enter(self, window):
+        super(MainMenu, self).on_enter(window)
 
         self.menu_x = (self._width - self.menu.width) / 2
         self.menu_y = (self._height - self.menu.height) / 2
@@ -58,7 +58,7 @@ class MainMenu(game.Scene):
     @profile("mainmenu.py", "MainMenu.draw")
     def draw(self, window):
         #
-        # FIXME: why do we need to re-submit this transform? it happens in self.activate!
+        # FIXME: why do we need to re-submit this transform? it happens in self.on_enter!
         #
         with gl.util.Scene3D(self._width, self._height, self.FOV, self.znear, self.zfar):
             c = Coord3D()
