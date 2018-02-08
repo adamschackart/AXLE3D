@@ -61,8 +61,10 @@ class Menu(game.Scene):
     def on_keyboard_key(self, keyboard, mods, key, pressed):
         if pressed:
             if key == 'f11':
-               w = Window.get_primary()
-               w.fullscreen = not w.fullscreen
+                w = Window.get_primary()
+
+                if w.resizable:
+                    w.fullscreen = not w.fullscreen
             else:
                 self.has_exit = True
 
@@ -155,7 +157,9 @@ class CheatMenu(PopupMenu):
         'Advance Stage',
         'Unlimited Weapon Charge',
         'Unlimited Health',
-        'FPS Counter'
+        'FPS Counter',
+        'Print XL Objects',
+        'Print GL Objects',
     ]
 
     def on_select(self, label):
@@ -170,5 +174,11 @@ class CheatMenu(PopupMenu):
             self.fps.level.set_health(1000000.)
         elif label.text == 'FPS Counter':
             self.fps.clock_display = clock.ClockDisplay()
+        elif label.text == 'Print XL Objects':
+            utl.log.clear_stdout()
+            xl.Object.print_all()
+        elif label.text == 'Print GL Objects':
+            utl.log.clear_stdout()
+            gl.Object.print_all()
 
         self.has_exit = True

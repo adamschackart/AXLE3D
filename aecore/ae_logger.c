@@ -5,8 +5,8 @@
 TODO: default_log_func should OutputDebugStringA if Win32 and IsDebuggerPresent
 --------------------------------------------------------------------------------
 XXX the implementation of this system should not use other parts of the system,
-    in order to avoid circular dependencies. for instance, if the flush function
-    emits a fatal error it will recurse forever, as fatal errors flush the log.
+--- in order to avoid circular dependencies. for instance, if the flush function
+--- emits a fatal error it will recurse forever, as fatal errors flush the log.
 ----------------------------------------------------------------------------- */
 #ifndef __AE_CORE_H__
 #include <ae_core.h>
@@ -193,7 +193,7 @@ void ae_log_handler(void (*log_func)(ae_log_category_t category,
 
 void ae_logger_init(int argc, char** argv)
 {
-    int i = 0;
+    int i = 0; // enable or disable some or all logging categories via arguments.
     ae_log_enable(AE_LOG_CATEGORY_WARNING, 1);
 
     #if defined(AE_LOG_DEFAULT_ENABLE_ALL)
@@ -229,5 +229,12 @@ void ae_logger_init(int argc, char** argv)
 
 void ae_logger_quit(void)
 {
-    ae_log_handler( NULL, NULL );
+    // XXX: can't clean up handler, because we log after this function is called.
+    // we'll flush anyways, even if that means some logfile loses a time message -
+    // if you're really concerned about it, define AECORE_EXTENDED and hook init.
+    #if 0
+        ae_log_handler(NULL, NULL);
+    #else
+        ae_log_flush();
+    #endif
 }

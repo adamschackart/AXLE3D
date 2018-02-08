@@ -130,6 +130,9 @@ class Extension(Cython.Distutils.Extension):
             self.extra_compile_args.append('/wd4267') # size_t -> long
             self.extra_compile_args.append('/wd4334') # 32-bit shift
             self.extra_compile_args.append('/wd4985') # type annotations
+
+            # more recent versions of cython export multiple module init functions
+            self.extra_link_args.append('/ignore:4197')
         else:
             # for some esoteric, quixotic, idealistic, impractical, ivory tower reason,
             # unix linkers don't search for shared libraries in the application's path

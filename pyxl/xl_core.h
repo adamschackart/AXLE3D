@@ -134,9 +134,10 @@ XL_DECL xl_object_type_t XL_CALL xl_object_type(void* object);
 
 /* These functions can be used to manage all objects tracked by this system.
  */
-XL_DECL size_t XL_CALL xl_object_count_all(void);
+XL_DECL size_t XL_CALL xl_object_count_all(void); // total
 XL_DECL void   XL_CALL xl_object_list_all (void** objects);
-XL_DECL void   XL_CALL xl_object_close_all(void);
+XL_DECL void   XL_CALL xl_object_print_all(void); // debug
+XL_DECL void   XL_CALL xl_object_close_all(void); // clean
 
 /*
 ================================================================================
@@ -167,6 +168,9 @@ XL_DECL xl_window_t* XL_CALL xl_primary_window(void);
                                                                                             \
     /* total number of textures active in GL context's table */                             \
     N(XL_WINDOW_PROPERTY_TEXTURE_COUNT, int, int, texture_count)                            \
+                                                                                            \
+    /* default subpixel coordinate and scale up/down sampling mode for textures */          \
+    N(XL_WINDOW_PROPERTY_HIGH_QUALITY_TEXTURES, int, int, high_quality_textures)            \
                                                                                             \
     /* default copy mode for textures created in this window */                             \
     N(XL_WINDOW_PROPERTY_COPY_TEXTURES, int, int, copy_textures)                            \
@@ -387,10 +391,13 @@ static c_inline size_t xl_window_count_all(void)
 // Fill array with windows (use the TOTAL window property to get list size).
 XL_DECL void XL_CALL xl_window_list_all(xl_window_t** windows);
 
+// Print all windows to stdout. This can be potentially useful for debugging.
+XL_DECL void XL_CALL xl_window_print_all(void);
+
 // Close all open windows. This is automatically called during shutdown.
 XL_DECL void XL_CALL xl_window_close_all(void);
 
-/* These three functions manage the window's texture table. Each texture belongs to
+/* These four functions manage the window's texture table. Each texture belongs to
  * a GL context (window), which is the only context that can render that texture.
  * Methods to deal with ALL textures are also available (see the texture section).
  */
@@ -402,10 +409,11 @@ static c_inline size_t xl_window_count_textures(xl_window_t* window)
 XL_DECL void XL_CALL
 xl_window_list_textures(xl_window_t* window, xl_texture_t** textures);
 
+XL_DECL void XL_CALL xl_window_print_textures(xl_window_t* window);
 XL_DECL void XL_CALL xl_window_close_textures(xl_window_t* window);
 
-/* These three functions manage the window's truetype font table. Fonts are held
- * by windows in case atlases are baked into textures for more efficient drawing.
+/* These four functions manage the window's truetype font table. Fonts are stored
+ * in windows in case atlases are baked into textures for more efficient drawing.
  */
 static c_inline size_t xl_window_count_fonts(xl_window_t* window)
 {
@@ -413,6 +421,8 @@ static c_inline size_t xl_window_count_fonts(xl_window_t* window)
 }
 
 XL_DECL void XL_CALL xl_window_list_fonts(xl_window_t* window, xl_font_t** fonts);
+
+XL_DECL void XL_CALL xl_window_print_fonts(xl_window_t* window);
 XL_DECL void XL_CALL xl_window_close_fonts(xl_window_t* window);
 
 /*
@@ -515,6 +525,15 @@ XL_DECL xl_texture_t* XL_CALL xl_texture_create(xl_window_t* win, int w, int h);
     N(XL_TEXTURE_PROPERTY_ALPHA, float, flt, alpha)             \
     N(XL_TEXTURE_PROPERTY_RGB, void*, ptr, rgb)                 \
     N(XL_TEXTURE_PROPERTY_RGBA, void*, ptr, rgba)               \
+                                                                \
+    /* smooth or retro mode (affects scale filter, subpixel) */ \
+    N(XL_TEXTURE_PROPERTY_HIGH_QUALITY, int, int, high_quality) \
+                                                                \
+    /* up and down sampling mode (xl_texture_scale_filter_t) */ \
+    N(XL_TEXTURE_PROPERTY_SCALE_FILTER, int, int, scale_filter) \
+                                                                \
+    /* if false, draw coords are snapped to integers */         \
+    N(XL_TEXTURE_PROPERTY_SUBPIXEL, int, int, subpixel)         \
                                                                 \
     /* flip mask (horizontal, vertical, or both) */             \
     N(XL_TEXTURE_PROPERTY_FLIP, int, int, flip)                 \
@@ -637,6 +656,41 @@ static const char* xl_texture_flip_short_name[] =
 XL_DECL xl_texture_flip_t XL_CALL // flip mode from string
         xl_texture_flip_from_short_name(const char* name);
 
+/* texture minification and magnification (up and down sampling) filter mode.
+ */
+#define XL_TEXTURE_SCALE_FILTER_N                       \
+                                                        \
+    N(XL_TEXTURE_SCALE_FILTER_NEAREST, nearest)         \
+    N(XL_TEXTURE_SCALE_FILTER_LINEAR, linear)           \
+    N(XL_TEXTURE_SCALE_FILTER_ANISOTROPIC, anisotropic) \
+                                                        \
+    N(XL_TEXTURE_SCALE_FILTER_COUNT, _)                 \
+
+typedef enum xl_texture_scale_filter_t
+{
+    #define N(x, s) x,
+    XL_TEXTURE_SCALE_FILTER_N
+    #undef N
+} \
+    xl_texture_scale_filter_t;
+
+static const char* xl_texture_scale_filter_name[] =
+{
+    #define N(x, s) #x,
+    XL_TEXTURE_SCALE_FILTER_N
+    #undef N
+};
+
+static const char* xl_texture_scale_filter_short_name[] =
+{
+    #define N(x, s) #s,
+    XL_TEXTURE_SCALE_FILTER_N
+    #undef N
+};
+
+XL_DECL xl_texture_scale_filter_t XL_CALL // scale filter from str
+        xl_texture_scale_filter_from_short_name(const char* name);
+
 /* Draw a clipped, scaled, rotated texture. src_rect is the region of the texture
  * to render (or NULL for the entire texture). dst_rect is the area of the window
  * to draw into (NULL stretches the texture across the entire rendering target).
@@ -679,6 +733,8 @@ static c_inline size_t xl_texture_count_all(void)
 }
 
 XL_DECL void XL_CALL xl_texture_list_all(xl_texture_t** textures);
+
+XL_DECL void XL_CALL xl_texture_print_all(void);
 XL_DECL void XL_CALL xl_texture_close_all(void);
 
 /*
@@ -847,6 +903,8 @@ static c_inline size_t xl_font_count_all(void)
 }
 
 XL_DECL void XL_CALL xl_font_list_all(xl_font_t** fonts);
+
+XL_DECL void XL_CALL xl_font_print_all(void);
 XL_DECL void XL_CALL xl_font_close_all(void);
 
 /*
@@ -1065,6 +1123,8 @@ static c_inline size_t xl_sound_count_all(void)
 }
 
 XL_DECL void XL_CALL xl_sound_list_all(xl_sound_t** sounds);
+
+XL_DECL void XL_CALL xl_sound_print_all(void);
 XL_DECL void XL_CALL xl_sound_close_all(void);
 
 /*
@@ -1185,6 +1245,7 @@ static c_inline size_t xl_keyboard_count_all(void)
 }
 
 XL_DECL void XL_CALL xl_keyboard_list_all(xl_keyboard_t** keyboards);
+XL_DECL void XL_CALL xl_keyboard_print_all(void);
 
 /* ===== [ modifiers and keys ] ============================================= */
 
@@ -1642,6 +1703,7 @@ static c_inline size_t xl_mouse_count_all(void)
 }
 
 XL_DECL void XL_CALL xl_mouse_list_all(xl_mouse_t** mice);
+XL_DECL void XL_CALL xl_mouse_print_all(void);
 
 /* ===== [ mouse buttons ] ================================================== */
 
@@ -1881,6 +1943,7 @@ static c_inline size_t xl_controller_count_all(void)
 }
 
 XL_DECL void XL_CALL xl_controller_list_all(xl_controller_t** controllers);
+XL_DECL void XL_CALL xl_controller_print_all(void);
 
 /* ===== [ digital buttons ] ================================================ */
 
@@ -2262,6 +2325,8 @@ static c_inline size_t xl_animation_count_all(void)
 }
 
 XL_DECL void XL_CALL xl_animation_list_all(xl_animation_t** animations);
+
+XL_DECL void XL_CALL xl_animation_print_all(void);
 XL_DECL void XL_CALL xl_animation_close_all(void);
 
 /*
@@ -2396,6 +2461,8 @@ static c_inline size_t xl_clock_count_all(void)
 }
 
 XL_DECL void XL_CALL xl_clock_list_all(xl_clock_t** clocks);
+
+XL_DECL void XL_CALL xl_clock_print_all(void);
 XL_DECL void XL_CALL xl_clock_close_all(void);
 
 /*

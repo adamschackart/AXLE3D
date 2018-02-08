@@ -58,16 +58,56 @@ GL_DECL void GL_CALL
 GL_Accum(unsigned int op, float value);
 
 GL_DECL void GL_CALL
+GL_ActiveShaderProgram(unsigned int pipeline, unsigned int program);
+
+GL_DECL void GL_CALL
 GL_ActiveTexture(unsigned int texture);
 
 GL_DECL void GL_CALL
 GL_AlphaFunc(unsigned int func, float ref);
 
+GL_DECL unsigned char GL_CALL
+GL_AreTexturesResident(int n, const unsigned int* tex, unsigned char* res);
+
+GL_DECL void GL_CALL
+GL_ArrayElement(int i);
+
+GL_DECL void GL_CALL
+GL_AttachShader(unsigned int program, unsigned int shader);
+
 GL_DECL void GL_CALL
 GL_Begin(unsigned int mode);
 
 GL_DECL void GL_CALL
+GL_BeginConditionalRender(unsigned int id, unsigned int mode);
+
+GL_DECL void GL_CALL
+GL_BeginQuery(unsigned int target, unsigned int id);
+
+GL_DECL void GL_CALL
+GL_BeginQueryIndexed(unsigned int target, unsigned int index, unsigned int id);
+
+GL_DECL void GL_CALL
+GL_BeginTransformFeedback(unsigned int primitiveMode);
+
+GL_DECL void GL_CALL
+GL_BindAttribLocation(unsigned int program, unsigned int index, const char *name);
+
+GL_DECL void GL_CALL
+GL_BindBuffer(unsigned int target, unsigned int buffer);
+
+GL_DECL void GL_CALL
 GL_BindTexture(unsigned int target, unsigned int texture);
+
+GL_DECL void GL_CALL
+GL_BindVertexArray(unsigned int array);
+
+GL_DECL void GL_CALL
+GL_Bitmap(int width, int height, float x_origin, float y_origin,
+        float x_move, float y_move, const unsigned char* bitmap);
+
+GL_DECL void GL_CALL
+GL_BlendColor(float red, float green, float blue, float alpha);
 
 GL_DECL void GL_CALL
 GL_BlendEquation(unsigned int mode);
@@ -81,6 +121,15 @@ GL_BlendFunc(unsigned int src, unsigned int dst);
 GL_DECL void GL_CALL
 GL_BlendFuncSeparate(unsigned int srcRGB, unsigned int dstRGB,
                         unsigned int srcA, unsigned int dstA);
+
+GL_DECL void GL_CALL
+GL_BufferData(unsigned int target, ptrdiff_t size, const void *data, unsigned int usage);
+
+GL_DECL void GL_CALL
+GL_CallList(unsigned int list);
+
+GL_DECL void GL_CALL
+GL_CallLists(int n, unsigned int type, const void *lists);
 
 GL_DECL void GL_CALL
 GL_Clear(unsigned int mask);
@@ -98,16 +147,106 @@ GL_DECL void GL_CALL
 GL_ClearIndex(float c);
 
 GL_DECL void GL_CALL
+GL_ClearStencil(int s);
+
+GL_DECL void GL_CALL
+GL_ClipPlane(unsigned int plane, const double *equation);
+
+GL_DECL void GL_CALL
+GL_Color3b(char red, char green, char blue);
+
+GL_DECL void GL_CALL
+GL_Color3bv(const char *v);
+
+GL_DECL void GL_CALL
+GL_Color3d(double red, double green, double blue);
+
+GL_DECL void GL_CALL
+GL_Color3dv(const double *v);
+
+GL_DECL void GL_CALL
 GL_Color3f(float r, float g, float b);
 
 GL_DECL void GL_CALL
 GL_Color3fv(const float* rgb);
 
 GL_DECL void GL_CALL
+GL_Color3i(int red, int green, int blue);
+
+GL_DECL void GL_CALL
+GL_Color3iv(const int *v);
+
+GL_DECL void GL_CALL
+GL_Color3s(short red, short green, short blue);
+
+GL_DECL void GL_CALL
+GL_Color3sv(const short *v);
+
+GL_DECL void GL_CALL
+GL_Color3ub(unsigned char red, unsigned char green, unsigned char blue);
+
+GL_DECL void GL_CALL
+GL_Color3ubv(const unsigned char *v);
+
+GL_DECL void GL_CALL
+GL_Color3ui(unsigned int red, unsigned int green, unsigned int blue);
+
+GL_DECL void GL_CALL
+GL_Color3uiv(const unsigned int *v);
+
+GL_DECL void GL_CALL
+GL_Color3us(unsigned short red, unsigned short green, unsigned short blue);
+
+GL_DECL void GL_CALL
+GL_Color3usv(const unsigned short *v);
+
+GL_DECL void GL_CALL
+GL_Color4b(char red, char green, char blue, char alpha);
+
+GL_DECL void GL_CALL
+GL_Color4bv(const char *v);
+
+GL_DECL void GL_CALL
+GL_Color4d(double red, double green, double blue, double alpha);
+
+GL_DECL void GL_CALL
+GL_Color4dv(const double *v);
+
+GL_DECL void GL_CALL
 GL_Color4f(float r, float g, float b, float a);
 
 GL_DECL void GL_CALL
 GL_Color4fv(const float* rgba);
+
+GL_DECL void GL_CALL
+GL_Color4i(int red, int green, int blue, int alpha);
+
+GL_DECL void GL_CALL
+GL_Color4iv(const int *v);
+
+GL_DECL void GL_CALL
+GL_Color4s(short red, short green, short blue, short alpha);
+
+GL_DECL void GL_CALL
+GL_Color4sv(const short *v);
+
+GL_DECL void GL_CALL
+GL_Color4ub(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha);
+
+GL_DECL void GL_CALL
+GL_Color4ubv(const unsigned char *v);
+
+GL_DECL void GL_CALL
+GL_Color4ui(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha);
+
+GL_DECL void GL_CALL
+GL_Color4uiv(const unsigned int *v);
+
+GL_DECL void GL_CALL
+GL_Color4us(unsigned short red, unsigned short green, unsigned short blue, unsigned short alpha);
+
+GL_DECL void GL_CALL
+GL_Color4usv(const unsigned short *v);
 
 GL_DECL void GL_CALL
 GL_ColorMask(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
@@ -119,10 +258,50 @@ GL_DECL void GL_CALL
 GL_ColorPointer(int size, unsigned int type, int stride, const void* data);
 
 GL_DECL void GL_CALL
+GL_CompileShader(unsigned int shader);
+
+GL_DECL void GL_CALL
+GL_CopyPixels(int x, int y, int width, int height, unsigned int type);
+
+GL_DECL void GL_CALL
+GL_CopyTexImage1D(unsigned int target, int level, unsigned int internalformat,
+                                        int x, int y, int width, int border);
+
+GL_DECL void GL_CALL
+GL_CopyTexImage2D(unsigned int target, int level, unsigned int internalformat,
+                            int x, int y, int width, int height, int border);
+
+GL_DECL void GL_CALL
+GL_CopyTexSubImage1D( unsigned int target, int level, int xoffset,
+                                        int x, int y, int width);
+
+GL_DECL void GL_CALL
+GL_CopyTexSubImage2D( unsigned int target, int level, int xoffset,
+                int yoffset, int x, int y, int width, int height);
+
+GL_DECL unsigned int GL_CALL
+GL_CreateProgram(void);
+
+GL_DECL unsigned int GL_CALL
+GL_CreateShader(unsigned int type);
+
+GL_DECL void GL_CALL
 GL_CullFace(unsigned int face);
 
 GL_DECL void GL_CALL
+GL_DeleteBuffers(int n, const unsigned int* buffers);
+
+GL_DECL void GL_CALL
+GL_DeleteLists(unsigned int list, int range);
+
+GL_DECL void GL_CALL
+GL_DeleteProgram(unsigned int program);
+
+GL_DECL void GL_CALL
 GL_DeleteTextures(int n, const unsigned int* textures);
+
+GL_DECL void GL_CALL
+GL_DeleteVertexArrays(int n, const unsigned int *arrays);
 
 GL_DECL void GL_CALL
 GL_DepthFunc(unsigned int func);
@@ -140,10 +319,29 @@ GL_DECL void GL_CALL
 GL_DisableClientState(unsigned int cap);
 
 GL_DECL void GL_CALL
+GL_DisableVertexAttribArray(unsigned int index);
+
+GL_DECL void GL_CALL
 GL_DrawArrays(unsigned int mode, int first, int count);
 
 GL_DECL void GL_CALL
+GL_DrawBuffer(unsigned int mode);
+
+GL_DECL void GL_CALL
 GL_DrawElements(unsigned int mode, int n, unsigned int type, const void* inds);
+
+GL_DECL void GL_CALL
+GL_DrawPixels(int width, int height, unsigned int format, unsigned int type,
+                                                        const void *pixels);
+
+GL_DECL void GL_CALL
+GL_EdgeFlag(unsigned char flag);
+
+GL_DECL void GL_CALL
+GL_EdgeFlagPointer(int stride, const void *ptr);
+
+GL_DECL void GL_CALL
+GL_EdgeFlagv(const unsigned char *flag);
 
 GL_DECL void GL_CALL
 GL_Enable(unsigned int cap);
@@ -152,7 +350,64 @@ GL_DECL void GL_CALL
 GL_EnableClientState(unsigned int cap);
 
 GL_DECL void GL_CALL
+GL_EnableVertexAttribArray(unsigned int index);
+
+GL_DECL void GL_CALL
 GL_End(void);
+
+GL_DECL void GL_CALL
+GL_EndConditionalRender(void);
+
+GL_DECL void GL_CALL
+GL_EndList(void);
+
+GL_DECL void GL_CALL
+GL_EndQuery(unsigned int target);
+
+GL_DECL void GL_CALL
+GL_EndQueryIndexed(unsigned int target, unsigned int index);
+
+GL_DECL void GL_CALL
+GL_EndTransformFeedback(void);
+
+GL_DECL void GL_CALL
+GL_EvalCoord1d(double u);
+
+GL_DECL void GL_CALL
+GL_EvalCoord1dv(const double *u);
+
+GL_DECL void GL_CALL
+GL_EvalCoord1f(float u);
+
+GL_DECL void GL_CALL
+GL_EvalCoord1fv(const float *u);
+
+GL_DECL void GL_CALL
+GL_EvalCoord2d(double u, double v);
+
+GL_DECL void GL_CALL
+GL_EvalCoord2dv(const double *u);
+
+GL_DECL void GL_CALL
+GL_EvalCoord2f(float u, float v);
+
+GL_DECL void GL_CALL
+GL_EvalCoord2fv(const float *u);
+
+GL_DECL void GL_CALL
+GL_EvalMesh1(unsigned int mode, int i1, int i2);
+
+GL_DECL void GL_CALL
+GL_EvalMesh2(unsigned int mode, int i1, int i2, int j1, int j2);
+
+GL_DECL void GL_CALL
+GL_EvalPoint1(int i);
+
+GL_DECL void GL_CALL
+GL_EvalPoint2(int i, int j);
+
+GL_DECL void GL_CALL
+GL_FeedbackBuffer(int size, unsigned int type, float *buffer);
 
 GL_DECL void GL_CALL
 GL_Finish(void);
@@ -179,7 +434,28 @@ GL_DECL void GL_CALL
 GL_Frustum(double lf, double rt, double bt, double tp, double nr, double fr);
 
 GL_DECL void GL_CALL
+GL_GenBuffers(int n, unsigned int *buffers);
+
+GL_DECL unsigned int GL_CALL
+GL_GenLists(int range);
+
+GL_DECL void GL_CALL
 GL_GenTextures(int n, unsigned int* textures);
+
+GL_DECL void GL_CALL
+GL_GenVertexArrays(int n, unsigned int *arrays);
+
+GL_DECL int GL_CALL
+GL_GetAttribLocation(unsigned int program, const char *name);
+
+GL_DECL void GL_CALL
+GL_GetBooleanv(unsigned int pname, unsigned char *params);
+
+GL_DECL void GL_CALL
+GL_GetClipPlane(unsigned int plane, double *equation);
+
+GL_DECL void GL_CALL
+GL_GetDoublev(unsigned int pname, double *params);
 
 GL_DECL unsigned int GL_CALL
 GL_GetError(void);
@@ -197,7 +473,46 @@ GL_DECL void GL_CALL
 GL_GetLightiv(unsigned int light, unsigned int pname, int* params);
 
 GL_DECL void GL_CALL
+GL_GetMapdv(unsigned int target, unsigned int query, double* v);
+
+GL_DECL void GL_CALL
+GL_GetMapfv(unsigned int target, unsigned int query, float* v);
+
+GL_DECL void GL_CALL
+GL_GetMapiv(unsigned int target, unsigned int query, int* v);
+
+GL_DECL void GL_CALL
 GL_GetMaterialfv(unsigned int face, unsigned int pname, float* params);
+
+GL_DECL void GL_CALL
+GL_GetMaterialiv(unsigned int face, unsigned int pname, int* params);
+
+GL_DECL void GL_CALL
+GL_GetPixelMapfv(unsigned int map, float* values);
+
+GL_DECL void GL_CALL
+GL_GetPixelMapuiv(unsigned int map, unsigned int* values);
+
+GL_DECL void GL_CALL
+GL_GetPixelMapusv(unsigned int map, unsigned short* values);
+
+GL_DECL void GL_CALL
+GL_GetPointerv(unsigned int pname, void** params);
+
+GL_DECL void GL_CALL
+GL_GetPolygonStipple(unsigned char* mask);
+
+GL_DECL void GL_CALL
+GL_GetProgramiv(unsigned int program, unsigned int pname, int* params);
+
+GL_DECL void GL_CALL
+GL_GetProgramInfoLog(unsigned int program, int buf_size, int* length, char* info_log);
+
+GL_DECL void GL_CALL
+GL_GetShaderiv(unsigned int shader, unsigned int pname, int* params);
+
+GL_DECL void GL_CALL
+GL_GetShaderInfoLog(unsigned int shader, int buf_size, int* length, char* info_log);
 
 GL_DECL const char* GL_CALL
 GL_GetString(unsigned int name);
@@ -230,10 +545,25 @@ GL_DECL void GL_CALL
 GL_InterleavedArrays(unsigned int format, int stride, const void* pointer);
 
 GL_DECL unsigned char GL_CALL
+GL_IsBuffer(unsigned int buffer);
+
+GL_DECL unsigned char GL_CALL
 GL_IsEnabled(unsigned int cap);
 
 GL_DECL unsigned char GL_CALL
+GL_IsList(unsigned int list);
+
+GL_DECL unsigned char GL_CALL
+GL_IsProgram(unsigned int program);
+
+GL_DECL unsigned char GL_CALL
+GL_IsShader(unsigned int shader);
+
+GL_DECL unsigned char GL_CALL
 GL_IsTexture(unsigned int texture);
+
+GL_DECL unsigned char GL_CALL
+GL_IsVertexArray(unsigned int array);
 
 GL_DECL void GL_CALL
 GL_Lightfv(unsigned int light, unsigned int pname, const float* params);
@@ -243,6 +573,9 @@ GL_Lightf(unsigned int light, unsigned int pname, float param);
 
 GL_DECL void GL_CALL
 GL_LineWidth(float width);
+
+GL_DECL void GL_CALL
+GL_LinkProgram(unsigned int program);
 
 GL_DECL void GL_CALL
 GL_LoadIdentity(void);
@@ -308,6 +641,15 @@ GL_DECL void GL_CALL
 GL_PushMatrix(void);
 
 GL_DECL void GL_CALL
+GL_PrioritizeTextures(int n, const unsigned int* tex, const float* priorities);
+
+GL_DECL void GL_CALL
+GL_ProvokingVertex(unsigned int mode);
+
+GL_DECL int GL_CALL
+GL_RenderMode(unsigned int mode);
+
+GL_DECL void GL_CALL
 GL_Rotatef(float theta, float x, float y, float z);
 
 GL_DECL void GL_CALL
@@ -318,6 +660,10 @@ GL_Scissor(int x, int y, int width, int height);
 
 GL_DECL void GL_CALL
 GL_ShadeModel(unsigned int mode);
+
+GL_DECL void GL_CALL
+GL_ShaderSource(unsigned int shader, int count, const char ** const string,
+                                                        const int *length);
 
 GL_DECL void GL_CALL
 GL_TexCoord2f(float s, float t);
@@ -341,10 +687,10 @@ GL_DECL void GL_CALL
 GL_TexCoordPointer(int size, unsigned int type, int stride, const void* data);
 
 GL_DECL void GL_CALL
-GL_TexEnvfv(unsigned int target, unsigned int pname, const float *params);
+GL_TexEnvfv(unsigned int target, unsigned int pname, const float* params);
 
 GL_DECL void GL_CALL
-GL_TexEnviv(unsigned int target, unsigned int pname, const int *params);
+GL_TexEnviv(unsigned int target, unsigned int pname, const int* params);
 
 GL_DECL void GL_CALL
 GL_TexEnvf(unsigned int target, unsigned int pname, float param);
@@ -353,13 +699,13 @@ GL_DECL void GL_CALL
 GL_TexEnvi(unsigned int target, unsigned int pname, int param);
 
 GL_DECL void GL_CALL
-GL_TexGeniv(unsigned int coord, unsigned int pname, const int *params);
+GL_TexGeniv(unsigned int coord, unsigned int pname, const int* params);
 
 GL_DECL void GL_CALL
-GL_TexGenfv(unsigned int coord, unsigned int pname, const float *params);
+GL_TexGenfv(unsigned int coord, unsigned int pname, const float* params);
 
 GL_DECL void GL_CALL
-GL_TexGendv(unsigned int coord, unsigned int pname, const double *params);
+GL_TexGendv(unsigned int coord, unsigned int pname, const double* params);
 
 GL_DECL void GL_CALL
 GL_TexGeni(unsigned int coord, unsigned int pname, int param);
@@ -385,6 +731,9 @@ GL_DECL void GL_CALL
 GL_Translatef(float x, float y, float z);
 
 GL_DECL void GL_CALL
+GL_UseProgram(unsigned int program);
+
+GL_DECL void GL_CALL
 GL_Vertex2f(float x, float y);
 
 GL_DECL void GL_CALL
@@ -395,6 +744,16 @@ GL_Vertex3f(float x, float y, float z);
 
 GL_DECL void GL_CALL
 GL_Vertex3fv(const float* xyz);
+
+GL_DECL void GL_CALL
+GL_Vertex4f(float x, float y, float z, float w);
+
+GL_DECL void GL_CALL
+GL_Vertex4fv(const float* xyzw);
+
+GL_DECL void GL_CALL
+GL_VertexAttribPointer(unsigned int index, int size, unsigned int type,
+            unsigned char normalized, int stride, const void *pointer);
 
 GL_DECL void GL_CALL
 GL_VertexPointer(int size, unsigned int type, int stride, const void* data);
@@ -819,9 +1178,10 @@ GL_DECL gl_object_type_t GL_CALL gl_object_type(void* object);
 
 /* These functions can be used to manage all objects tracked by this system.
  */
-GL_DECL size_t GL_CALL gl_object_count_all(void);
+GL_DECL size_t GL_CALL gl_object_count_all(void); // total
 GL_DECL void   GL_CALL gl_object_list_all (void** objects);
-GL_DECL void   GL_CALL gl_object_close_all(void);
+GL_DECL void   GL_CALL gl_object_print_all(void); // debug
+GL_DECL void   GL_CALL gl_object_close_all(void); // clean
 
 /*
 ================================================================================
@@ -859,6 +1219,7 @@ GL_DECL void   GL_CALL gl_object_close_all(void);
     /* whatever interesting info we want to display */          \
     N(GL_TEXTURE_PROPERTY_STATUS, const char*, str, status)     \
                                                                 \
+    /* origin on the filesystem, stripped file name */          \
     N(GL_TEXTURE_PROPERTY_PATH, const char*, str, path)         \
     N(GL_TEXTURE_PROPERTY_NAME, const char*, str, name)         \
                                                                 \
@@ -959,6 +1320,17 @@ GL_DECL void GL_CALL gl_texture_draw(gl_texture_t* texture, float x, float y);
 GL_DECL void GL_CALL /* Draw a translucent, color-modulated texture. */
 gl_texture_draw_ex(gl_texture_t* tex, float x, float y, const float rgba[4]);
 
+/* Draw an infinitely-distant textured cube around the viewer.
+ */
+GL_DECL void GL_CALL gl_texture_draw_skybox_ex( gl_texture_t* front,
+                                                gl_texture_t* back,
+                                                gl_texture_t* left,
+                                                gl_texture_t* right,
+                                                gl_texture_t* up,
+                                                gl_texture_t* down,
+                                                gl_coord3D_t* viewer,
+                                                const float color[4]);
+
 GL_DECL void GL_CALL gl_texture_draw_skybox(gl_texture_t* front,
                                             gl_texture_t* back,
                                             gl_texture_t* left,
@@ -973,6 +1345,8 @@ static c_inline size_t gl_texture_count_all(void)
 }
 
 GL_DECL void GL_CALL gl_texture_list_all(gl_texture_t** textures);
+
+GL_DECL void GL_CALL gl_texture_print_all(void);
 GL_DECL void GL_CALL gl_texture_close_all(void);
 
 /*
@@ -1010,9 +1384,14 @@ GL_DECL void GL_CALL gl_texture_close_all(void);
      * Unlike most values here, this is in the [0, 128] range.      \
      */                                                             \
     N(GL_MATERIAL_PROPERTY_SHININESS, float, flt, shininess)        \
+                                                                    \
+    /* alpha value for diffuse, ambient, specular, and emission */  \
     N(GL_MATERIAL_PROPERTY_OPACITY, float, flt, opacity)            \
                                                                     \
+    /* any interesting info we want to print (usually name str) */  \
     N(GL_MATERIAL_PROPERTY_STATUS, const char*, str, status)        \
+                                                                    \
+    /* origin on the filesystem, filename without the extension */  \
     N(GL_MATERIAL_PROPERTY_PATH, const char*, str, path)            \
     N(GL_MATERIAL_PROPERTY_NAME, const char*, str, name)            \
                                                                     \
@@ -1120,6 +1499,8 @@ static c_inline size_t gl_material_count_all(void)
 }
 
 GL_DECL void GL_CALL gl_material_list_all(gl_material_t** mtls);
+
+GL_DECL void GL_CALL gl_material_print_all(void);
 GL_DECL void GL_CALL gl_material_close_all(void);
 
 /*
@@ -1147,6 +1528,8 @@ GL_DECL void GL_CALL gl_material_close_all(void);
     N(GL_LIGHT_PROPERTY_QUADRATIC_ATTENUATION, float, flt, quadratic_attenuation)   \
                                                                                     \
     N(GL_LIGHT_PROPERTY_STATUS, const char*, str, status)                           \
+                                                                                    \
+    N(GL_LIGHT_PROPERTY_PATH, const char*, str, path)                               \
     N(GL_LIGHT_PROPERTY_NAME, const char*, str, name)                               \
                                                                                     \
     N(GL_LIGHT_PROPERTY_OPEN, int, int, open)                                       \
@@ -1242,6 +1625,8 @@ static c_inline size_t gl_light_count_all(void)
 }
 
 GL_DECL void GL_CALL gl_light_list_all(gl_light_t** lights);
+
+GL_DECL void GL_CALL gl_light_print_all(void);
 GL_DECL void GL_CALL gl_light_close_all(void);
 
 /*
@@ -1270,6 +1655,7 @@ GL_DECL void GL_CALL gl_light_close_all(void);
     N(GL_BUFFER_PROPERTY_LINE_MODE, int, int, line_mode)            \
                                                                     \
     N(GL_BUFFER_PROPERTY_STATUS, const char*, str, status)          \
+                                                                    \
     N(GL_BUFFER_PROPERTY_PATH, const char*, str, path)              \
     N(GL_BUFFER_PROPERTY_NAME, const char*, str, name)              \
                                                                     \
@@ -1481,6 +1867,12 @@ gl_buffer_invert_faces(gl_buffer_t* buffer);
 GL_DECL void GL_CALL gl_buffer_draw_ex(gl_buffer_t* buffer, gl_material_t* mtl);
 GL_DECL void GL_CALL gl_buffer_draw(gl_buffer_t* buffer);
 
+GL_DECL void GL_CALL gl_buffer_draw_aabbox_ex( gl_buffer_t* buffer, // debugging
+                                            const float* rgba, float line_width);
+
+GL_DECL void GL_CALL gl_buffer_draw_aabbox(gl_buffer_t* buffer,
+                                            const float* rgba);
+
 GL_DECL void GL_CALL gl_buffer_draw_normals_ex(gl_buffer_t* buffer, // debugging
             const float* start_color, const float* end_color, float line_width);
 
@@ -1493,6 +1885,8 @@ static c_inline size_t gl_buffer_count_all(void)
 }
 
 GL_DECL void GL_CALL gl_buffer_list_all(gl_buffer_t** buffers);
+
+GL_DECL void GL_CALL gl_buffer_print_all(void);
 GL_DECL void GL_CALL gl_buffer_close_all(void);
 
 /*
@@ -1532,6 +1926,8 @@ GL_DECL void GL_CALL gl_buffer_close_all(void);
     N(GL_PARTICLE_EMITTER_PROPERTY_PERIOD, double, dbl, period)                 \
                                                                                 \
     N(GL_PARTICLE_EMITTER_PROPERTY_STATUS, const char*, str, status)            \
+                                                                                \
+    N(GL_PARTICLE_EMITTER_PROPERTY_PATH, const char*, str, path)                \
     N(GL_PARTICLE_EMITTER_PROPERTY_NAME, const char*, str, name)                \
                                                                                 \
     N(GL_PARTICLE_EMITTER_PROPERTY_OPEN, int, int, open)                        \
@@ -1739,6 +2135,36 @@ gl_particle_emitter_radius_reset(gl_particle_emitter_t* emitter, float radius);
 GL_DECL void GL_CALL // set the position of each particle to a random pos on a line segment
 gl_particle_emitter_line_reset(gl_particle_emitter_t* emitter, float* minv, float* maxv);
 
+/* Randomly distribute particles over the surface of each tri.
+ * Particles in the emitter are appended to for mesh building.
+ */
+GL_DECL void GL_CALL gl_particle_emitter_mesh_cover_face(gl_particle_emitter_t* emitter,
+                                    gl_buffer_t* buffer, size_t particles_per_triangle);
+
+/* Randomly distribute particles along each triangle edge. The
+ * particles will not cross the face of the tri in animations.
+ */
+GL_DECL void GL_CALL gl_particle_emitter_mesh_same_edges(gl_particle_emitter_t* emitter,
+                                    gl_buffer_t* buffer, size_t particles_per_triangle);
+
+/* Randomly distribute particles along each triangle edge. The
+ * chosen edge for each particle will be different every time.
+ */
+GL_DECL void GL_CALL gl_particle_emitter_mesh_rand_edges(gl_particle_emitter_t* emitter,
+                                    gl_buffer_t* buffer, size_t particles_per_triangle);
+
+/* Randomly distribute particles along a single triangle edge.
+ * This is a bizarre effect, included mostly for completeness.
+ */
+GL_DECL void GL_CALL gl_particle_emitter_mesh_given_edge(gl_particle_emitter_t* emitter,
+                    gl_buffer_t* buffer, size_t particles_per_triangle, size_t index);
+
+/* Creates a particle sphere around every vertex in the group.
+ * If the radius is 0 and particles is 3, a fast path is used.
+ */
+GL_DECL void GL_CALL gl_particle_emitter_mesh_rad_vertex(gl_particle_emitter_t* emitter,
+                    gl_buffer_t* buffer, size_t particles_per_triangle, float radius);
+
 GL_DECL void GL_CALL gl_particle_emitter_reset_all(void); // zero particle count
 GL_DECL void GL_CALL gl_particle_emitter_reset(gl_particle_emitter_t* emitter);
 
@@ -1751,7 +2177,13 @@ GL_DECL void GL_CALL gl_particle_emitter_update(gl_particle_emitter_t* emitter, 
 GL_DECL void GL_CALL gl_particle_emitter_draw_all(void); // render particles
 GL_DECL void GL_CALL gl_particle_emitter_draw(gl_particle_emitter_t* emitter);
 
-GL_DECL void GL_CALL
+GL_DECL void GL_CALL gl_particle_emitter_draw_aabbox_ex(gl_particle_emitter_t* emitter,
+                                                const float* rgba, float line_width);
+
+GL_DECL void GL_CALL // draw the axial bounding box of all particles in the emitter
+gl_particle_emitter_draw_aabbox(gl_particle_emitter_t* emitter, const float* rgba);
+
+GL_DECL void GL_CALL // draw debug velocity lines with a color gradient & width
 gl_particle_emitter_draw_velocity_ex( gl_particle_emitter_t * emitter,
     const float* start_rgba, const float* end_rgba, float line_width);
 
@@ -1764,6 +2196,8 @@ static c_inline size_t gl_particle_emitter_count_all(void)
 }
 
 GL_DECL void GL_CALL gl_particle_emitter_list_all(gl_particle_emitter_t**);
+
+GL_DECL void GL_CALL gl_particle_emitter_print_all(void);
 GL_DECL void GL_CALL gl_particle_emitter_close_all(void);
 
 // NOTE avoiding linker issues when changing build configurations,

@@ -168,6 +168,13 @@ NOTE: disabling these for now, as their templates massively increase build time
     #include <utility>
 #endif
 
+/* NOTE: allow bare use of C types here - should make `ae_*` versions of these.
+ * never put using some::function in a header, or it could silently break code.
+ */
+#if defined(__cplusplus) && !defined(_MSC_VER)
+    using std::ptrdiff_t;
+#endif
+
 /*
 ================================================================================
  * ~~ [ aecore header file includes ] ~~ *

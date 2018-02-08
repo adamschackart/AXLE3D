@@ -8,10 +8,27 @@ from vtx cimport *
 from lin cimport *
 
 cdef extern from "ae_triangle.h":
-    # ===== [ depth sorting ] ==================================================
+    # ===== [ misc. utils ] ====================================================
+
+    float tri_area( const float* v0, const float* v1,
+                    const float* v2, const size_t n)
+
+    float tri2area(const float v0[2], const float v1[2], const float v2[2])
+    float tri3area(const float v0[3], const float v1[3], const float v2[3])
+
+    void tri_centroid(float * center, const float * v0, const float * v1,
+                                        const float * v2, const size_t n)
+
+    void tri2centroid(float center[2], const float v0[2],
+                    const float v1[2], const float v2[2])
 
     void tri3centroid(float center[3], const float v0[3],
                     const float v1[3], const float v2[3])
+
+    void tri3face_normal(float out[3], const float v0[3],
+                    const float v1[3], const float v2[3])
+
+    # ===== [ depth sorting ] ==================================================
 
     void tri3_mesh_depthsort_ex(const float point[3],
                                 float* vertices,

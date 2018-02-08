@@ -73,6 +73,11 @@ void xl_object_list_all(void** objects)
     AE_STUB();
 }
 
+void xl_object_print_all(void)
+{
+    AE_STUB();
+}
+
 void xl_object_close_all(void)
 {
     AE_STUB();
@@ -174,6 +179,11 @@ void xl_window_list_all(xl_window_t** windows)
     AE_STUB();
 }
 
+void xl_window_print_all(void)
+{
+    AE_STUB();
+}
+
 void xl_window_close_all(void)
 {
     AE_STUB();
@@ -184,12 +194,22 @@ void xl_window_list_textures(xl_window_t* window, xl_texture_t** textures)
     AE_STUB();
 }
 
+void xl_window_print_textures(xl_window_t* window)
+{
+    AE_STUB();
+}
+
 void xl_window_close_textures(xl_window_t* window)
 {
     AE_STUB();
 }
 
 void xl_window_list_fonts(xl_window_t* window, xl_font_t** fonts)
+{
+    AE_STUB();
+}
+
+void xl_window_print_fonts(xl_window_t* window)
 {
     AE_STUB();
 }
@@ -320,6 +340,11 @@ xl_texture_get_img(xl_texture_t* texture, xl_texture_property_t property)
     AE_STUB(); return NULL;
 }
 
+xl_texture_scale_filter_t xl_texture_scale_filter_from_short_name(const char* name)
+{
+    AE_STUB(); return XL_TEXTURE_SCALE_FILTER_NEAREST;
+}
+
 xl_texture_flip_t xl_texture_flip_from_short_name(const char* name)
 {
     AE_STUB(); return XL_TEXTURE_FLIP_NONE;
@@ -359,6 +384,11 @@ xl_texture_t* xl_texture_load_ex(xl_window_t* window, const char* filename,
 }
 
 void xl_texture_list_all(xl_texture_t** textures)
+{
+    AE_STUB();
+}
+
+void xl_texture_print_all(void)
 {
     AE_STUB();
 }
@@ -465,6 +495,11 @@ xl_font_t* xl_font_load_system_monospace(xl_window_t* window, int point_size)
 }
 
 void xl_font_list_all(xl_font_t** fonts)
+{
+    AE_STUB();
+}
+
+void xl_font_print_all(void)
 {
     AE_STUB();
 }
@@ -613,6 +648,11 @@ void xl_sound_list_all(xl_sound_t** sounds)
     AE_STUB();
 }
 
+void xl_sound_print_all(void)
+{
+    AE_STUB();
+}
+
 void xl_sound_close_all(void)
 {
     AE_STUB();
@@ -678,6 +718,11 @@ xl_keyboard_get_ptr(xl_keyboard_t* keyboard, xl_keyboard_property_t property)
 }
 
 void xl_keyboard_list_all(xl_keyboard_t** keyboards)
+{
+    AE_STUB();
+}
+
+void xl_keyboard_print_all(void)
 {
     AE_STUB();
 }
@@ -779,6 +824,11 @@ void xl_mouse_list_all(xl_mouse_t** mice)
     AE_STUB();
 }
 
+void xl_mouse_print_all(void)
+{
+    AE_STUB();
+}
+
 xl_mouse_button_index_t xl_mouse_button_index_from_short_name(const char* name)
 {
     AE_STUB(); return XL_MOUSE_BUTTON_INDEX_LEFT;
@@ -867,6 +917,11 @@ xl_controller_get_str(xl_controller_t* controller, xl_controller_property_t prop
 }
 
 void xl_controller_list_all(xl_controller_t** controllers)
+{
+    AE_STUB();
+}
+
+void xl_controller_print_all(void)
 {
     AE_STUB();
 }
@@ -1061,6 +1116,11 @@ void xl_animation_list_all(xl_animation_t** animations)
     AE_STUB();
 }
 
+void xl_animation_print_all(void)
+{
+    AE_STUB();
+}
+
 void xl_animation_close_all(void)
 {
     AE_STUB();
@@ -1201,6 +1261,11 @@ void xl_clock_free_timer_names(xl_clock_t* clock, char** names)
 }
 
 void xl_clock_list_all(xl_clock_t** clocks)
+{
+    AE_STUB();
+}
+
+void xl_clock_print_all(void)
 {
     AE_STUB();
 }

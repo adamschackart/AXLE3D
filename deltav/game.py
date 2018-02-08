@@ -33,7 +33,9 @@ class Scene(object):
         if pressed:
             if key == 'f11':
                 w = Window.get_primary()
-                w.fullscreen = not w.fullscreen
+
+                if w.resizable:
+                    w.fullscreen = not w.fullscreen
 
             elif key == 'escape':
                 raise SystemExit

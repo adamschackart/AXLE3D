@@ -24,6 +24,7 @@
 --- TODO: get the average of controller or mouse inputs within a sliding window
 --- TODO: string property overload for object id - add int to hex string to AE
 --- TODO: xl_webcam_t (capture to image probably requires YUV decompress code!)
+--- TODO: make sure release events are never sent without press (dropped input)
 ----------------------------------------------------------------------------- */
 #ifndef __XL_CORE_H__
 #include <xl_core.h>
@@ -121,6 +122,13 @@ void xl_object_list_all(void ** objects)
     AE_PROFILE_LEAVE();
 }
 
+void xl_object_print_all(void)
+{
+    #define N(cap, low) xl_ ## low ## _print_all();
+    XL_OBJECT_TYPE_N
+    #undef N
+}
+
 void xl_object_close_all(void)
 {
     AE_STATIC_ASSERT(all_objects_covered, XL_OBJECT_TYPE_COUNT == 10);
@@ -155,12 +163,14 @@ typedef struct xl_internal_window_t
     SDL_RendererInfo renderer_info;
     SDL_GLContext gl_context;
 
-    ae_ptrset_t fonts;
     ae_ptrset_t textures;
+    ae_ptrset_t fonts;
+
+    int high_quality_textures;
     int copy_textures;
 
+    int id; // random id
     double time_opened;
-    int id;
 } \
     xl_internal_window_t;
 
@@ -220,6 +230,9 @@ xl_window_t* xl_window_create(int initially_visible)
     // We use the xorshift32 generator to create IDs, because it doesn't
     // generate a number more than once (before the 32-bit state wraps).
     window->id = (int)ae_random_xorshift32_ex(&xl_window_id_state);
+
+    // By default, texture subpixel coordinates and smooth scaling is on.
+    window->high_quality_textures = 1;
 
     // Residence in this set indicates window is open and pointer is valid.
     if (!ae_ptrset_add(&xl_window_set, window))
@@ -341,6 +354,18 @@ xl_window_t* xl_window_create(int initially_visible)
     SDL_SetWindowData(window->window, "xl_window", window);
     assert(SDL_GetWindowData(window->window, "xl_window") == window);
 
+    #if defined(AE_DEBUG)
+    {
+        int argc = 0; // set window title to the app's name in debug.
+        char** argv = ae_argv(&argc);
+
+        if (argc > 0)
+        {
+            SDL_SetWindowTitle(window->window, (const char*)argv[0]);
+        }
+    }
+    #endif
+
     // Write after init, in case we want to view the logfile in-game.
     ae_log_flush();
 
@@ -403,6 +428,12 @@ void xl_window_set_int(xl_window_t* window, xl_window_property_t property, int v
 
     ae_switch (property, xl_window_property, XL_WINDOW_PROPERTY, suffix)
     {
+        case XL_WINDOW_PROPERTY_HIGH_QUALITY_TEXTURES:
+        {
+            if (xl_window_get_open(window)) data->high_quality_textures = value;
+        }
+        break;
+
         case XL_WINDOW_PROPERTY_COPY_TEXTURES:
         {
             if (xl_window_get_open(window)) data->copy_textures = value;
@@ -619,7 +650,7 @@ int xl_window_get_int(xl_window_t* window, xl_window_property_t property)
 
         case XL_WINDOW_PROPERTY_PRIMARY:
         {
-            value = window == xl_primary_window(); // is window first?
+            value = (window == xl_primary_window()); // is window first?
         }
         break;
 
@@ -632,6 +663,12 @@ int xl_window_get_int(xl_window_t* window, xl_window_property_t property)
         case XL_WINDOW_PROPERTY_TEXTURE_COUNT:
         {
             if (xl_window_get_open(window)) value = data->textures.count;
+        }
+        break;
+
+        case XL_WINDOW_PROPERTY_HIGH_QUALITY_TEXTURES:
+        {
+            if (xl_window_get_open(window)) value = data->high_quality_textures;
         }
         break;
 
@@ -1525,6 +1562,8 @@ void xl_window_clear(xl_window_t* window, float r, float g, float b)
 
 void xl_window_flip(xl_window_t* window)
 {
+    /* TODO: pre-flip callback for flushing renderer command buffers
+     */
     if (xl_window_get_open(window))
     {
         AE_PROFILE_ENTER(); // NOTE: SDL can also wait for vsync here
@@ -1539,52 +1578,28 @@ void xl_window_flip(xl_window_t* window)
             case GL_NO_ERROR: break;
 
             case GL_INVALID_ENUM:
-            {
-                AE_WARN("GL_INVALID_ENUM");
-            }
-            break;
+                AE_WARN("GL_INVALID_ENUM"); break;
 
             case GL_INVALID_VALUE:
-            {
-                AE_WARN("GL_INVALID_VALUE");
-            }
-            break;
+                AE_WARN("GL_INVALID_VALUE"); break;
 
             case GL_INVALID_OPERATION:
-            {
-                AE_WARN("GL_INVALID_OPERATION");
-            }
-            break;
+                AE_WARN("GL_INVALID_OPERATION"); break;
 
             case GL_INVALID_FRAMEBUFFER_OPERATION:
-            {
-                AE_WARN("GL_INVALID_FRAMEBUFFER_OPERATION");
-            }
-            break;
+                AE_WARN("GL_INVALID_FRAMEBUFFER_OPERATION"); break;
 
             case GL_OUT_OF_MEMORY:
-            {
-                AE_WARN("GL_OUT_OF_MEMORY");
-            }
-            break;
+                AE_WARN("GL_OUT_OF_MEMORY"); break;
 
             case GL_STACK_UNDERFLOW:
-            {
-                AE_WARN("GL_STACK_UNDERFLOW");
-            }
-            break;
+                AE_WARN("GL_STACK_UNDERFLOW"); break;
 
             case GL_STACK_OVERFLOW:
-            {
-                AE_WARN("GL_STACK_OVERFLOW");
-            }
-            break;
+                AE_WARN("GL_STACK_OVERFLOW"); break;
 
             default:
-            {
-                AE_WARN("GL_UNKNOWN_ERROR");
-            }
-            break;
+                AE_WARN("GL_UNKNOWN_ERROR"); break;
         }
         #endif
 
@@ -1601,7 +1616,7 @@ void xl_window_screenshot(xl_window_t* window, ae_image_t* image)
         AE_PROFILE_ENTER(); // TODO use ae_image_alloc_fit for sized images
         xl_internal_window_t* data = (xl_internal_window_t*)window;
 
-        image->width = xl_window_get_width(window);
+        image->width  = xl_window_get_width (window);
         image->height = xl_window_get_height(window);
 
         image->format = AE_IMAGE_FORMAT_RGB;
@@ -1612,10 +1627,8 @@ void xl_window_screenshot(xl_window_t* window, ae_image_t* image)
         if (SDL_RenderReadPixels(data->renderer, NULL, SDL_PIXELFORMAT_RGB24,
                                 image->pixels, ae_image_pitch(image)) < 0)
         {
-            float black[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-
             AE_WARN("failed to get window screenshot: %s", SDL_GetError());
-            ae_image_set_color(image, NULL, black, 1, 1, 1, 1);
+            ae_image_set_color(image, NULL, ae_color_black, 1, 1, 1, 1);
         }
 
         AE_PROFILE_LEAVE();
@@ -1641,6 +1654,16 @@ void xl_window_list_all(xl_window_t** windows)
         sizeof(xl_window_t *), xl_window_compare_time_opened);
 }
 
+void xl_window_print_all(void)
+{
+    XL_BUILD_WINDOW_LIST();
+
+    while (i < n)
+    {
+        printf("xl_window(%s)\n", xl_window_get_status(windows[i++]));
+    }
+}
+
 void xl_window_close_all(void)
 {
     XL_BUILD_WINDOW_LIST();
@@ -1662,6 +1685,21 @@ void xl_window_list_textures(xl_window_t* window, xl_texture_t** textures)
 
         qsort(textures, xl_window_count_textures(window), // re-order
             sizeof(xl_texture_t *), xl_texture_compare_time_created);
+    }
+}
+
+void xl_window_print_textures(xl_window_t* window)
+{
+    size_t i = 0, n = xl_window_count_textures(window);
+
+    xl_texture_t** textures = (xl_texture_t**)
+                alloca(sizeof( xl_texture_t *) * n);
+
+    xl_window_list_textures(window, textures);
+
+    while (i < n)
+    {
+        printf("xl_texture(%s)\n", xl_texture_get_status(textures[i++]));
     }
 }
 
@@ -1691,6 +1729,21 @@ void xl_window_list_fonts(xl_window_t* window, xl_font_t** fonts)
 
         qsort(fonts, xl_window_count_fonts(window), // keep order
                 sizeof(xl_font_t*), xl_font_compare_time_created);
+    }
+}
+
+void xl_window_print_fonts(xl_window_t* window)
+{
+    size_t i = 0, n = xl_window_count_fonts(window);
+
+    xl_font_t ** fonts = (xl_font_t**)
+            alloca(sizeof(xl_font_t *) * n);
+
+    xl_window_list_fonts(window, fonts);
+
+    while (i < n)
+    {
+        printf("xl_font(%s)\n", xl_font_get_status(fonts[i++]));
     }
 }
 
@@ -1748,7 +1801,8 @@ void xl_draw_rect_ex(xl_window_t* window, float* rect, float* color,
     {
         /* FIXME: this is a super ugly inefficient hack, where
          * we just use the texture pipeline to draw rectangles.
-         * eventually, we should issue the proper gl commands.
+         * eventually, we should issue the proper gl commands,
+         * or call into line or tri functions when they use gl.
          */
         AE_PROFILE_ENTER();
 
@@ -1781,6 +1835,9 @@ void xl_draw_rect_ex(xl_window_t* window, float* rect, float* color,
         ae_image_alloc(&image); // push through the texture pipeline
         temp = xl_texture_create(window, image.width, image.height);
 
+        // always keep rect edges looking nice and crisp when downsampling
+        xl_texture_set_scale_filter(temp, XL_TEXTURE_SCALE_FILTER_NEAREST);
+
         ae_assert(ae_image_bytes(&image) != 0 ? image.pixels != NULL : 1,
                                         "ae_image code is stubbed out!");
 
@@ -1810,7 +1867,7 @@ void xl_draw_rect_ex(xl_window_t* window, float* rect, float* color,
 
 void xl_draw_rect(xl_window_t* window, float* rect, float* color)
 {
-    // TODO take the SDL_Render(Draw/Fill)Rect path here
+    // TODO take the SDL_Render(Draw/Fill)Rect path here (or GL!)
     xl_draw_rect_ex(window, rect, color, 0.0, NULL, 0);
 }
 
@@ -1899,30 +1956,40 @@ void xl_draw_circle(xl_window_t * window, float * center, float radius,
     AE_PROFILE_ENTER();
 
     const float step = (2.0f * ae_acosf(-1.0f)) / (float)num_divisions;
-    size_t i = 0;
+    size_t i;
 
-    if (outline)
+    if (center == NULL) // silly - if no center, center in screen
     {
-        for (; i < num_divisions; i++)
+        static float c[2];
+
+        c[0] = (float)xl_window_get_render_width (window) / 2.0f;
+        c[1] = (float)xl_window_get_render_height(window) / 2.0f;
+
+        center = c;
+    }
+
+    for (i = 0; i < num_divisions; i++)
+    {
+        float a[2] =
         {
-            float a[2] =
-            {
-                center[0] + ae_cosf(step * (float)(i + 0)) * radius,
-                center[1] + ae_sinf(step * (float)(i + 0)) * radius,
-            };
+            center[0] + ae_cosf(step * (float)(i + 0)) * radius,
+            center[1] + ae_sinf(step * (float)(i + 0)) * radius,
+        };
 
-            float b[2] =
-            {
-                center[0] + ae_cosf(step * (float)(i + 1)) * radius,
-                center[1] + ae_sinf(step * (float)(i + 1)) * radius,
-            };
+        float b[2] =
+        {
+            center[0] + ae_cosf(step * (float)(i + 1)) * radius,
+            center[1] + ae_sinf(step * (float)(i + 1)) * radius,
+        };
 
+        if (outline) // TODO: move branch outside of the loop
+        {
             xl_draw_line(window, a, b, color);
         }
-    }
-    else
-    {
-        ae_assert(0, "TODO: draw a circular filled 2D polygon (tris)");
+        else
+        {
+            xl_draw_triangle(window, a, b, center, color, 0);
+        }
     }
 
     AE_PROFILE_LEAVE();
@@ -1969,8 +2036,10 @@ typedef struct xl_internal_texture_t
     xl_window_t * window;
     double time_created;
 
+    int id, draw_calls, subpixel;
     xl_texture_flip_t flip_mode;
-    int draw_calls, id;
+
+    xl_texture_scale_filter_t scale_filter;
 
     ae_image_t image;
     int copy_enabled;
@@ -2058,6 +2127,18 @@ xl_texture_t* xl_texture_create(xl_window_t* window, int width, int height)
             ae_error("failed to set texture blend mode: %s", SDL_GetError());
         }
 
+        // by default, textures don't snap to integer coordinates
+        data->subpixel = window_data->high_quality_textures;
+
+        if (data->subpixel)
+        {
+            data->scale_filter = XL_TEXTURE_SCALE_FILTER_LINEAR;
+        }
+        else
+        {
+            data->scale_filter = XL_TEXTURE_SCALE_FILTER_NEAREST;
+        }
+
         data->copy_enabled = window_data->copy_textures;
         data->window = window;
 
@@ -2138,6 +2219,43 @@ xl_texture_set_int(xl_texture_t* texture, xl_texture_property_t property, int va
                     ae_error("failed to set texture color: %s", SDL_GetError());
                 }
             }
+        }
+        break;
+
+        case XL_TEXTURE_PROPERTY_HIGH_QUALITY:
+        {
+            if (xl_texture_get_open(texture))
+            {
+                ae_if (value)
+                {
+                #if 0
+                    data->scale_filter = XL_TEXTURE_SCALE_FILTER_ANISOTROPIC;
+                #else
+                    data->scale_filter = XL_TEXTURE_SCALE_FILTER_LINEAR;
+                #endif
+                }
+                else
+                {
+                    data->scale_filter = XL_TEXTURE_SCALE_FILTER_NEAREST;
+                }
+
+                data->subpixel = value;
+            }
+        }
+        break;
+
+        case XL_TEXTURE_PROPERTY_SCALE_FILTER:
+        {
+            if (xl_texture_get_open(texture))
+            {
+                data->scale_filter = (xl_texture_scale_filter_t)value;
+            }
+        }
+        break;
+
+        case XL_TEXTURE_PROPERTY_SUBPIXEL:
+        {
+            if (xl_texture_get_open(texture)) data->subpixel = value;
         }
         break;
 
@@ -2291,6 +2409,28 @@ xl_texture_get_int(xl_texture_t* texture, xl_texture_property_t property)
         }
         break;
 
+        case XL_TEXTURE_PROPERTY_HIGH_QUALITY:
+        {
+            if (xl_texture_get_open(texture))
+            {
+                return data->scale_filter != XL_TEXTURE_SCALE_FILTER_NEAREST
+                    && data->subpixel;
+            }
+        }
+        break;
+
+        case XL_TEXTURE_PROPERTY_SCALE_FILTER:
+        {
+            if (xl_texture_get_open(texture)) value = (int)data->scale_filter;
+        }
+        break;
+
+        case XL_TEXTURE_PROPERTY_SUBPIXEL:
+        {
+            if (xl_texture_get_open(texture)) value = data->subpixel; // snap mode
+        }
+        break;
+
         case XL_TEXTURE_PROPERTY_FLIP:
         {
             if (xl_texture_get_open(texture)) value = (int)data->flip_mode;
@@ -2396,6 +2536,13 @@ xl_texture_set_str(xl_texture_t* texture, xl_texture_property_t property, const 
         }
         break;
 
+        case XL_TEXTURE_PROPERTY_SCALE_FILTER:
+        {
+            xl_texture_set_scale_filter(texture, // string overload for python etc.
+                                xl_texture_scale_filter_from_short_name(value));
+        }
+        break;
+
         case XL_TEXTURE_PROPERTY_FLIP:
         {
             xl_texture_set_flip(texture, xl_texture_flip_from_short_name(value));
@@ -2462,6 +2609,13 @@ xl_texture_get_str(xl_texture_t* texture, xl_texture_property_t property)
         case XL_TEXTURE_PROPERTY_NAME:
         {
             if (xl_texture_get_open(texture) && data->name != NULL) return data->name;
+        }
+        break;
+
+        case XL_TEXTURE_PROPERTY_SCALE_FILTER:
+        {
+            return xl_texture_scale_filter_short_name[ // str overload for python etc.
+                                                xl_texture_get_scale_filter(texture)];
         }
         break;
 
@@ -2671,6 +2825,19 @@ xl_texture_get_img(xl_texture_t* texture, xl_texture_property_t property)
     return NULL;
 }
 
+xl_texture_scale_filter_t xl_texture_scale_filter_from_short_name(const char* name)
+{
+    // make sure we've covered all possible cases here (TODO: hash table?)
+    AE_STATIC_ASSERT(scale_filter, XL_TEXTURE_SCALE_FILTER_COUNT == 3);
+
+    if (!strcmp("nearest", name)) return XL_TEXTURE_SCALE_FILTER_NEAREST;
+    if (!strcmp("linear", name)) return XL_TEXTURE_SCALE_FILTER_LINEAR;
+    if (!strcmp("anisotropic", name)) return XL_TEXTURE_SCALE_FILTER_ANISOTROPIC;
+
+    ae_assert(0, "\"%s\" is not a valid texture scale filter mode", name);
+    return XL_TEXTURE_SCALE_FILTER_COUNT;
+}
+
 xl_texture_flip_t xl_texture_flip_from_short_name(const char* name)
 {
     if (!strcmp("none", name)) return XL_TEXTURE_FLIP_NONE;
@@ -2688,21 +2855,7 @@ xl_texture_draw_internal(xl_internal_window_t* window, xl_internal_texture_t* te
 {
     AE_PROFILE_ENTER();
 
-    // this can help us track exactly what's rendered within a given frame
-    texture->draw_calls++;
-
-#if 1
-{
-    // Make sure the SDL renderer flip mode bit flags match our enum values
-    AE_STATIC_ASSERT(SDL_RendererFlip, XL_TEXTURE_FLIP_BOTH == \
-                    (SDL_FLIP_HORIZONTAL | SDL_FLIP_VERTICAL));
-
-    // fix the origin (0, 0) to be the bottom left of the screen (gl style)
-    SDL_Rect * fixed_src_rect = NULL;
-    SDL_Rect * fixed_dst_rect = NULL;
-    SDL_Point* fixed_rotate_p = NULL;
-
-    int sw, sh, dw, dh; // the dimensions of the texture src and dst rects
+    int sw, sh, dw, dh; // get the dimensions of the texture src and dst rects
     SDL_RenderGetLogicalSize(window->renderer, &dw, &dh);
 
     if (SDL_QueryTexture(texture->texture, NULL, NULL, &sw, &sh) < 0)
@@ -2710,60 +2863,332 @@ xl_texture_draw_internal(xl_internal_window_t* window, xl_internal_texture_t* te
         ae_error("failed to get texture size: %s", SDL_GetError());
     }
 
-    if (src_rect)
+    // this can help us track exactly what's rendered within a given frame etc.
+    texture->draw_calls++;
+
+    if (ae_branch(texture->scale_filter == XL_TEXTURE_SCALE_FILTER_NEAREST) &&
+        ae_branch(texture->subpixel) == 0)
     {
-        fixed_src_rect = (SDL_Rect*)alloca(sizeof(SDL_Rect));
+        void* inner = ae_profile_enter(__FILE__, "xl_texture_draw_sdl");
 
-        fixed_src_rect->x = src_rect[0];
-        fixed_src_rect->y = (sh - src_rect[3]) - src_rect[1];
-        fixed_src_rect->w = src_rect[2];
-        fixed_src_rect->h = src_rect[3];
-    }
+        // Make sure the SDL renderer flip mode bit flags match our enum values
+        AE_STATIC_ASSERT(SDL_RendererFlip, XL_TEXTURE_FLIP_BOTH == \
+                        (SDL_FLIP_HORIZONTAL | SDL_FLIP_VERTICAL));
 
-    if (dst_rect)
-    {
-        fixed_dst_rect = (SDL_Rect*)alloca(sizeof(SDL_Rect));
+        // fix the origin (0, 0) to be the bottom left of the screen (gl style)
+        SDL_Rect * fixed_src_rect = NULL;
+        SDL_Rect * fixed_dst_rect = NULL;
+        SDL_Point* fixed_rotate_p = NULL;
 
-        fixed_dst_rect->x = dst_rect[0];
-        fixed_dst_rect->y = (dh - dst_rect[3]) - dst_rect[1];
-        fixed_dst_rect->w = dst_rect[2];
-        fixed_dst_rect->h = dst_rect[3];
-    }
-
-    if (center)
-    {
-        fixed_rotate_p = (SDL_Point*)alloca(sizeof(SDL_Point));
-
-        fixed_rotate_p->x = center[0];
-        if (dst_rect)
+        ae_if (src_rect != NULL)
         {
-            fixed_rotate_p->y = fixed_dst_rect->h - center[1];
+            fixed_src_rect = (SDL_Rect*)alloca(sizeof(SDL_Rect));
+
+            fixed_src_rect->x = src_rect[0];
+            fixed_src_rect->y = (sh - src_rect[3]) - src_rect[1];
+            fixed_src_rect->w = src_rect[2];
+            fixed_src_rect->h = src_rect[3];
+        }
+
+        ae_if (dst_rect != NULL)
+        {
+            fixed_dst_rect = (SDL_Rect*)alloca(sizeof(SDL_Rect));
+
+            fixed_dst_rect->x = dst_rect[0];
+            fixed_dst_rect->y = (dh - dst_rect[3]) - dst_rect[1];
+            fixed_dst_rect->w = dst_rect[2];
+            fixed_dst_rect->h = dst_rect[3];
+        }
+
+        ae_if (center != NULL)
+        {
+            fixed_rotate_p = (SDL_Point*)alloca(sizeof(SDL_Point));
+            fixed_rotate_p->x = center[0];
+
+            ae_if (dst_rect != NULL)
+            {
+                fixed_rotate_p->y = fixed_dst_rect->h - center[1];
+            }
+            else
+            {
+                fixed_rotate_p->y = dh - center[1];
+            }
+        }
+
+        /* NOTE since this uses integer coordinates, moving objects "shimmer"!!!
+         * this also makes seams between textures when drawing tiled + rotated.
+         * TODO use rotated rect bounds for clipping so we can use this naively.
+         */
+        if (SDL_RenderCopyEx(window->renderer, texture->texture,
+            fixed_src_rect,
+            fixed_dst_rect,
+            -angle * 180.0 / M_PI,
+            fixed_rotate_p,
+            (SDL_RendererFlip)texture->flip_mode) < 0)
+        {
+            ae_error("failed to draw texture: %s", SDL_GetError());
+        }
+
+        ae_profile_leave(inner);
+    }
+    else
+    {
+        /* TODO add state tracking! this is way slower than non-subpixel path.
+         * that being said, a lot of the cost of SDL's texture rendering is
+         * deferred to window flipping - is something here flushing GL state?
+         */
+        void* inner = ae_profile_enter(__FILE__, "xl_texture_draw_gl1");
+
+        float real_src_rect[4] = AE_ZERO_STRUCT;
+        float real_dst_rect[4] = AE_ZERO_STRUCT;
+        float real_rotate_p[2] = AE_ZERO_STRUCT;
+
+        // src (texture) and dst (render) scales
+        float sx, sy, dx, dy;
+
+        // rects converted to axis-aligned boxes
+        float min_x, max_x, min_y, max_y;
+        float min_u, max_u, min_v, max_v;
+
+        SDL_RenderGetScale(window->renderer, &dx, &dy); // scale values
+        if (SDL_GL_BindTexture(texture->texture, &sx, &sy) < 0)
+        {
+            ae_error("texture bind failed: %s", SDL_GetError());
+        }
+
+        // TODO: culling so we can do this naively (see the TODO above)
+        ae_if (src_rect != NULL)
+        {
+            memcpy(real_src_rect, src_rect, sizeof(float[4]));
         }
         else
         {
-            fixed_rotate_p->y = dh - center[1];
+            real_src_rect[2] = (float)sw;
+            real_src_rect[3] = (float)sh;
         }
-    }
 
-    /* FIXME since this uses integer coordinates, moving objects "shimmer"!!!
-     * this also makes seams between textures when drawing tiled + rotated.
-     * TODO use rotated rect bounds for clipping so we can use this naively.
-     */
-    if (SDL_RenderCopyEx(window->renderer, texture->texture,
-        fixed_src_rect,
-        fixed_dst_rect,
-        -angle * 180.0 / M_PI,
-        fixed_rotate_p,
-        (SDL_RendererFlip)texture->flip_mode) < 0)
-    {
-        ae_error("failed to draw texture: %s", SDL_GetError());
+        ae_if (dst_rect != NULL)
+        {
+            memcpy(real_dst_rect, dst_rect, sizeof(float[4]));
+        }
+        else
+        {
+            real_dst_rect[2] = (float)dw;
+            real_dst_rect[3] = (float)dh;
+        }
+
+        ae_if (center != NULL)
+        {
+            memcpy(real_rotate_p, center, sizeof(float[2]));
+        }
+        else
+        {
+            real_rotate_p[0] = real_dst_rect[2] / 2.0f;
+            real_rotate_p[1] = real_dst_rect[3] / 2.0f;
+        }
+
+        // TODO do the y is up coordinate fixup in the axis-aligned box setup
+        real_rotate_p[1] = real_dst_rect[3] - real_rotate_p[1];
+
+        real_src_rect[1] = ((float)sh - real_src_rect[3]) - real_src_rect[1];
+        real_dst_rect[1] = ((float)dh - real_dst_rect[3]) - real_dst_rect[1];
+
+        real_dst_rect[0] *= dx;
+        real_dst_rect[1] *= dy;
+        real_dst_rect[2] *= dx;
+        real_dst_rect[3] *= dy;
+
+        real_rotate_p[0] *= dx;
+        real_rotate_p[1] *= dy;
+
+        if (!texture->subpixel) // snap coordinates to integer
+        {
+            real_src_rect[0] = (float)((int)real_src_rect[0]);
+            real_src_rect[1] = (float)((int)real_src_rect[1]);
+            real_src_rect[2] = (float)((int)real_src_rect[2]);
+            real_src_rect[3] = (float)((int)real_src_rect[3]);
+
+            real_dst_rect[0] = (float)((int)real_dst_rect[0]);
+            real_dst_rect[1] = (float)((int)real_dst_rect[1]);
+            real_dst_rect[2] = (float)((int)real_dst_rect[2]);
+            real_dst_rect[3] = (float)((int)real_dst_rect[3]);
+
+            real_rotate_p[0] = (float)((int)real_rotate_p[0]);
+            real_rotate_p[1] = (float)((int)real_rotate_p[1]);
+        }
+
+        ae_if ((texture->flip_mode & XL_TEXTURE_FLIP_HORIZONTAL) != 0)
+        {
+            min_x = +real_dst_rect[2] - real_rotate_p[0];
+            max_x = -real_rotate_p[0];
+        }
+        else
+        {
+            min_x = -real_rotate_p[0];
+            max_x = +real_dst_rect[2] - real_rotate_p[0];
+        }
+
+        ae_if ((texture->flip_mode & XL_TEXTURE_FLIP_VERTICAL) != 0)
+        {
+            min_y = +real_dst_rect[3] - real_rotate_p[1];
+            max_y = -real_rotate_p[1];
+        }
+        else
+        {
+            min_y = -real_rotate_p[1];
+            max_y = +real_dst_rect[3] - real_rotate_p[1];
+        }
+
+        min_u =  (real_src_rect[0] / (float)sw) * sx; // S tex coordinate
+        max_u = ((real_src_rect[0] + real_src_rect[2]) / (float)sw) * sx;
+
+        min_v =  (real_src_rect[1] / (float)sh) * sy; // T tex coordinate
+        max_v = ((real_src_rect[1] + real_src_rect[3]) / (float)sh) * sy;
+
+        glPushAttrib(GL_CURRENT_BIT | GL_ENABLE_BIT |
+                GL_TEXTURE_BIT | GL_COLOR_BUFFER_BIT);
+        {
+            /* TODO: use XL blendmode enum here so we can use switch case tracking
+             */
+            SDL_BlendMode tex_blend_mode = SDL_BLENDMODE_BLEND;
+
+            /* TODO: we'll probably want to use this elsewhere, so make it global!
+             */
+            static PFNGLBLENDFUNCSEPARATEPROC xlBlendFuncSeparate;
+            if (xlBlendFuncSeparate == NULL)
+            {
+                xlBlendFuncSeparate = (PFNGLBLENDFUNCSEPARATEPROC)
+                    SDL_GL_GetProcAddress("glBlendFuncSeparate");
+
+                if (xlBlendFuncSeparate == NULL)
+                {
+                    ae_error("glBlendFuncSeparate not supported");
+                }
+            }
+
+            /* TODO: this doesn't have to happen at every draw call - gl textures keep
+             * their own local min and mag filter state. bind the texture when setting
+             * this property, and call these GL state setting functions at that time.
+             */
+            ae_switch ((texture->scale_filter), xl_texture_scale_filter,
+                                        XL_TEXTURE_SCALE_FILTER, suffix)
+            {
+                case XL_TEXTURE_SCALE_FILTER_NEAREST:
+                {
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                }
+                break;
+
+                case XL_TEXTURE_SCALE_FILTER_ANISOTROPIC:
+                case XL_TEXTURE_SCALE_FILTER_LINEAR:
+                {
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                }
+                break;
+
+                default: ae_assert(0, "%u", (u32)texture->scale_filter);
+            }
+
+            /* TODO: there are four texture open checks here - optimize this!!!
+             */
+            glColor4fv((const float*)xl_texture_get_ptr((xl_texture_t*)texture,
+                                                    XL_TEXTURE_PROPERTY_RGBA));
+
+            if (SDL_GetTextureBlendMode(texture->texture, &tex_blend_mode) < 0)
+            {
+                ae_error("failed to get texture blend mode: %s", SDL_GetError());
+            }
+
+            switch (tex_blend_mode) // TODO: texture blending equation property
+            {
+                case SDL_BLENDMODE_NONE:
+                {
+                    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+                    glDisable(GL_BLEND);
+                }
+                break;
+
+                case SDL_BLENDMODE_BLEND:
+                {
+                    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+                    glEnable(GL_BLEND);
+
+                    xlBlendFuncSeparate(GL_SRC_ALPHA,
+                        GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+                }
+                break;
+
+                case SDL_BLENDMODE_ADD:
+                {
+                    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+                    glEnable(GL_BLEND);
+                    xlBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ZERO, GL_ONE);
+                }
+                break;
+
+                case SDL_BLENDMODE_MOD:
+                {
+                    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+                    glEnable(GL_BLEND);
+                    xlBlendFuncSeparate(GL_ZERO, GL_SRC_COLOR, GL_ZERO, GL_ONE);
+                }
+                break;
+
+                default: ae_assert(0, "%u", ( unsigned )tex_blend_mode); break;
+            }
+
+            glPushMatrix();
+            {
+                glTranslatef(real_dst_rect[0] + real_rotate_p[0],
+                    real_dst_rect[1] + real_rotate_p[1], 0.0f);
+
+                glRotated(-angle * 180.0 / M_PI, 0.0, 0.0, 1.0);
+
+            #if 1
+            {
+                float vert_array[] =
+                {
+                    min_u, min_v, min_x, min_y, 0.0f,
+                    max_u, min_v, max_x, min_y, 0.0f,
+                    min_u, max_v, min_x, max_y, 0.0f,
+                    max_u, max_v, max_x, max_y, 0.0f,
+                };
+
+                glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
+
+                glInterleavedArrays(GL_T2F_V3F, 0, vert_array);
+                glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+                glPopClientAttrib(); // emit all verts at once
+            }
+            #else
+                glBegin(GL_TRIANGLE_STRIP);
+                {
+                    glTexCoord2f(min_u, min_v);
+                    glVertex2f  (min_x, min_y);
+                    glTexCoord2f(max_u, min_v);
+                    glVertex2f  (max_x, min_y);
+                    glTexCoord2f(min_u, max_v);
+                    glVertex2f  (min_x, max_y);
+                    glTexCoord2f(max_u, max_v);
+                    glVertex2f  (max_x, max_y);
+                }
+                glEnd();
+            #endif
+            }
+            glPopMatrix();
+
+            if (SDL_GL_UnbindTexture(texture->texture) < 0) // for rect
+            {
+                ae_error("texture unbind failed: %s", SDL_GetError());
+            }
+        }
+        glPopAttrib();
+
+        ae_profile_leave(inner);
     }
-}
-#else
-{
-    #error TODO OpenGL floating-point coordinate path from SDL_render_gl.c
-}
-#endif
 
     AE_PROFILE_LEAVE();
 }
@@ -2914,6 +3339,16 @@ void xl_texture_list_all(xl_texture_t** textures)
 
     qsort(textures, xl_texture_count_all(), // keep stable order
         sizeof(xl_texture_t*), xl_texture_compare_time_created);
+}
+
+void xl_texture_print_all(void)
+{
+    XL_BUILD_WINDOW_LIST();
+
+    while (i < n)
+    {
+        xl_window_print_textures(windows[i++]);
+    }
 }
 
 void xl_texture_close_all(void)
@@ -3759,6 +4194,16 @@ void xl_font_list_all(xl_font_t** fonts)
         sizeof(xl_font_t*), xl_font_compare_time_created);
 }
 
+void xl_font_print_all(void)
+{
+    XL_BUILD_WINDOW_LIST();
+
+    while (i < n)
+    {
+        xl_window_print_fonts(windows[i++]);
+    }
+}
+
 void xl_font_close_all(void)
 {
     XL_BUILD_WINDOW_LIST();
@@ -4556,6 +5001,21 @@ void xl_sound_list_all(xl_sound_t** sounds)
         sizeof(xl_sound_t*), xl_sound_compare_time_created);
 }
 
+void xl_sound_print_all(void)
+{
+    size_t i = 0, n = xl_sound_count_all();
+
+    xl_sound_t ** sounds = (xl_sound_t **)
+                alloca(sizeof(xl_sound_t*) * n);
+
+    xl_sound_list_all(sounds);
+
+    while (i < n)
+    {
+        printf("xl_sound(%s)\n", xl_sound_get_status(sounds[i++]));
+    }
+}
+
 void xl_sound_close_all(void)
 {
     size_t i = 0, n = xl_sound_count_all();
@@ -4928,6 +5388,22 @@ void xl_keyboard_list_all(xl_keyboard_t** keyboards)
 
     qsort(keyboards, xl_keyboard_count_all(), // keep stable order
         sizeof(xl_keyboard_t*), xl_keyboard_compare_time_inserted);
+}
+
+void xl_keyboard_print_all(void)
+{
+    // TODO copy & pasted from animation code, make macro that generates this
+    size_t i = 0, n = xl_keyboard_count_all();
+
+    xl_keyboard_t ** keyboards = (xl_keyboard_t**)
+                    alloca(sizeof(xl_keyboard_t *) * n);
+
+    xl_keyboard_list_all(keyboards);
+
+    while (i < n)
+    {
+        printf("xl_keyboard(%s)\n", xl_keyboard_get_status(keyboards[i++]));
+    }
 }
 
 /* ===== [ modifiers and keys ] ============================================= */
@@ -5597,6 +6073,22 @@ void xl_mouse_list_all(xl_mouse_t** mice)
 
     qsort(mice, xl_mouse_count_all(), // keep a stable order
         sizeof(xl_mouse_t*), xl_mouse_compare_time_inserted);
+}
+
+void xl_mouse_print_all(void)
+{
+    // TODO copy & pasted from animation code, make macro that generates this
+    size_t i = 0, n = xl_mouse_count_all();
+
+    xl_mouse_t ** mice = (xl_mouse_t**)
+            alloca(sizeof(xl_mouse_t *) * n);
+
+    xl_mouse_list_all(mice);
+
+    while (i < n)
+    {
+        printf("xl_mouse(%s)\n", xl_mouse_get_status(mice[i++]));
+    }
 }
 
 /* ===== [ mouse buttons ] ================================================== */
@@ -6475,6 +6967,22 @@ void xl_controller_list_all(xl_controller_t ** controllers)
 
     qsort(controllers, xl_controller_count_all(), // keep stable order
         sizeof(xl_controller_t*), xl_controller_compare_time_inserted);
+}
+
+void xl_controller_print_all(void)
+{
+    // TODO: copied and pasted from animation code, make macro that generates this
+    size_t i = 0, n = xl_controller_count_all();
+
+    xl_controller_t ** controllers = (xl_controller_t**)
+                        alloca(sizeof(xl_controller_t *) * n);
+
+    xl_controller_list_all(controllers);
+
+    while (i < n)
+    {
+        printf("xl_controller(%s)\n", xl_controller_get_status(controllers[i++]));
+    }
 }
 
 /* ===== [ digital buttons ] ================================================ */
@@ -7743,6 +8251,22 @@ void xl_animation_list_all(xl_animation_t** animations)
         sizeof(xl_animation_t*), xl_animation_compare_time_created);
 }
 
+void xl_animation_print_all(void)
+{
+    // TODO this was copy & pasted from sound code, make macro that generates this
+    size_t i = 0, n = xl_animation_count_all();
+
+    xl_animation_t** animations = (xl_animation_t**)
+                alloca(sizeof(xl_animation_t *) * n);
+
+    xl_animation_list_all(animations);
+
+    while (i < n)
+    {
+        printf("xl_animation(%s)\n", xl_animation_get_status(animations[i++]));
+    }
+}
+
 void xl_animation_close_all(void)
 {
     // TODO this was copy & pasted from sound code, make macro that generates this
@@ -8199,11 +8723,28 @@ xl_clock_get_str(xl_clock_t* clock, xl_clock_property_t property)
     {
         case XL_CLOCK_PROPERTY_STATUS:
         {
-            const char* name = xl_clock_get_name(clock); // TODO: quotation marks
-
-            if (name && name[0]) { return name; } else
+            if (xl_clock_get_open(clock))
             {
-                return xl_clock_get_open(clock) ? "open" : "closed";
+                static char xl_clock_status[1024];
+                const char* name = data->name;
+
+                if (name == NULL || name[0] == 0)
+                {
+                    name = "?"; // TODO: different anonymous clock path
+                }
+
+                if (AE_SNPRINTF(xl_clock_status, "\"%s\", %i timers",
+                                name, data->num_timers) < 0)
+                {
+                    AE_WARN("%u bytes is not enough for clock status!",
+                                (unsigned int)sizeof(xl_clock_status));
+                }
+
+                return (const char*)xl_clock_status;
+            }
+            else
+            {
+                return "closed";
             }
         }
         break;
@@ -8656,6 +9197,21 @@ void xl_clock_list_all(xl_clock_t** clocks)
         sizeof(xl_clock_t*), xl_clock_compare_time_created);
 }
 
+void xl_clock_print_all(void)
+{
+    size_t i = 0, n = xl_clock_count_all();
+
+    xl_clock_t** clocks = (xl_clock_t**)
+        alloca(sizeof(xl_clock_t *) * n);
+
+    xl_clock_list_all(clocks);
+
+    while (i < n)
+    {
+        printf("xl_clock(%s)\n", xl_clock_get_status(clocks[i++]));
+    }
+}
+
 void xl_clock_close_all(void)
 {
     size_t i = 0, n = xl_clock_count_all();
@@ -8969,6 +9525,14 @@ xl_event_from_sdl_mouse_motion(xl_event_t* dst, SDL_MouseMotionEvent* src)
         xl_mouse_list_all(&dst->as_mouse_motion.mouse);
 
         dst->as_mouse_motion.window = xl_window_from_sdl_window_id(src->windowID);
+
+        /* this could happen on rare instances, especially if the window loses focus.
+         * this doesn't crash anything, but i don't want to pass goofy mouse events.
+         */
+        if (!xl_window_get_open(dst->as_mouse_motion.window))
+        {
+            dst->type = XL_EVENT_NOTHING; return;
+        }
 
         // we have to build this mask as an int to satisfy C++'s bizarre type system
         {
@@ -10006,6 +10570,7 @@ void xl_init(void)
 
         /* keyboard remove events are never fired, as there's only one keyboard
          * connected, so we don't need to register a custom user event for it.
+         * TODO: xl_register_sdl_event(u32* event), xl_register_sdl_events(void)
          */
         xl_keyboard_insert_event_type = SDL_RegisterEvents(1);
         if (xl_keyboard_insert_event_type == (u32)-1)

@@ -41,6 +41,7 @@ cdef extern from "ae_random.h":
 
     # ===== [ array shuffling (permutation) ] ==================================
 
+    # NOTE: this is wrapped in `mem.pyx` instead, for arrays
     # void memshuffle(void* base, size_t count, size_t size)
 
     # ===== [ lower-level random float api ] ===================================
@@ -113,6 +114,44 @@ cdef extern from "ae_random.h":
     void ae_random_unit_vec2(float v[2])
     void ae_random_unit_vec3(float v[3])
     void ae_random_unit_vec4(float v[4])
+
+    # ===== [ point on line segment ] ==========================================
+
+    void ae_random_seg_point(float* d, const float* a, const float* b, size_t n)
+
+    void ae_random_seg2_point(float out[2], const float a[2], const float b[2])
+    void ae_random_seg3_point(float out[3], const float a[3], const float b[3])
+
+    # ===== [ point on triangle edge ] =========================================
+
+    void ae_random_tri_edge_index(float* out, const float* v0, const float* v1,
+                            const float* v2, const size_t idx, const size_t n)
+
+    void ae_random_tri2_edge_index(  float pt[2], const float v0[2],
+            const float v1[2], const float v2[2], const size_t idx)
+
+    void ae_random_tri3_edge_index(  float pt[3], const float v0[3],
+            const float v1[3], const float v2[3], const size_t idx)
+
+    void ae_random_tri_edge(float * out, const float * v0, const float * v1,
+                                                const float * v2, size_t n)
+
+    void ae_random_tri2_edge(float out[2], const float v0[2],
+                        const float v1[2], const float v2[2])
+
+    void ae_random_tri3_edge(float out[3], const float v0[3],
+                        const float v1[3], const float v2[3])
+
+    # ===== [ point on triangle face ] =========================================
+
+    void ae_random_tri_point(float * pt, const float * v0, const float * v1,
+                                                const float * v2, size_t n)
+
+    void ae_random_tri2_point(float pt[2], const float v0[2],
+                        const float v1[2], const float v2[2])
+
+    void ae_random_tri3_point(float pt[3], const float v0[3],
+                        const float v1[3], const float v2[3])
 
 try:
     import sys, random
@@ -512,3 +551,35 @@ def unit_vec3():
 def unit_vec4():
     cdef Vec4 vc = Vec4()
     ae_random_unit_vec4(vc.v); return vc
+
+def seg2_point(Vec2 v0, Vec2 v1):
+    cdef Vec2 pt = Vec2()
+    ae_random_seg2_point(pt.v, v0.v, v1.v); return pt
+
+def seg3_point(Vec3 v0, Vec3 v1):
+    cdef Vec3 pt = Vec3()
+    ae_random_seg3_point(pt.v, v0.v, v1.v); return pt
+
+def tri2_edge_index(Vec2 v0, Vec2 v1, Vec2 v2, size_t index):
+    cdef Vec2 pt = Vec2()
+    ae_random_tri2_edge_index(pt.v, v0.v, v1.v, v2.v, index); return pt
+
+def tri3_edge_index(Vec3 v0, Vec3 v1, Vec3 v2, size_t index):
+    cdef Vec3 pt = Vec3()
+    ae_random_tri3_edge_index(pt.v, v0.v, v1.v, v2.v, index); return pt
+
+def tri2_edge(Vec2 v0, Vec2 v1, Vec2 v2):
+    cdef Vec2 pt = Vec2()
+    ae_random_tri2_edge(pt.v, v0.v, v1.v, v2.v); return pt
+
+def tri3_edge(Vec3 v0, Vec3 v1, Vec3 v2):
+    cdef Vec3 pt = Vec3()
+    ae_random_tri3_edge(pt.v, v0.v, v1.v, v2.v); return pt
+
+def tri2_point(Vec2 v0, Vec2 v1, Vec2 v2):
+    cdef Vec2 pt = Vec2()
+    ae_random_tri2_point(pt.v, v0.v, v1.v, v2.v); return pt
+
+def tri3_point(Vec3 v0, Vec3 v1, Vec3 v2):
+    cdef Vec3 pt = Vec3()
+    ae_random_tri3_point(pt.v, v0.v, v1.v, v2.v); return pt

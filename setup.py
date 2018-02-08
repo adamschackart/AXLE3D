@@ -258,13 +258,39 @@ shared_libs[0].include_dirs.extend(
 shared_libs[0].sources.extend(
 [
     'mash3D/gl_core.cpp',
+
+    # 'mash3D/gl_wrapper.cpp',
+    # 'mash3D/gl_utility.cpp',
+    # 'mash3D/gl_objects.cpp',
+
     'mash3D/al_core.cpp',
+
+    # 'mash3D/al_wrapper.cpp',
+    # 'mash3D/al_utility.cpp',
+    # 'mash3D/al_objects.cpp',
 ])
 
 shared_libs[0].define_macros.extend(
 [
     ('GL_COMPILING_DLL', '1'),
+
+    # ('GL_NOBUILD_WRAPPER', '1'),
+    # ('GL_NOBUILD_UTILITY', '1'),
+    # ('GL_NOBUILD_OBJECTS', '1'),
+
+    # ('GL_STUB_WRAPPER', '1'),
+    # ('GL_STUB_UTILITY', '1'),
+    # ('GL_STUB_OBJECTS', '1'),
+
     ('AL_COMPILING_DLL', '1'),
+
+    # ('AL_NOBUILD_WRAPPER', '1'),
+    # ('AL_NOBUILD_UTILITY', '1'),
+    # ('AL_NOBUILD_OBJECTS', '1'),
+
+    # ('AL_STUB_WRAPPER', '1'),
+    # ('AL_STUB_UTILITY', '1'),
+    # ('AL_STUB_OBJECTS', '1'),
 ])
 
 ext_modules.insert(0,

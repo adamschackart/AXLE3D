@@ -67,6 +67,8 @@ cdef extern from "xl_core.h":
 
     size_t xl_object_count_all()
     void xl_object_list_all(void** objects)
+
+    void xl_object_print_all()
     void xl_object_close_all()
 
     # ==========================================================================
@@ -80,6 +82,7 @@ cdef extern from "xl_core.h":
         XL_WINDOW_PROPERTY_TOTAL
         XL_WINDOW_PROPERTY_ID
         XL_WINDOW_PROPERTY_TEXTURE_COUNT
+        XL_WINDOW_PROPERTY_HIGH_QUALITY_TEXTURES
         XL_WINDOW_PROPERTY_COPY_TEXTURES
         XL_WINDOW_PROPERTY_FONT_COUNT
         XL_WINDOW_PROPERTY_X
@@ -182,18 +185,21 @@ cdef extern from "xl_core.h":
     const char* xl_window_driver_short_name[]
 
     size_t xl_window_count_all()
-
     void xl_window_list_all(xl_window_t** windows)
+
+    void xl_window_print_all()
     void xl_window_close_all()
 
     size_t xl_window_count_textures(xl_window_t* window)
-
     void xl_window_list_textures(xl_window_t* window, xl_texture_t** textures)
+
+    void xl_window_print_textures(xl_window_t* window)
     void xl_window_close_textures(xl_window_t* window)
 
     size_t xl_window_count_fonts(xl_window_t* window)
-
     void xl_window_list_fonts(xl_window_t* window, xl_font_t** fonts)
+
+    void xl_window_print_fonts(xl_window_t* window)
     void xl_window_close_fonts(xl_window_t* window)
 
     # ==========================================================================
@@ -243,6 +249,9 @@ cdef extern from "xl_core.h":
         XL_TEXTURE_PROPERTY_ALPHA
         XL_TEXTURE_PROPERTY_RGB
         XL_TEXTURE_PROPERTY_RGBA
+        XL_TEXTURE_PROPERTY_HIGH_QUALITY
+        XL_TEXTURE_PROPERTY_SCALE_FILTER
+        XL_TEXTURE_PROPERTY_SUBPIXEL
         XL_TEXTURE_PROPERTY_FLIP
         XL_TEXTURE_PROPERTY_OPEN
         XL_TEXTURE_PROPERTY_COUNT
@@ -277,7 +286,18 @@ cdef extern from "xl_core.h":
     const char* xl_texture_flip_name[]
     const char* xl_texture_flip_short_name[]
 
-    xl_texture_flip_t xl_texture_flip_from_short_name(const char* name)
+    xl_texture_flip_t xl_texture_flip_from_short_name(const char*) # "str" -> mode
+
+    ctypedef enum xl_texture_scale_filter_t:
+        XL_TEXTURE_SCALE_FILTER_NEAREST
+        XL_TEXTURE_SCALE_FILTER_LINEAR
+        XL_TEXTURE_SCALE_FILTER_ANISOTROPIC
+        XL_TEXTURE_SCALE_FILTER_COUNT
+
+    const char* xl_texture_scale_filter_name[]
+    const char* xl_texture_scale_filter_short_name[]
+
+    xl_texture_scale_filter_t xl_texture_scale_filter_from_short_name(const char*)
 
     void xl_texture_draw_ex(xl_texture_t* texture, float* src_rect,
                     float* dst_rect, double angle, float* center)
@@ -296,8 +316,9 @@ cdef extern from "xl_core.h":
     xl_texture_t* xl_texture_load(xl_window_t* window, const char* filename)
 
     size_t xl_texture_count_all()
-
     void xl_texture_list_all(xl_texture_t** textures)
+
+    void xl_texture_print_all()
     void xl_texture_close_all()
 
     # ==========================================================================
@@ -355,8 +376,9 @@ cdef extern from "xl_core.h":
     xl_font_t* xl_font_load_system_monospace(xl_window_t* window, int point_size)
 
     size_t xl_font_count_all()
-
     void xl_font_list_all(xl_font_t** fonts)
+
+    void xl_font_print_all()
     void xl_font_close_all()
 
     # ==========================================================================
@@ -433,8 +455,9 @@ cdef extern from "xl_core.h":
     xl_sound_t* xl_sound_load(const char* filename)
 
     size_t xl_sound_count_all()
-
     void xl_sound_list_all(xl_sound_t** sounds)
+
+    void xl_sound_print_all()
     void xl_sound_close_all()
 
     # ==========================================================================
@@ -477,6 +500,8 @@ cdef extern from "xl_core.h":
 
     size_t xl_keyboard_count_all()
     void xl_keyboard_list_all(xl_keyboard_t** keyboards)
+
+    void xl_keyboard_print_all()
 
     # ===== [ modifiers and keys ] =============================================
 
@@ -697,6 +722,8 @@ cdef extern from "xl_core.h":
     size_t xl_mouse_count_all()
     void xl_mouse_list_all(xl_mouse_t** mice)
 
+    void xl_mouse_print_all()
+
     # ===== [ mouse buttons ] ==================================================
 
     ctypedef enum xl_mouse_button_index_t:
@@ -787,6 +814,8 @@ cdef extern from "xl_core.h":
 
     size_t xl_controller_count_all()
     void xl_controller_list_all(xl_controller_t** controllers)
+
+    void xl_controller_print_all()
 
     # ===== [ digital buttons ] ================================================
 
@@ -931,8 +960,9 @@ cdef extern from "xl_core.h":
                         int frame_width, int frame_height, ae_image_error_t* error)
 
     size_t xl_animation_count_all()
-
     void xl_animation_list_all(xl_animation_t** animations)
+
+    void xl_animation_print_all()
     void xl_animation_close_all()
 
     # ==========================================================================
@@ -998,8 +1028,9 @@ cdef extern from "xl_core.h":
     void xl_clock_free_timer_names(xl_clock_t* clock, char** names)
 
     size_t xl_clock_count_all()
-
     void xl_clock_list_all(xl_clock_t** clocks)
+
+    void xl_clock_print_all()
     void xl_clock_close_all()
 
     # ==========================================================================
@@ -1276,6 +1307,9 @@ cdef class Object:
         return objects
 
     @staticmethod
+    def print_all(): xl_object_print_all()
+
+    @staticmethod
     def close_all(): xl_object_close_all()
 
     property open:
@@ -1401,6 +1435,9 @@ cdef class Window:
         return objects
 
     @staticmethod
+    def print_all(): xl_window_print_all()
+
+    @staticmethod
     def close_all(): xl_window_close_all()
 
     @classmethod
@@ -1431,6 +1468,9 @@ cdef class Window:
 
         return objects
 
+    def print_textures(self):
+        xl_window_print_textures(self.window); return self
+
     def close_textures(self):
         xl_window_close_textures(self.window); return self
 
@@ -1454,6 +1494,9 @@ cdef class Window:
             objects.append(cls(reference = <size_t>fonts[i]))
 
         return objects
+
+    def print_fonts(self):
+        xl_window_print_fonts(self.window); return self
 
     def close_fonts(self):
         xl_window_close_fonts(self.window); return self
@@ -1567,6 +1610,13 @@ cdef class Window:
 
         def __set__(self, object value):
             self.render_width, self.render_height = value
+
+    property high_quality_textures:
+        def __get__(self):
+            return xl_window_get_int(self.window, XL_WINDOW_PROPERTY_HIGH_QUALITY_TEXTURES)
+
+        def __set__(self, bint value):
+            xl_window_set_int(self.window, XL_WINDOW_PROPERTY_HIGH_QUALITY_TEXTURES, value)
 
     property copy_textures:
         def __get__(self):
@@ -2106,6 +2156,9 @@ cdef class Texture:
         return objects
 
     @staticmethod
+    def print_all(): xl_texture_print_all()
+
+    @staticmethod
     def close_all(): xl_texture_close_all()
 
     property id:
@@ -2237,7 +2290,7 @@ cdef class Texture:
             cdef void* c = xl_texture_get_ptr(self.texture, XL_TEXTURE_PROPERTY_RGB)
             cdef Vec3 p = Vec3()
 
-            if c != NULL: vec3copy(p.v, <float*>c)
+            if c != NULL: vec3copy(p.v, <const float*>c)
             return p
 
         def __set__(self, Vec3 value):
@@ -2248,11 +2301,40 @@ cdef class Texture:
             cdef void* c = xl_texture_get_ptr(self.texture, XL_TEXTURE_PROPERTY_RGBA)
             cdef Vec4 p = Vec4()
 
-            if c != NULL: vec4copy(p.v, <float*>c)
+            if c != NULL: vec4copy(p.v, <const float*>c)
             return p
 
         def __set__(self, Vec4 value):
             xl_texture_set_ptr(self.texture, XL_TEXTURE_PROPERTY_RGBA, value.v)
+
+    property high_quality:
+        def __get__(self):
+            return xl_texture_get_int(self.texture, XL_TEXTURE_PROPERTY_HIGH_QUALITY)
+
+        def __set__(self, bint value):
+            xl_texture_set_int(self.texture, XL_TEXTURE_PROPERTY_HIGH_QUALITY, value)
+
+    property scale_filter:
+        def __get__(self):
+            cdef bytes s = xl_texture_get_str(self.texture, XL_TEXTURE_PROPERTY_SCALE_FILTER)
+            return s.decode() if sys.version_info.major > 2 else s # convert char* to unicode
+
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            xl_texture_set_str(self.texture, XL_TEXTURE_PROPERTY_SCALE_FILTER, <char*>string)
+
+    property subpixel:
+        def __get__(self):
+            return xl_texture_get_int(self.texture, XL_TEXTURE_PROPERTY_SUBPIXEL)
+
+        def __set__(self, bint value):
+            xl_texture_set_int(self.texture, XL_TEXTURE_PROPERTY_SUBPIXEL, value)
 
     property flip:
         def __get__(self):
@@ -2443,6 +2525,9 @@ cdef class Font:
         return self.draw(*a, **k)
 
     @staticmethod
+    def print_all(): return xl_font_print_all()
+
+    @staticmethod
     def count_all(): return xl_font_count_all()
 
     @classmethod
@@ -2565,7 +2650,7 @@ cdef class Font:
             cdef void* c = xl_font_get_ptr(self.font, XL_FONT_PROPERTY_RGB)
             cdef Vec3 p = Vec3()
 
-            if c != NULL: vec3copy(p.v, <float*>c)
+            if c != NULL: vec3copy(p.v, <const float*>c)
             return p
 
         def __set__(self, Vec3 value):
@@ -2576,7 +2661,7 @@ cdef class Font:
             cdef void* c = xl_font_get_ptr(self.font, XL_FONT_PROPERTY_RGBA)
             cdef Vec4 p = Vec4()
 
-            if c != NULL: vec4copy(p.v, <float*>c)
+            if c != NULL: vec4copy(p.v, <const float*>c)
             return p
 
         def __set__(self, Vec4 value):
@@ -2929,6 +3014,9 @@ cdef class Sound:
         return self.play(*a, **k)
 
     @staticmethod
+    def print_all(): return xl_sound_print_all()
+
+    @staticmethod
     def count_all(): return xl_sound_count_all()
 
     @classmethod
@@ -3158,6 +3246,9 @@ cdef class Keyboard:
 
         return bool(xl_keyboard_key_is_down(self.keyboard, # magic casting
                     xl_keyboard_key_index_from_short_name(<char *>k_str)))
+
+    @staticmethod
+    def print_all(): return xl_keyboard_print_all()
 
     @staticmethod
     def count_all(): return xl_keyboard_count_all()
@@ -3462,6 +3553,9 @@ cdef class Mouse:
                     xl_mouse_button_index_from_short_name(<char *>b_str)))
 
     @staticmethod
+    def print_all(): return xl_mouse_print_all()
+
+    @staticmethod
     def count_all(): return xl_mouse_count_all()
 
     @classmethod
@@ -3756,6 +3850,9 @@ cdef class Controller:
 
         return bool(xl_controller_button_is_down(self.controller, # magic cast
                     xl_controller_button_index_from_short_name(<char*>b_str)))
+
+    @staticmethod
+    def print_all(): return xl_controller_print_all()
 
     @staticmethod
     def count_all(): return xl_controller_count_all()
@@ -4169,6 +4266,9 @@ cdef class Animation:
         return self.draw(*a, **k)
 
     @staticmethod
+    def print_all(): return xl_animation_print_all()
+
+    @staticmethod
     def count_all(): return xl_animation_count_all()
 
     @classmethod
@@ -4516,6 +4616,9 @@ cdef class Clock:
 
     def __call__(self, *a, **k):
         return self.get_timer(*a, **k)
+
+    @staticmethod
+    def print_all(): return xl_clock_print_all()
 
     @staticmethod
     def count_all(): return xl_clock_count_all()

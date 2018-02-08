@@ -21,17 +21,114 @@ void ae_triangle_quit(void); // private init
 
 /*
 ================================================================================
- * ~~ [ depth sorting ] ~~ *
+ * ~~ [ misc. utils ] ~~ *
 --------------------------------------------------------------------------------
 */
 
-static c_inline void tri3centroid(float center[3], const float v0[3],
+static c_inline float tri_area( const float* v0, const float* v1,
+                                const float* v2, const size_t n)
+{
+    float s; // allocate temporary space for results
+
+    float a, *av = (float*)alloca(sizeof(float) * n);
+    float b, *bv = (float*)alloca(sizeof(float) * n);
+    float c, *cv = (float*)alloca(sizeof(float) * n);
+
+    vec_sub_vec(av, v1, v0, n); a = vec_mag(av, n);
+    vec_sub_vec(bv, v2, v0, n); b = vec_mag(bv, n);
+    vec_sub_vec(cv, v2, v1, n); c = vec_mag(cv, n);
+
+    s = (a + b + c) / 2.0f; /* precise single side */
+    return ae_sqrtf(s * (s - a) * (s - b) * (s - c));
+}
+
+#if 0
+    #define tri2area(v0, v1, v2) tri_area((v0), (v1), (v2), 2)
+    #define tri3area(v0, v1, v2) tri_area((v0), (v1), (v2), 3)
+#else
+    static c_inline float tri2area(const float v0[2],
+                const float v1[2], const float v2[2])
+    {
+        float a, b, c, s, av[2], bv[2], cv[2]; /* temp */
+
+        vec2sub_vec(av, v1, v0); a = vec2mag(av);
+        vec2sub_vec(bv, v2, v0); b = vec2mag(bv);
+        vec2sub_vec(cv, v2, v1); c = vec2mag(cv);
+
+        s = (a + b + c) / 2.0f; /* precise single side */
+        return ae_sqrtf(s * (s - a) * (s - b) * (s - c));
+    }
+
+    static c_inline float tri3area(const float v0[3],
+                const float v1[3], const float v2[3])
+    {
+        float a, b, c, s, av[3], bv[3], cv[3]; /* temp */
+
+        vec3sub_vec(av, v1, v0); a = vec3mag(av);
+        vec3sub_vec(bv, v2, v0); b = vec3mag(bv);
+        vec3sub_vec(cv, v2, v1); c = vec3mag(cv);
+
+        s = (a + b + c) / 2.0f; /* precise single side */
+        return ae_sqrtf(s * (s - a) * (s - b) * (s - c));
+    }
+#endif
+
+static c_inline void tri_centroid( float* center, const float* v0,
+                const float* v1, const float* v2, const size_t n)
+{
+    size_t i = 0; // compute 1/3 of the sum of all vertices
+    for (; i < n; i++)
+    {
+        center[i] = (v0[i] + v1[i] + v2[i]) * (1.0f / 3.0f);
+    }
+}
+
+#if 0
+    #define tri2centroid(d, a, b, c) tri_centroid((d), (a), (b), (c), 2)
+    #define tri3centroid(d, a, b, c) tri_centroid((d), (a), (b), (c), 3)
+#else
+    static c_inline void tri2centroid(float center[2], const float v0[2],
+                                    const float v1[2], const float v2[2])
+    {
+        center[0] = (v0[0] + v1[0] + v2[0]) * (1.0f / 3.0f);
+        center[1] = (v0[1] + v1[1] + v2[1]) * (1.0f / 3.0f);
+    }
+
+    static c_inline void tri3centroid(float center[3], const float v0[3],
+                                    const float v1[3], const float v2[3])
+    {
+        center[0] = (v0[0] + v1[0] + v2[0]) * (1.0f / 3.0f);
+        center[1] = (v0[1] + v1[1] + v2[1]) * (1.0f / 3.0f);
+        center[2] = (v0[2] + v1[2] + v2[2]) * (1.0f / 3.0f);
+    }
+#endif
+
+static c_inline void tri3face_normal(float out[3], const float v0[3],
                                 const float v1[3], const float v2[3])
 {
-    center[0] = (v0[0] + v1[0] + v2[0]) * (1.0f / 3.0f);
-    center[1] = (v0[1] + v1[1] + v2[1]) * (1.0f / 3.0f);
-    center[2] = (v0[2] + v1[2] + v2[2]) * (1.0f / 3.0f);
+    /* NOTE: could use plane_from_points, but this is slightly faster
+     * because we don't need to compute distance scalar (dot product)
+     */
+    float u[3];
+    float v[3];
+
+    /* this isn't a crasher bug, but it generates meaningless results
+     */
+    ae_assert(tri3area(v0, v1, v2) > 0.00000001f,
+            "got degenerate (0-area) triangle!");
+
+    vec3sub_vec(u, v1, v0);
+    vec3sub_vec(v, v2, v0);
+
+    vec3cross(out, u, v);
+    vec3normalize(out, out);
 }
+
+/*
+================================================================================
+ * ~~ [ depth sorting ] ~~ *
+--------------------------------------------------------------------------------
+*/
 
 /* Sort the triangles from back to front, based on distance from a viewpoint.
  * This is useful for correctly rendering scenes with translucent surfaces.

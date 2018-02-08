@@ -31,41 +31,130 @@ cdef extern from "gl_core.h":
     # ==========================================================================
 
     void GL_Accum(unsigned int op, float value)
+    void GL_ActiveShaderProgram(unsigned int pipeline, unsigned int program)
     void GL_ActiveTexture(unsigned int texture)
     void GL_AlphaFunc(unsigned int func, float ref)
+    unsigned char GL_AreTexturesResident(int, const unsigned int*, unsigned char*)
+    void GL_ArrayElement(int i)
+    void GL_AttachShader(unsigned int program, unsigned int shader)
     void GL_Begin(unsigned int mode)
+    void GL_BeginConditionalRender(unsigned int id, unsigned int mode)
+    void GL_BeginQuery(unsigned int target, unsigned int id)
+    void GL_BeginQueryIndexed(unsigned int target, unsigned int index, unsigned int id)
+    void GL_BeginTransformFeedback(unsigned int primitiveMode)
+    void GL_BindAttribLocation(unsigned int program, unsigned int index, const char *name)
+    void GL_BindBuffer(unsigned int target, unsigned int buf)
     void GL_BindTexture(unsigned int target, unsigned int texture)
+    void GL_BindVertexArray(unsigned int array)
+    void GL_Bitmap(int, int, float, float, float, float, const unsigned char*)
+    void GL_BlendColor(float red, float green, float blue, float alpha)
     void GL_BlendEquation(unsigned int mode)
     void GL_BlendEquationSeparate(unsigned int modeRGB, unsigned int modeA)
     void GL_BlendFunc(unsigned int src, unsigned int dst)
-
-    void GL_BlendFuncSeparate(unsigned int srcRGB, unsigned int dstRGB,
-                                unsigned int srcA, unsigned int dstA)
-
+    void GL_BlendFuncSeparate(unsigned int, unsigned int, unsigned int, unsigned int)
+    void GL_BufferData(unsigned int, ptrdiff_t, const void*, unsigned int)
+    void GL_CallList(unsigned int list)
+    void GL_CallLists(int n, unsigned int type, const void *lists)
     void GL_Clear(unsigned int mask)
     void GL_ClearAccum(float r, float g, float b, float a)
     void GL_ClearColor(float r, float g, float b, float a)
     void GL_ClearDepth(double depth)
     void GL_ClearIndex(float c)
+    void GL_ClearStencil(int s)
+    void GL_ClipPlane(unsigned int plane, const double *equation)
+    void GL_Color3b(char red, char green, char blue)
+    void GL_Color3bv(const char *v)
+    void GL_Color3d(double red, double green, double blue)
+    void GL_Color3dv(const double *v)
     void GL_Color3f(float r, float g, float b)
     void GL_Color3fv(const float* rgb)
+    void GL_Color3i(int red, int green, int blue)
+    void GL_Color3iv(const int *v)
+    void GL_Color3s(short red, short green, short blue)
+    void GL_Color3sv(const short *v)
+    void GL_Color3ub(unsigned char red, unsigned char green, unsigned char blue)
+    void GL_Color3ubv(const unsigned char *v)
+    void GL_Color3ui(unsigned int red, unsigned int green, unsigned int blue)
+    void GL_Color3uiv(const unsigned int *v)
+    void GL_Color3us(unsigned short red, unsigned short green, unsigned short blue)
+    void GL_Color3usv(const unsigned short *v)
+    void GL_Color4b(char red, char green, char blue, char alpha)
+    void GL_Color4bv(const char *v)
+    void GL_Color4d(double red, double green, double blue, double alpha)
+    void GL_Color4dv(const double *v)
     void GL_Color4f(float r, float g, float b, float a)
     void GL_Color4fv(const float* rgba)
+    void GL_Color4i(int red, int green, int blue, int alpha)
+    void GL_Color4iv(const int *v)
+    void GL_Color4s(short red, short green, short blue, short alpha)
+    void GL_Color4sv(const short *v)
+    void GL_Color4ub(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha)
+    void GL_Color4ubv(const unsigned char *v)
+    void GL_Color4ui(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha)
+    void GL_Color4uiv(const unsigned int *v)
+    void GL_Color4us(unsigned short red, unsigned short green, unsigned short blue, unsigned short alpha)
+    void GL_Color4usv(const unsigned short *v)
     void GL_ColorMask(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
     void GL_ColorMaterial(unsigned int face, unsigned int mode)
     void GL_ColorPointer(int size, unsigned int type, int stride, const void* data)
+    void GL_CompileShader(unsigned int shader)
+    void GL_CopyPixels(int x, int y, int width, int height, unsigned int type)
+
+    void GL_CopyTexImage1D(unsigned int target, int level, unsigned int internal_format,
+                                                    int x, int y, int width, int border)
+
+    void GL_CopyTexImage2D(unsigned int target, int level, unsigned int internal_format,
+                                        int x, int y, int width, int height, int border)
+
+    void GL_CopyTexSubImage1D(unsigned int target, int level, int xoffset,
+                                                int x, int y, int width)
+
+    void GL_CopyTexSubImage2D(unsigned int target, int level, int xoffset,
+                        int yoffset, int x, int y, int width, int height)
+
+    unsigned int GL_CreateProgram()
+    unsigned int GL_CreateShader(unsigned int type)
     void GL_CullFace(unsigned int face)
+    void GL_DeleteBuffers(int n, const unsigned int* buffers)
+    void GL_DeleteLists(unsigned int list, int range)
+    void GL_DeleteProgram(unsigned int program)
     void GL_DeleteTextures(int n, const unsigned int* textures)
     void GL_DepthFunc(unsigned int func)
+    void GL_DeleteVertexArrays(int n, const unsigned int *arrays)
     void GL_DepthMask(unsigned char flag)
     void GL_DepthRange(double near_val, double far_val)
     void GL_Disable(unsigned int cap)
     void GL_DisableClientState(unsigned int cap)
+    void GL_DisableVertexAttribArray(unsigned int index)
     void GL_DrawArrays(unsigned int mode, int first, int count)
+    void GL_DrawBuffer(unsigned int mode)
     void GL_DrawElements(unsigned int mode, int n, unsigned int type, const void* inds)
+    void GL_DrawPixels(int w, int h, unsigned int fmt, unsigned int type_id, const void *data)
+    void GL_EdgeFlag(unsigned char flag)
+    void GL_EdgeFlagPointer(int stride, const void *ptr)
+    void GL_EdgeFlagv(const unsigned char *flag)
     void GL_Enable(unsigned int cap)
     void GL_EnableClientState(unsigned int cap)
+    void GL_EnableVertexAttribArray(unsigned int index)
     void GL_End()
+    void GL_EndConditionalRender()
+    void GL_EndList()
+    void GL_EndQuery(unsigned int target)
+    void GL_EndQueryIndexed(unsigned int target, unsigned int index)
+    void GL_EndTransformFeedback()
+    void GL_EvalCoord1d(double u)
+    void GL_EvalCoord1dv(const double *u)
+    void GL_EvalCoord1f(float u)
+    void GL_EvalCoord1fv(const float *u)
+    void GL_EvalCoord2d(double u, double v)
+    void GL_EvalCoord2dv(const double *u)
+    void GL_EvalCoord2f(float u, float v)
+    void GL_EvalCoord2fv(const float *u)
+    void GL_EvalMesh1(unsigned int mode, int i1, int i2)
+    void GL_EvalMesh2(unsigned int mode, int i1, int i2, int j1, int j2)
+    void GL_EvalPoint1(int i)
+    void GL_EvalPoint2(int i, int j)
+    void GL_FeedbackBuffer(int size, unsigned int type, float *buffer)
     void GL_Finish()
     void GL_Flush()
     void GL_Fogfv(unsigned int pname, const float* params)
@@ -74,13 +163,33 @@ cdef extern from "gl_core.h":
     void GL_Fogi(unsigned int pname, int param)
     void GL_FrontFace(unsigned int mode)
     void GL_Frustum(double lf, double rt, double bt, double tp, double nr, double fr)
+    void GL_GenBuffers(int n, unsigned int *buffers)
+    unsigned int GL_GenLists(int range)
     void GL_GenTextures(int n, unsigned int* textures)
+    void GL_GenVertexArrays(int n, unsigned int *arrays)
+    int GL_GetAttribLocation(unsigned int program, const char *name)
+    void GL_GetBooleanv(unsigned int pname, unsigned char *params)
+    void GL_GetClipPlane(unsigned int plane, double *equation)
+    void GL_GetDoublev(unsigned int pname, double *params)
     unsigned int GL_GetError()
     void GL_GetFloatv(unsigned int pname, float* data)
     void GL_GetIntegerv(unsigned int pname, int* data)
     void GL_GetLightfv(unsigned int light, unsigned int pname, float* params)
     void GL_GetLightiv(unsigned int light, unsigned int pname, int* params)
+    void GL_GetMapdv(unsigned int target, unsigned int query, double *v)
+    void GL_GetMapfv(unsigned int target, unsigned int query, float *v)
+    void GL_GetMapiv(unsigned int target, unsigned int query, int *v)
     void GL_GetMaterialfv(unsigned int face, unsigned int pname, float* params)
+    void GL_GetMaterialiv(unsigned int face, unsigned int pname, int* params)
+    void GL_GetPixelMapfv(unsigned int map, float *values)
+    void GL_GetPixelMapuiv(unsigned int map, unsigned int *values)
+    void GL_GetPixelMapusv(unsigned int map, unsigned short *values)
+    void GL_GetPointerv(unsigned int pname, void **params)
+    void GL_GetPolygonStipple(unsigned char *mask)
+    void GL_GetProgramiv(unsigned int program, unsigned int pname, int *params)
+    void GL_GetProgramInfoLog(unsigned int program, int buf_size, int *length, char *info_log)
+    void GL_GetShaderiv(unsigned int shader, unsigned int pname, int *params)
+    void GL_GetShaderInfoLog(unsigned int shader, int buf_size, int *length, char *info_log)
     const char* GL_GetString(unsigned int name)
     void GL_GetTexEnvfv(unsigned int target, unsigned int pname, float* params)
     void GL_GetTexEnviv(unsigned int target, unsigned int pname, int* params)
@@ -91,11 +200,17 @@ cdef extern from "gl_core.h":
     void GL_GetTexParameteriv(unsigned int target, unsigned int pname, int* params)
     void GL_Hint(unsigned int target, unsigned int mode)
     void GL_InterleavedArrays(unsigned int format, int stride, const void* pointer)
+    unsigned char GL_IsBuffer(unsigned int buffer_id)
     unsigned char GL_IsEnabled(unsigned int cap)
-    unsigned char GL_IsTexture(unsigned int texture)
+    unsigned char GL_IsList(unsigned int list_id)
+    unsigned char GL_IsProgram(unsigned int program_id)
+    unsigned char GL_IsShader(unsigned int shader_id)
+    unsigned char GL_IsTexture(unsigned int texture_id)
+    unsigned char GL_IsVertexArray(unsigned int array_id)
     void GL_Lightfv(unsigned int light, unsigned int pname, const float* params)
     void GL_Lightf(unsigned int light, unsigned int pname, float param)
     void GL_LineWidth(float width)
+    void GL_LinkProgram(unsigned int program)
     void GL_LoadIdentity()
     void GL_LogicOp(unsigned int opcode)
     void GL_Materialfv(unsigned int face, unsigned int pname, const float* params)
@@ -117,10 +232,20 @@ cdef extern from "gl_core.h":
     void GL_PushClientAttrib(unsigned int mask)
     void GL_PopMatrix()
     void GL_PushMatrix()
+    void GL_PrioritizeTextures(int n, const unsigned int* tex, const float* priorities)
+    void GL_ProvokingVertex(unsigned int mode)
+    int GL_RenderMode(unsigned int mode)
     void GL_Rotatef(float theta, float x, float y, float z)
     void GL_Scalef(float x, float y, float z)
     void GL_Scissor(int x, int y, int width, int height)
     void GL_ShadeModel(unsigned int mode)
+
+    #
+    # FIXME: cython doesn't like this string argument - google around for a solution!
+    #
+    #void GL_ShaderSource(unsigned int shader, int count, const char** const string,
+    #                                                            const int * length)
+
     void GL_TexCoord2f(float s, float t)
     void GL_TexCoord2fv(const float* st)
     void GL_TexCoord3f(float s, float t, float r)
@@ -148,10 +273,17 @@ cdef extern from "gl_core.h":
             int w, int h, unsigned int format, unsigned int type, const void* pix)
 
     void GL_Translatef(float x, float y, float z)
+    void GL_UseProgram(unsigned int program)
     void GL_Vertex2f(float x, float y)
     void GL_Vertex2fv(const float* xy)
     void GL_Vertex3f(float x, float y, float z)
     void GL_Vertex3fv(const float* xyz)
+    void GL_Vertex4f(float x, float y, float z, float w)
+    void GL_Vertex4fv(const float* xyzw)
+
+    void GL_VertexAttribPointer(unsigned int index, int size, unsigned int type,
+                        unsigned char normalized, int stride, const void * data)
+
     void GL_VertexPointer(int size, unsigned int type, int stride, const void* data)
     void GL_Viewport(int x, int y, int width, int height)
 
@@ -314,8 +446,9 @@ cdef extern from "gl_core.h":
     const char* gl_object_type_short_name[]
 
     size_t gl_object_count_all()
-
     void gl_object_list_all(void** objects)
+
+    void gl_object_print_all()
     void gl_object_close_all()
 
     # ==========================================================================
@@ -369,6 +502,15 @@ cdef extern from "gl_core.h":
     void gl_texture_draw(gl_texture_t* texture, float x, float y) # blit
     void gl_texture_draw_ex(gl_texture_t*, float, float, const float[4])
 
+    void gl_texture_draw_skybox_ex( gl_texture_t* front,
+                                    gl_texture_t* back,
+                                    gl_texture_t* left,
+                                    gl_texture_t* right,
+                                    gl_texture_t* up,
+                                    gl_texture_t* down,
+                                    gl_coord3D_t* viewer,
+                                    const float color[4])
+
     void gl_texture_draw_skybox(gl_texture_t* front,
                                 gl_texture_t* back,
                                 gl_texture_t* left,
@@ -378,8 +520,9 @@ cdef extern from "gl_core.h":
                                 gl_coord3D_t* viewer)
 
     size_t gl_texture_count_all()
-
     void gl_texture_list_all(gl_texture_t** textures)
+
+    void gl_texture_print_all()
     void gl_texture_close_all()
 
     # ==========================================================================
@@ -440,8 +583,9 @@ cdef extern from "gl_core.h":
     void gl_material_apply(gl_material_t* material)
 
     size_t gl_material_count_all()
-
     void gl_material_list_all(gl_material_t** materials)
+
+    void gl_material_print_all()
     void gl_material_close_all()
 
     # ==========================================================================
@@ -462,6 +606,7 @@ cdef extern from "gl_core.h":
         GL_LIGHT_PROPERTY_LINEAR_ATTENUATION
         GL_LIGHT_PROPERTY_QUADRATIC_ATTENUATION
         GL_LIGHT_PROPERTY_STATUS
+        GL_LIGHT_PROPERTY_PATH
         GL_LIGHT_PROPERTY_NAME
         GL_LIGHT_PROPERTY_OPEN
         GL_LIGHT_PROPERTY_COUNT
@@ -499,8 +644,9 @@ cdef extern from "gl_core.h":
     void gl_light_apply_all()
 
     size_t gl_light_count_all()
-
     void gl_light_list_all(gl_light_t** lights)
+
+    void gl_light_print_all()
     void gl_light_close_all()
 
     # ==========================================================================
@@ -630,14 +776,20 @@ cdef extern from "gl_core.h":
     void gl_buffer_draw_ex(gl_buffer_t* buffer, gl_material_t* material)
     void gl_buffer_draw(gl_buffer_t* buffer)
 
+    void gl_buffer_draw_aabbox_ex(gl_buffer_t* buffer, const float* rgba,
+                                                        float line_width)
+
+    void gl_buffer_draw_aabbox(gl_buffer_t* buffer, const float* rgba)
+
     void gl_buffer_draw_normals_ex(gl_buffer_t* buffer, const float* start_color,
                                         const float* end_color, float line_width)
 
     void gl_buffer_draw_normals(gl_buffer_t* buffer, const float* color)
 
     size_t gl_buffer_count_all()
-
     void gl_buffer_list_all(gl_buffer_t** buffers)
+
+    void gl_buffer_print_all()
     void gl_buffer_close_all()
 
     # ==========================================================================
@@ -665,6 +817,7 @@ cdef extern from "gl_core.h":
         GL_PARTICLE_EMITTER_PROPERTY_MAX_PARTICLES
         GL_PARTICLE_EMITTER_PROPERTY_PERIOD
         GL_PARTICLE_EMITTER_PROPERTY_STATUS
+        GL_PARTICLE_EMITTER_PROPERTY_PATH
         GL_PARTICLE_EMITTER_PROPERTY_NAME
         GL_PARTICLE_EMITTER_PROPERTY_OPEN
         GL_PARTICLE_EMITTER_PROPERTY_COUNT
@@ -801,6 +954,21 @@ cdef extern from "gl_core.h":
     void gl_particle_emitter_line_reset(gl_particle_emitter_t* emitter,
                                         float* min_val, float* max_val)
 
+    void gl_particle_emitter_mesh_cover_face(gl_particle_emitter_t* emitter,
+                        gl_buffer_t* buffer, size_t particles_per_triangle)
+
+    void gl_particle_emitter_mesh_same_edges(gl_particle_emitter_t* emitter,
+                        gl_buffer_t* buffer, size_t particles_per_triangle)
+
+    void gl_particle_emitter_mesh_rand_edges(gl_particle_emitter_t* emitter,
+                        gl_buffer_t* buffer, size_t particles_per_triangle)
+
+    void gl_particle_emitter_mesh_given_edge(gl_particle_emitter_t * emitter,
+            gl_buffer_t* buffer, size_t particles_per_triangle, size_t index)
+
+    void gl_particle_emitter_mesh_rad_vertex(gl_particle_emitter_t * emitter,
+            gl_buffer_t* buffer, size_t particles_per_triangle, float radius)
+
     void gl_particle_emitter_reset_all()
     void gl_particle_emitter_reset(gl_particle_emitter_t* emitter)
 
@@ -813,6 +981,12 @@ cdef extern from "gl_core.h":
     void gl_particle_emitter_draw_all()
     void gl_particle_emitter_draw(gl_particle_emitter_t* emitter)
 
+    void gl_particle_emitter_draw_aabbox_ex(gl_particle_emitter_t * emitter,
+                                        const float* rgba, float line_width)
+
+    void gl_particle_emitter_draw_aabbox(gl_particle_emitter_t* emitter,
+                                                    const float* color)
+
     void gl_particle_emitter_draw_velocity_ex( gl_particle_emitter_t * emitter,
             const float* start_color, const float* end_color, float line_width)
 
@@ -820,8 +994,9 @@ cdef extern from "gl_core.h":
                                                         const float* rgba)
 
     size_t gl_particle_emitter_count_all()
-
     void gl_particle_emitter_list_all(gl_particle_emitter_t** elist)
+
+    void gl_particle_emitter_print_all()
     void gl_particle_emitter_close_all()
 
 def early_init():
@@ -2870,17 +3045,67 @@ if 1:
 def Accum(unsigned int op, float value):
     GL_Accum(op, value)
 
+def ActiveShaderProgram(unsigned int pipeline, unsigned int program):
+    GL_ActiveShaderProgram(pipeline, program)
+
 def ActiveTexture(unsigned int texture):
     GL_ActiveTexture(texture)
 
 def AlphaFunc(unsigned int func, float ref):
     GL_AlphaFunc(func, ref)
 
+def AreTexturesResident(int n, size_t tex, size_t res):
+    # TODO: use Array for texture and residence arrays? IsTextureResident wrapper?
+    return GL_AreTexturesResident(n, <const unsigned int*>tex, <unsigned char*>res)
+
+def ArrayElement(int i):
+    GL_ArrayElement(i)
+
+def AttachShader(unsigned int program, unsigned int shader):
+    GL_AttachShader(program, shader)
+
 def Begin(unsigned int mode):
     GL_Begin(mode)
 
+def BeginConditionalRender(unsigned int id, unsigned int mode):
+    GL_BeginConditionalRender(id, mode)
+
+def BeginQuery(unsigned int target, unsigned int id):
+    GL_BeginQuery(target, id)
+
+def BeginQueryIndexed(unsigned int target, unsigned int index, unsigned int id):
+    GL_BeginQueryIndexed(target, index, id)
+
+def BeginTransformFeedback(unsigned int primitive_mode):
+    GL_BeginTransformFeedback(primitive_mode)
+
+def BindAttribLocation(unsigned int program, unsigned int index, str name):
+    cdef bytes b_name
+
+    if sys.version_info.major > 2:
+        b_name = <bytes>name.encode('utf-8')
+    else:
+        b_name = <bytes>name
+
+    GL_BindAttribLocation(program, index, <const char*>b_name)
+
+def BindBuffer(unsigned int target, unsigned int buf):
+    GL_BindBuffer(target, buf)
+
 def BindTexture(unsigned int target, unsigned int texture):
     GL_BindTexture(target, texture)
+
+def BindVertexArray(unsigned int array):
+    GL_BindVertexArray(array)
+
+def Bitmap(int width, int height, float x_orig, float y_orig,
+                float x_move, float y_move, size_t bitmap_p):
+    # TODO: use Image?
+    GL_Bitmap(width, height, x_orig, y_orig, x_move, y_move,
+                            <const unsigned char *>bitmap_p)
+
+def BlendColor(float red, float green, float blue, float alpha):
+    GL_BlendColor(red, green, blue, alpha)
 
 def BlendEquation(unsigned int mode):
     GL_BlendEquation(mode)
@@ -2893,6 +3118,15 @@ def BlendFunc(unsigned int src, unsigned int dst):
 
 def BlendFuncSeparate(unsigned sRGB, unsigned dRGB, unsigned sA, unsigned dA):
     GL_BlendFuncSeparate(sRGB, dRGB, sA, dA)
+
+def BufferData(unsigned int target, ptrdiff_t size, size_t data, unsigned int usage):
+    GL_BufferData(target, size, <const void*>data, usage)
+
+def CallList(unsigned int list_id):
+    GL_CallList(list_id)
+
+def CallLists(int n, unsigned int type, size_t lists):
+    GL_CallLists(n, type, <const void*>lists) # TODO: use Array?
 
 def Clear(unsigned int mask):
     GL_Clear(mask)
@@ -2909,11 +3143,71 @@ def ClearDepth(double depth):
 def ClearIndex(float c):
     GL_ClearIndex(c)
 
+def ClearStencil(int s):
+    GL_ClearStencil(s)
+
+def ClipPlane(unsigned int plane, size_t equation):
+    GL_ClipPlane(plane, < const double* >equation)
+
+def Color3b(char red, char green, char blue):
+    GL_Color3b(red, green, blue)
+
+def Color3bv(size_t v):
+    GL_Color3bv(<const char*>v)
+
+def Color3d(double red, double green, double blue):
+    GL_Color3d(red, green, blue)
+
+def Color3dv(size_t v):
+    GL_Color3dv(<const double*>v)
+
 def Color3f(float r, float g, float b):
     GL_Color3f(r, g, b)
 
 def Color3fv(Vec3 rgb):
     GL_Color3fv(rgb.v)
+
+def Color3i(int red, int green, int blue):
+    GL_Color3i(red, green, blue)
+
+def Color3iv(size_t v):
+    GL_Color3iv(<const int*>v)
+
+def Color3s(short red, short green, short blue):
+    GL_Color3s(red, green, blue)
+
+def Color3sv(size_t v):
+    GL_Color3sv(<const short*>v)
+
+def Color3ub(unsigned char red, unsigned char green, unsigned char blue):
+    GL_Color3ub(red, green, blue)
+
+def Color3ubv(size_t v):
+    GL_Color3ubv(<const unsigned char*>v)
+
+def Color3ui(unsigned int red, unsigned int green, unsigned int blue):
+    GL_Color3ui(red, green, blue)
+
+def Color3uiv(size_t v):
+    GL_Color3uiv(<const unsigned int*>v)
+
+def Color3us(unsigned short red, unsigned short green, unsigned short blue):
+    GL_Color3us(red, green, blue)
+
+def Color3usv(size_t v):
+    GL_Color3usv(<const unsigned short*>v)
+
+def Color4b(char red, char green, char blue, char alpha):
+    GL_Color4b(red, green, blue, alpha)
+
+def Color4bv(size_t v):
+    GL_Color4bv(<const char*>v)
+
+def Color4d(double red, double green, double blue, double alpha):
+    GL_Color4d(red, green, blue, alpha)
+
+def Color4dv(size_t v):
+    GL_Color4dv(<const double*>v)
 
 def Color4f(float r, float g, float b, float a):
     GL_Color4f(r, g, b, a)
@@ -2921,20 +3215,90 @@ def Color4f(float r, float g, float b, float a):
 def Color4fv(Vec4 rgba):
     GL_Color4fv(rgba.v)
 
+def Color4i(int red, int green, int blue, int alpha):
+    GL_Color4i(red, green, blue, alpha)
+
+def Color4iv(size_t v):
+    GL_Color4iv(<const int*>v)
+
+def Color4s(short red, short green, short blue, short alpha):
+    GL_Color4s(red, green, blue, alpha)
+
+def Color4sv(size_t v):
+    GL_Color4sv(<const short*>v)
+
+def Color4ub(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha):
+    GL_Color4ub(red, green, blue, alpha)
+
+def Color4ubv(size_t v):
+    GL_Color4ubv(<const unsigned char*>v)
+
+def Color4ui(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha):
+    GL_Color4ui(red, green, blue, alpha)
+
+def Color4uiv(size_t v):
+    GL_Color4uiv(<const unsigned int*>v)
+
+def Color4us(unsigned short red, unsigned short green, unsigned short blue, unsigned short alpha):
+    GL_Color4us(red, green, blue, alpha)
+
+def Color4usv(size_t v):
+    GL_Color4usv(<const unsigned short*>v)
+
 def ColorMask(unsigned char r, unsigned char g, unsigned char b, unsigned char a):
     GL_ColorMask(r, g, b, a)
 
 def ColorMaterial(unsigned int face, unsigned int mode):
     GL_ColorMaterial(face, mode)
 
-def ColorPointer(int size, unsigned int type, int stride, size_t data):
-    GL_ColorPointer(size, type, stride, <const void*>data)
+def ColorPointer(int size, unsigned int type_id, int stride, size_t data):
+    GL_ColorPointer(size, type_id, stride, <const void*>data)
+
+def CompileShader(unsigned int shader):
+    GL_CompileShader(shader)
+
+def CopyPixels(int x, int y, int width, int height, unsigned int type_id):
+    GL_CopyPixels(x, y, width, height, type_id)
+
+def CopyTexImage1D( unsigned int target, int level, unsigned int internal_format,
+                                            int x, int y, int width, int border):
+    GL_CopyTexImage1D(target, level, internal_format, x, y, width, border)
+
+def CopyTexImage2D( unsigned int target, int level, unsigned int internal_format,
+                                int x, int y, int width, int height, int border):
+    GL_CopyTexImage2D(target, level, internal_format, x, y, width, height, border)
+
+def CopyTexSubImage1D(unsigned int target, int level, int xoffset,
+                                        int x, int y, int width):
+    GL_CopyTexSubImage1D(target, level, xoffset, x, y, width)
+
+def CopyTexSubImage2D(unsigned int target, int level, int xoffset,
+                int yoffset, int x, int y, int width, int height):
+    GL_CopyTexSubImage2D(target, level, xoffset, yoffset, x, y, width, height)
+
+def CreateProgram():
+    return GL_CreateProgram()
+
+def CreateShader(unsigned int shader_type):
+    return GL_CreateShader(shader_type)
 
 def CullFace(unsigned int face):
     GL_CullFace(face)
 
+def DeleteBuffers(int n, size_t buffers):
+    GL_DeleteBuffers(n, <const unsigned int*>buffers) # TODO: use Array here?
+
+def DeleteLists(unsigned int id_list, int id_range):
+    GL_DeleteLists(id_list, id_range) # names altered to avoid builtin conflicts
+
+def DeleteProgram(unsigned int program):
+    GL_DeleteProgram(program) # TODO: wrap in a plural form (GL_DeletePrograms)?
+
 def DeleteTextures(int n, size_t textures):
     GL_DeleteTextures(n, <const unsigned int*>textures) # TODO: use Array here?
+
+def DeleteVertexArrays(int n, size_t arrays):
+    GL_DeleteVertexArrays(n, <const unsigned int*>arrays) # TODO: use Array here?
 
 def DepthFunc(unsigned int func):
     GL_DepthFunc(func)
@@ -2951,11 +3315,29 @@ def Disable(unsigned int cap):
 def DisableClientState(unsigned int cap):
     GL_DisableClientState(cap)
 
+def DisableVertexAttribArray(unsigned int index):
+    GL_DisableVertexAttribArray(index)
+
 def DrawArrays(unsigned int mode, int first, int count):
     GL_DrawArrays(mode, first, count)
 
+def DrawBuffer(unsigned int mode):
+    GL_DrawBuffer(mode)
+
 def DrawElements(unsigned int mode, int num, unsigned int itype, size_t inds):
     GL_DrawElements(mode, num, itype, <const void*>inds) # TODO: use an Array?
+
+def DrawPixels(int w, int h, unsigned int fmt, unsigned int type_id, size_t data):
+    GL_DrawPixels(w, h, fmt, type_id, <const void*>data) # TODO: use an Image?
+
+def EdgeFlag(unsigned char flag):
+    GL_EdgeFlag(flag)
+
+def EdgeFlagPointer(int stride, size_t ptr):
+    GL_EdgeFlagPointer(stride, <const void*>ptr)
+
+def EdgeFlagv(size_t flag):
+    GL_EdgeFlagv(<const unsigned char*>flag)
 
 def Enable(unsigned int cap):
     GL_Enable(cap)
@@ -2963,8 +3345,65 @@ def Enable(unsigned int cap):
 def EnableClientState(unsigned int cap):
     GL_EnableClientState(cap)
 
+def EnableVertexAttribArray(unsigned int index):
+    GL_EnableVertexAttribArray(index)
+
 def End():
     GL_End()
+
+def EndConditionalRender():
+    GL_EndConditionalRender()
+
+def EndList():
+    GL_EndList()
+
+def EndQuery(unsigned int target):
+    GL_EndQuery(target)
+
+def EndQueryIndexed(unsigned int target, unsigned int index):
+    GL_EndQueryIndexed(target, index)
+
+def EndTransformFeedback():
+    GL_EndTransformFeedback()
+
+def EvalCoord1d(double u):
+    GL_EvalCoord1d(u)
+
+def EvalCoord1dv(size_t u):
+    GL_EvalCoord1dv(<const double*>u)
+
+def EvalCoord1f(float u):
+    GL_EvalCoord1f(u)
+
+def EvalCoord1fv(size_t u):
+    GL_EvalCoord1fv(<const float*>u)
+
+def EvalCoord2d(double u, double v):
+    GL_EvalCoord2d(u, v)
+
+def EvalCoord2dv(size_t u):
+    GL_EvalCoord2dv(<const double*>u)
+
+def EvalCoord2f(float u, float v):
+    GL_EvalCoord2f(u, v)
+
+def EvalCoord2fv(Vec2 u):
+    GL_EvalCoord2fv(u.v)
+
+def EvalMesh1(unsigned int mode, int i1, int i2):
+    GL_EvalMesh1(mode, i1, i2)
+
+def EvalMesh2(unsigned int mode, int i1, int i2, int j1, int j2):
+    GL_EvalMesh2(mode, i1, i2, j1, j2)
+
+def EvalPoint1(int i):
+    GL_EvalPoint1(i)
+
+def EvalPoint2(int i, int j):
+    GL_EvalPoint2(i, j)
+
+def FeedbackBuffer(int size, unsigned int b_type, size_t data):
+    GL_FeedbackBuffer(size, b_type, <float*>data)
 
 def Finish():
     GL_Finish()
@@ -2990,17 +3429,45 @@ def FrontFace(unsigned int mode):
 def Frustum(double lf, double rt, double bt, double tp, double nr, double fr):
     GL_Frustum(lf, rt, bt, tp, nr, fr)
 
+def GenBuffers(int n, size_t buffers):
+    GL_GenBuffers(n, <unsigned int*>buffers) # TODO: use Array?
+
+def GenLists(int list_range):
+    return GL_GenLists(list_range) # TODO: wrap in a singular form
+
 def GenTextures(int n, size_t textures):
-    GL_GenTextures(n, <unsigned int*>textures)
+    GL_GenTextures(n, <unsigned int*>textures) # TODO: use Array?
+
+def GenVertexArrays(int n, size_t arrays):
+    GL_GenVertexArrays(n, <unsigned int*>arrays) # TODO: use Array?
+
+def GetAttribLocation(unsigned int program, str name):
+    cdef bytes b_name
+
+    if sys.version_info.major > 2:
+        b_name = <bytes>name.encode('utf-8')
+    else:
+        b_name = <bytes>name
+
+    return GL_GetAttribLocation(program, <const char*>b_name)
+
+def GetBooleanv(unsigned int pname, size_t params):
+    GL_GetBooleanv(pname, <unsigned char *>params)
+
+def GetClipPlane(unsigned int plane, size_t equation):
+    GL_GetClipPlane(plane, <double *>equation)
+
+def GetDoublev(unsigned int pname, size_t params):
+    GL_GetDoublev(pname, <double *>params)
 
 def GetError():
     return GL_GetError()
 
-def GetFloatv(unsigned int pname, size_t data):
-    GL_GetFloatv(pname, <float*>data)
+def GetFloatv(unsigned int pname, size_t params):
+    GL_GetFloatv(pname, <float*>params)
 
-def GetIntegerv(unsigned int pname, size_t data):
-    GL_GetIntegerv(pname, <int*>data)
+def GetIntegerv(unsigned int pname, size_t params):
+    GL_GetIntegerv(pname, <int*>params)
 
 def GetLightfv(unsigned int light, unsigned int pname, size_t params):
     GL_GetLightfv(light, pname, <float*>params)
@@ -3008,8 +3475,45 @@ def GetLightfv(unsigned int light, unsigned int pname, size_t params):
 def GetLightiv(unsigned int light, unsigned int pname, size_t params):
     GL_GetLightiv(light, pname, <int*>params)
 
+def GetMapdv(unsigned int target, unsigned int query, size_t v):
+    GL_GetMapdv(target, query, <double*>v)
+
+def GetMapfv(unsigned int target, unsigned int query, size_t v):
+    GL_GetMapfv(target, query, <float*>v)
+
+def GetMapiv(unsigned int target, unsigned int query, size_t v):
+    GL_GetMapiv(target, query, <int*>v)
+
 def GetMaterialfv(unsigned int face, unsigned int pname, size_t params):
     GL_GetMaterialfv(face, pname, <float*>params)
+
+def GetMaterialiv(unsigned int face, unsigned int pname, size_t params):
+    GL_GetMaterialiv(face, pname, <int*>params)
+
+def GetPixelMapfv(unsigned int pmap, size_t values):
+    GL_GetPixelMapfv(pmap, <float*>values)
+
+def GetPixelMapuiv(unsigned int pmap, size_t values):
+    GL_GetPixelMapuiv(pmap, <unsigned int *> values)
+
+def GetPixelMapusv(unsigned int pmap, size_t values):
+    GL_GetPixelMapusv(pmap, <unsigned short*>values)
+
+def GetPointerv(unsigned int pname, size_t params):
+    GL_GetPointerv(pname, <void **> params)
+
+def GetPolygonStipple(size_t mask):
+    GL_GetPolygonStipple(<unsigned char *>mask)
+
+def GetProgramiv(unsigned int program, unsigned int pname, size_t params):
+    GL_GetProgramiv(program, pname, <int*>params)
+
+# TODO: GetProgramInfoLog (get info log length and allocate string)
+
+def GetShaderiv(unsigned int shader, unsigned int pname, size_t params):
+    GL_GetShaderiv(shader, pname, <int*>params)
+
+# TODO: GetShaderInfoLog (get info log length and allocate string)
 
 def GetString(unsigned int name):
     cdef bytes b = GL_GetString(name) # convert to unicode
@@ -3042,11 +3546,26 @@ def Hint(unsigned int target, unsigned int mode):
 def InterleavedArrays(unsigned int format, int stride, size_t data):
     GL_InterleavedArrays(format, stride, <const void*>data)
 
+def IsBuffer(unsigned int buffer_id):
+    return GL_IsBuffer(buffer_id)
+
 def IsEnabled(unsigned int cap):
     return GL_IsEnabled(cap)
 
-def IsTexture(unsigned int texture):
-    return GL_IsTexture(texture)
+def IsList(unsigned int list_id):
+    return GL_IsList(list_id)
+
+def IsProgram(unsigned int program_id):
+    return GL_IsProgram(program_id)
+
+def IsShader(unsigned int shader_id):
+    return GL_IsShader(shader_id)
+
+def IsTexture(unsigned int texture_id):
+    return GL_IsTexture(texture_id)
+
+def IsVertexArray(unsigned int array_id):
+    return GL_IsVertexArray(array_id)
 
 def Lightfv(unsigned int light, unsigned int pname, size_t params):
     GL_Lightfv(light, pname, <const float*>params)
@@ -3056,6 +3575,9 @@ def Lightf(unsigned int light, unsigned int pname, float param):
 
 def LineWidth(float width):
     GL_LineWidth(width)
+
+def LinkProgram(unsigned int program):
+    GL_LinkProgram(program)
 
 def LoadIdentity():
     GL_LoadIdentity()
@@ -3120,6 +3642,16 @@ def PopMatrix():
 def PushMatrix():
     GL_PushMatrix()
 
+def PrioritizeTextures(int n, size_t textures, size_t priorities):
+    # TODO: use Array for textures and priorities arrays? GL_PrioritizeTexture wrapper?
+    GL_PrioritizeTextures(n, <const unsigned int *>textures, <const float *>priorities)
+
+def ProvokingVertex(unsigned int mode):
+    GL_ProvokingVertex(mode)
+
+def RenderMode(unsigned int mode):
+    return GL_RenderMode(mode)
+
 def Rotatef(float theta, float x, float y, float z):
     GL_Rotatef(theta, x, y, z)
 
@@ -3131,6 +3663,8 @@ def Scissor(int x, int y, int width, int height):
 
 def ShadeModel(unsigned int mode):
     GL_ShadeModel(mode)
+
+# TODO: ShaderSource (handle source string argument and length argument)
 
 def TexCoord2f(float s, float t):
     GL_TexCoord2f(s, t)
@@ -3199,6 +3733,9 @@ def TexSubImage2D( unsigned int target, int level, int xoffset, int yoffset, int
 def Translatef(float x, float y, float z):
     GL_Translatef(x, y, z)
 
+def UseProgram(unsigned int program):
+    GL_UseProgram(program)
+
 def Vertex2f(float x, float y):
     GL_Vertex2f(x, y)
 
@@ -3210,6 +3747,18 @@ def Vertex3f(float x, float y, float z):
 
 def Vertex3fv(Vec3 xyz):
     GL_Vertex3fv(xyz.v)
+
+def Vertex4f(float x, float y, float z, float w):
+    GL_Vertex4f(x, y, z, w)
+
+def Vertex4fv(Vec4 xyzw):
+    GL_Vertex4fv(xyzw.v)
+
+def VertexAttribPointer(unsigned int index, int size, unsigned int type,
+                    unsigned char normalized, int stride, size_t d_ptr):
+    # TODO: take Array arg instead?
+    GL_VertexAttribPointer(index, size, type, normalized, stride,
+                                            < const void* >d_ptr)
 
 def VertexPointer(int size, unsigned int type, int stride, size_t data):
     GL_VertexPointer(size, type, stride, <const void*>data)
@@ -3836,6 +4385,9 @@ cdef class Object:
         return objects
 
     @staticmethod
+    def print_all(): gl_object_print_all()
+
+    @staticmethod
     def close_all(): gl_object_close_all()
 
     property open:
@@ -3938,6 +4490,9 @@ cdef class Texture:
             objects.append(cls(reference = <size_t>textures[i]))
 
         return objects
+
+    @staticmethod
+    def print_all(): gl_texture_print_all()
 
     @staticmethod
     def close_all(): gl_texture_close_all()
@@ -4170,6 +4725,23 @@ cdef class Texture:
                                 up.texture, dn.texture,
                                 &coord.coord )
 
+    @staticmethod
+    def draw_skybox_ex(list textures, Coord3D coord, Vec4 rgba):
+        """
+        Draw an infinitely-distant, color-modulated textured cube around viewer.
+        """
+        cdef Texture ft = textures[0]
+        cdef Texture bk = textures[1]
+        cdef Texture lf = textures[2]
+        cdef Texture rt = textures[3]
+        cdef Texture up = textures[4]
+        cdef Texture dn = textures[5]
+
+        gl_texture_draw_skybox_ex(  ft.texture, bk.texture,
+                                    lf.texture, rt.texture,
+                                    up.texture, dn.texture,
+                                    &coord.coord, rgba.v  )
+
 # ==============================================================================
 # ~ [ material system ]
 # ==============================================================================
@@ -4235,6 +4807,9 @@ cdef class Material:
             objects.append(cls(reference = <size_t>materials[i]))
 
         return objects
+
+    @staticmethod
+    def print_all(): gl_material_print_all()
 
     @staticmethod
     def close_all(): gl_material_close_all()
@@ -4466,6 +5041,9 @@ cdef class Light:
         return objects
 
     @staticmethod
+    def close_all(): gl_light_print_all()
+
+    @staticmethod
     def close_all(): gl_light_close_all()
 
     property id:
@@ -4572,6 +5150,21 @@ cdef class Light:
 
             gl_light_set_str(self.light, GL_LIGHT_PROPERTY_STATUS, <char*>string)
 
+    property path:
+        def __get__(self):
+            cdef bytes s = gl_light_get_str(self.light, GL_LIGHT_PROPERTY_PATH)
+            return s.decode() if sys.version_info.major > 2 else s # to unicode
+
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            gl_light_set_str(self.light, GL_LIGHT_PROPERTY_PATH, <char*>string)
+
     property name:
         def __get__(self):
             cdef bytes s = gl_light_get_str(self.light, GL_LIGHT_PROPERTY_NAME)
@@ -4626,6 +5219,13 @@ cdef class Light:
 # ==============================================================================
 # ~ [ vertex buffers ]
 # ==============================================================================
+
+def Mesh(str mode, *args, **kwargs):
+    """
+    Convenience method for constructing buffers. gl.Object is extremely slow!!!
+    """
+    return AutoObject(getattr(Buffer(), "create_{0}".format(mode))
+                                                (*args, **kwargs))
 
 cdef class Buffer:
     """
@@ -4682,6 +5282,9 @@ cdef class Buffer:
             objects.append(cls(reference = <size_t>buffers[i]))
 
         return objects
+
+    @staticmethod
+    def print_all(): gl_buffer_print_all()
 
     @staticmethod
     def close_all(): gl_buffer_close_all()
@@ -5197,6 +5800,12 @@ cdef class Buffer:
     def draw(self):
         gl_buffer_draw(self.buffer); return self
 
+    def draw_aabbox_ex(self, Vec4 rgba, float width=1.0):
+        gl_buffer_draw_aabbox_ex(self.buffer, rgba.v, width); return self
+
+    def draw_aabbox(self, Vec4 rgba):
+        gl_buffer_draw_aabbox(self.buffer, rgba.v); return self
+
     def draw_normals_ex(self, Vec4 start_color, Vec4 end_color, float width=1.0):
         gl_buffer_draw_normals_ex(self.buffer, start_color.v, end_color.v, width)
         return self
@@ -5210,7 +5819,7 @@ cdef class Buffer:
 
 def Emitter(*args, **kwargs):
     """
-    Convenience thing for porting an old game - define this for other classes?
+    Convenience method for porting an old game - define this for other classes?
     """
     return AutoObject(ParticleEmitter(*args, **kwargs))
 
@@ -5275,6 +5884,9 @@ cdef class ParticleEmitter:
             objects.append(cls(reference = <size_t>emitters[i]))
 
         return objects
+
+    @staticmethod
+    def print_all(): gl_particle_emitter_print_all()
 
     @staticmethod
     def close_all(): gl_particle_emitter_close_all()
@@ -5447,6 +6059,21 @@ cdef class ParticleEmitter:
 
             gl_particle_emitter_set_str(self.emitter, GL_PARTICLE_EMITTER_PROPERTY_STATUS, <char*>string)
 
+    property path:
+        def __get__(self):
+            cdef bytes s = gl_particle_emitter_get_str(self.emitter, GL_PARTICLE_EMITTER_PROPERTY_PATH)
+            return s.decode() if sys.version_info.major > 2 else s # convert to utf-8 string in python 3
+
+        def __set__(self, str value):
+            cdef bytes string
+
+            if sys.version_info.major > 2:
+                string = <bytes>value.encode('utf-8')
+            else:
+                string = <bytes>value
+
+            gl_particle_emitter_set_str(self.emitter, GL_PARTICLE_EMITTER_PROPERTY_PATH, <char*>string)
+
     property name:
         def __get__(self):
             cdef bytes s = gl_particle_emitter_get_str(self.emitter, GL_PARTICLE_EMITTER_PROPERTY_NAME)
@@ -5583,6 +6210,46 @@ cdef class ParticleEmitter:
         """
         gl_particle_emitter_line_reset(self.emitter, minv.v, maxv.v); return self
 
+    def mesh_cover_face(self, Buffer buffer, size_t particles_per_triangle):
+        """
+        Randomly distribute emitter particles over the surface of each triangle.
+        New particles are appended to the emitter, for generating large meshes.
+        """
+        gl_particle_emitter_mesh_cover_face(self.emitter, buffer.buffer, particles_per_triangle)
+        return self
+
+    def mesh_same_edges(self, Buffer buffer, size_t particles_per_triangle):
+        """
+        Randomly distribute particles along the edges of each triangle. Particles
+        will not cross the face of the triangle in animations (same edges picked).
+        """
+        gl_particle_emitter_mesh_same_edges(self.emitter, buffer.buffer, particles_per_triangle)
+        return self
+
+    def mesh_rand_edges(self, Buffer buffer, size_t particles_per_triangle):
+        """
+        Randomly distribute particles along the edge of each triangle. The chosen edge
+        for each new particle will be different every time (anim lerp crosses face).
+        """
+        gl_particle_emitter_mesh_rand_edges(self.emitter, buffer.buffer, particles_per_triangle)
+        return self
+
+    def mesh_given_edge(self, Buffer buffer, size_t particles_per_triangle, size_t index):
+        """
+        Randomly distribute particles along a single edge of each mesh triangle.
+        This is a pretty weird-looking effect, included mostly for completeness.
+        """
+        gl_particle_emitter_mesh_given_edge(self.emitter, buffer.buffer, particles_per_triangle, index)
+        return self
+
+    def mesh_rad_vertex(self, Buffer buffer, size_t particles_per_triangle, float radius):
+        """
+        Creates a sphere of particles around every vertex in the triangle mesh.
+        If the radius is 0 and particles per tri is 3, a fast path may be used.
+        """
+        gl_particle_emitter_mesh_rad_vertex(self.emitter, buffer.buffer, particles_per_triangle, radius)
+        return self
+
     @staticmethod
     def reset_all():
         gl_particle_emitter_reset_all()
@@ -5610,6 +6277,12 @@ cdef class ParticleEmitter:
 
     def draw(self):
         gl_particle_emitter_draw(self.emitter); return self
+
+    def draw_aabbox_ex(self, Vec4 rgba, float width):
+        gl_particle_emitter_draw_aabbox_ex(self.emitter, rgba.v, width); return self
+
+    def draw_aabbox(self, Vec4 rgba):
+        gl_particle_emitter_draw_aabbox(self.emitter, rgba.v); return self
 
     def draw_velocity_ex(self, Vec4 start_color, Vec4 end_color, float width=1.0):
         """

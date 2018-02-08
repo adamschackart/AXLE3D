@@ -410,6 +410,145 @@ static c_inline void ae_random_unit_vec(float* v, size_t n)
     }
 #endif
 
+/*
+================================================================================
+ * ~~ [ point on line segment ] ~~ *
+--------------------------------------------------------------------------------
+*/
+
+static c_inline void
+ae_random_seg_point(float* out, const float* a, const float* b, size_t n)
+{
+    vec_lerp(out, a, b, ae_random_flt(), n);
+}
+
+#if 0
+    #define ae_random_seg2_point(d, a, b) ae_random_seg_point((d), (a), (b), 2)
+    #define ae_random_seg3_point(d, a, b) ae_random_seg_point((d), (a), (b), 3)
+#else
+    static c_inline void ae_random_seg2_point(float out[2],
+                        const float a[2], const float b[2])
+    {
+        vec2lerp(out, a, b, ae_random_flt());
+    }
+
+    static c_inline void ae_random_seg3_point(float out[3],
+                        const float a[3], const float b[3])
+    {
+        vec3lerp(out, a, b, ae_random_flt());
+    }
+#endif
+
+/*
+================================================================================
+ * ~~ [ point on triangle edge ] ~~ *
+--------------------------------------------------------------------------------
+*/
+
+static c_inline void
+ae_random_tri_edge_index( float* out, const float* v0, const float* v1,
+                    const float* v2, const size_t idx, const size_t n)
+{
+    switch (idx) {
+        case  0: { ae_random_seg_point(out, v0, v1, n); } break;
+        case  1: { ae_random_seg_point(out, v1, v2, n); } break;
+        default: { ae_random_seg_point(out, v2, v0, n); } break;
+    }
+}
+
+#if 0
+    #define ae_random_tri2_edge_index(out, v0, v1, v2, idx) /* 2D tri edge */ \
+            ae_random_tri_edge_index((out), (v0), (v1), (v2), (idx), 2)
+
+    #define ae_random_tri3_edge_index(out, v0, v1, v2, idx) /* 3D tri edge */ \
+            ae_random_tri_edge_index((out), (v0), (v1), (v2), (idx), 3)
+#else
+    static c_inline void
+    ae_random_tri2_edge_index(float out[2], const float v0[2], const float v1[2],
+                                            const float v2[2], const size_t idx)
+    {
+        switch (idx) {
+            case  0: { ae_random_seg2_point(out, v0, v1); } break;
+            case  1: { ae_random_seg2_point(out, v1, v2); } break;
+            default: { ae_random_seg2_point(out, v2, v0); } break;
+        }
+    }
+
+    static c_inline void
+    ae_random_tri3_edge_index(float out[3], const float v0[3], const float v1[3],
+                                            const float v2[3], const size_t idx)
+    {
+        switch (idx) {
+            case  0: { ae_random_seg3_point(out, v0, v1); } break;
+            case  1: { ae_random_seg3_point(out, v1, v2); } break;
+            default: { ae_random_seg3_point(out, v2, v0); } break;
+        }
+    }
+#endif
+
+static c_inline void ae_random_tri_edge(float* out, const float* v0,
+                        const float* v1, const float* v2, size_t n)
+{
+    ae_random_tri_edge_index(out, v0, v1, v2, ae_random_bounded_u32(3), n);
+}
+
+#if 0
+    #define ae_random_tri2_edge(out, v0, v1, v2) /* 2D tri edge */ \
+            ae_random_tri_edge((out), (v0), (v1), (v2), 2)
+
+    #define ae_random_tri3_edge(out, v0, v1, v2) /* 3D tri edge */ \
+            ae_random_tri_edge((out), (v0), (v1), (v2), 3)
+#else
+    static c_inline void ae_random_tri2_edge(float out[2], const float v0[2],
+                                        const float v1[2], const float v2[2])
+    {
+        ae_random_tri2_edge_index(out, v0, v1, v2, ae_random_bounded_u32(3));
+    }
+
+    static c_inline void ae_random_tri3_edge(float out[3], const float v0[3],
+                                        const float v1[3], const float v2[3])
+    {
+        ae_random_tri3_edge_index(out, v0, v1, v2, ae_random_bounded_u32(3));
+    }
+#endif
+
+/*
+================================================================================
+ * ~~ [ point on triangle face ] ~~ *
+--------------------------------------------------------------------------------
+FIXME: selected points cluster slightly (but still noticeably) around one vertex
+--------------------------------------------------------------------------------
+*/
+
+static c_inline void ae_random_tri_point(float* pt, const float* v0,
+                        const float* v1, const float* v2, size_t n)
+{
+    ae_random_seg_point(pt, v1, v2, n); /* edge point */
+    ae_random_seg_point(pt, v0, pt, n); /* and median */
+}
+
+#if 0
+    #define ae_random_tri2_point(pt, v0, v1, v2) /* 2D tri face */ \
+            ae_random_tri_point((pt), (v0), (v1), (v2), 2)
+
+    #define ae_random_tri3_point(pt, v0, v1, v2) /* 3D tri face */ \
+            ae_random_tri_point((pt), (v0), (v1), (v2), 3)
+#else
+    static c_inline void ae_random_tri2_point(float pt[2], const float v0[2],
+                                        const float v1[2], const float v2[2])
+    {
+        ae_random_seg2_point(pt, v1, v2); /* edge point */
+        ae_random_seg2_point(pt, v0, pt); /* and median */
+    }
+
+    static c_inline void ae_random_tri3_point(float pt[3], const float v0[3],
+                                        const float v1[3], const float v2[3])
+    {
+        ae_random_seg3_point(pt, v1, v2); /* edge point */
+        ae_random_seg3_point(pt, v0, pt); /* and median */
+    }
+#endif
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
