@@ -42,7 +42,7 @@ cdef extern from "gl_core.h":
     void GL_BeginQuery(unsigned int target, unsigned int id)
     void GL_BeginQueryIndexed(unsigned int target, unsigned int index, unsigned int id)
     void GL_BeginTransformFeedback(unsigned int primitiveMode)
-    void GL_BindAttribLocation(unsigned int program, unsigned int index, const char *name)
+    void GL_BindAttribLocation(unsigned int program, unsigned int index, const char* name)
     void GL_BindBuffer(unsigned int target, unsigned int buf)
     void GL_BindTexture(unsigned int target, unsigned int texture)
     void GL_BindVertexArray(unsigned int array)
@@ -53,47 +53,48 @@ cdef extern from "gl_core.h":
     void GL_BlendFunc(unsigned int src, unsigned int dst)
     void GL_BlendFuncSeparate(unsigned int, unsigned int, unsigned int, unsigned int)
     void GL_BufferData(unsigned int, ptrdiff_t, const void*, unsigned int)
+    void GL_BufferSubData(unsigned int, ptrdiff_t, ptrdiff_t, const void*)
     void GL_CallList(unsigned int list)
-    void GL_CallLists(int n, unsigned int type, const void *lists)
+    void GL_CallLists(int n, unsigned int type, const void* lists)
     void GL_Clear(unsigned int mask)
     void GL_ClearAccum(float r, float g, float b, float a)
     void GL_ClearColor(float r, float g, float b, float a)
     void GL_ClearDepth(double depth)
     void GL_ClearIndex(float c)
     void GL_ClearStencil(int s)
-    void GL_ClipPlane(unsigned int plane, const double *equation)
+    void GL_ClipPlane(unsigned int plane, const double* equation)
     void GL_Color3b(char red, char green, char blue)
-    void GL_Color3bv(const char *v)
+    void GL_Color3bv(const char* v)
     void GL_Color3d(double red, double green, double blue)
-    void GL_Color3dv(const double *v)
+    void GL_Color3dv(const double* v)
     void GL_Color3f(float r, float g, float b)
     void GL_Color3fv(const float* rgb)
     void GL_Color3i(int red, int green, int blue)
-    void GL_Color3iv(const int *v)
+    void GL_Color3iv(const int* v)
     void GL_Color3s(short red, short green, short blue)
-    void GL_Color3sv(const short *v)
+    void GL_Color3sv(const short* v)
     void GL_Color3ub(unsigned char red, unsigned char green, unsigned char blue)
-    void GL_Color3ubv(const unsigned char *v)
+    void GL_Color3ubv(const unsigned char* v)
     void GL_Color3ui(unsigned int red, unsigned int green, unsigned int blue)
-    void GL_Color3uiv(const unsigned int *v)
+    void GL_Color3uiv(const unsigned int* v)
     void GL_Color3us(unsigned short red, unsigned short green, unsigned short blue)
-    void GL_Color3usv(const unsigned short *v)
+    void GL_Color3usv(const unsigned short* v)
     void GL_Color4b(char red, char green, char blue, char alpha)
-    void GL_Color4bv(const char *v)
+    void GL_Color4bv(const char* v)
     void GL_Color4d(double red, double green, double blue, double alpha)
-    void GL_Color4dv(const double *v)
+    void GL_Color4dv(const double* v)
     void GL_Color4f(float r, float g, float b, float a)
     void GL_Color4fv(const float* rgba)
     void GL_Color4i(int red, int green, int blue, int alpha)
-    void GL_Color4iv(const int *v)
+    void GL_Color4iv(const int* v)
     void GL_Color4s(short red, short green, short blue, short alpha)
-    void GL_Color4sv(const short *v)
+    void GL_Color4sv(const short* v)
     void GL_Color4ub(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha)
-    void GL_Color4ubv(const unsigned char *v)
+    void GL_Color4ubv(const unsigned char* v)
     void GL_Color4ui(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha)
-    void GL_Color4uiv(const unsigned int *v)
+    void GL_Color4uiv(const unsigned int* v)
     void GL_Color4us(unsigned short red, unsigned short green, unsigned short blue, unsigned short alpha)
-    void GL_Color4usv(const unsigned short *v)
+    void GL_Color4usv(const unsigned short* v)
     void GL_ColorMask(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
     void GL_ColorMaterial(unsigned int face, unsigned int mode)
     void GL_ColorPointer(int size, unsigned int type, int stride, const void* data)
@@ -120,7 +121,7 @@ cdef extern from "gl_core.h":
     void GL_DeleteProgram(unsigned int program)
     void GL_DeleteTextures(int n, const unsigned int* textures)
     void GL_DepthFunc(unsigned int func)
-    void GL_DeleteVertexArrays(int n, const unsigned int *arrays)
+    void GL_DeleteVertexArrays(int n, const unsigned int* arrays)
     void GL_DepthMask(unsigned char flag)
     void GL_DepthRange(double near_val, double far_val)
     void GL_Disable(unsigned int cap)
@@ -129,10 +130,10 @@ cdef extern from "gl_core.h":
     void GL_DrawArrays(unsigned int mode, int first, int count)
     void GL_DrawBuffer(unsigned int mode)
     void GL_DrawElements(unsigned int mode, int n, unsigned int type, const void* inds)
-    void GL_DrawPixels(int w, int h, unsigned int fmt, unsigned int type_id, const void *data)
+    void GL_DrawPixels(int w, int h, unsigned int fmt, unsigned int type_id, const void* data)
     void GL_EdgeFlag(unsigned char flag)
-    void GL_EdgeFlagPointer(int stride, const void *ptr)
-    void GL_EdgeFlagv(const unsigned char *flag)
+    void GL_EdgeFlagPointer(int stride, const void* ptr)
+    void GL_EdgeFlagv(const unsigned char* flag)
     void GL_Enable(unsigned int cap)
     void GL_EnableClientState(unsigned int cap)
     void GL_EnableVertexAttribArray(unsigned int index)
@@ -143,18 +144,18 @@ cdef extern from "gl_core.h":
     void GL_EndQueryIndexed(unsigned int target, unsigned int index)
     void GL_EndTransformFeedback()
     void GL_EvalCoord1d(double u)
-    void GL_EvalCoord1dv(const double *u)
+    void GL_EvalCoord1dv(const double* u)
     void GL_EvalCoord1f(float u)
-    void GL_EvalCoord1fv(const float *u)
+    void GL_EvalCoord1fv(const float* u)
     void GL_EvalCoord2d(double u, double v)
-    void GL_EvalCoord2dv(const double *u)
+    void GL_EvalCoord2dv(const double* u)
     void GL_EvalCoord2f(float u, float v)
-    void GL_EvalCoord2fv(const float *u)
+    void GL_EvalCoord2fv(const float* u)
     void GL_EvalMesh1(unsigned int mode, int i1, int i2)
     void GL_EvalMesh2(unsigned int mode, int i1, int i2, int j1, int j2)
     void GL_EvalPoint1(int i)
     void GL_EvalPoint2(int i, int j)
-    void GL_FeedbackBuffer(int size, unsigned int type, float *buffer)
+    void GL_FeedbackBuffer(int size, unsigned int type, float* buffer)
     void GL_Finish()
     void GL_Flush()
     void GL_Fogfv(unsigned int pname, const float* params)
@@ -163,42 +164,65 @@ cdef extern from "gl_core.h":
     void GL_Fogi(unsigned int pname, int param)
     void GL_FrontFace(unsigned int mode)
     void GL_Frustum(double lf, double rt, double bt, double tp, double nr, double fr)
-    void GL_GenBuffers(int n, unsigned int *buffers)
+    void GL_GenBuffers(int n, unsigned int* buffers)
     unsigned int GL_GenLists(int range)
     void GL_GenTextures(int n, unsigned int* textures)
-    void GL_GenVertexArrays(int n, unsigned int *arrays)
-    int GL_GetAttribLocation(unsigned int program, const char *name)
-    void GL_GetBooleanv(unsigned int pname, unsigned char *params)
-    void GL_GetClipPlane(unsigned int plane, double *equation)
-    void GL_GetDoublev(unsigned int pname, double *params)
+    void GL_GenVertexArrays(int n, unsigned int* arrays)
+    int GL_GetAttribLocation(unsigned int program, const char* name)
+    void GL_GetBooleanv(unsigned int pname, unsigned char* params)
+    void GL_GetClipPlane(unsigned int plane, double* equation)
+    void GL_GetDoublev(unsigned int pname, double* params)
     unsigned int GL_GetError()
     void GL_GetFloatv(unsigned int pname, float* data)
     void GL_GetIntegerv(unsigned int pname, int* data)
     void GL_GetLightfv(unsigned int light, unsigned int pname, float* params)
     void GL_GetLightiv(unsigned int light, unsigned int pname, int* params)
-    void GL_GetMapdv(unsigned int target, unsigned int query, double *v)
-    void GL_GetMapfv(unsigned int target, unsigned int query, float *v)
-    void GL_GetMapiv(unsigned int target, unsigned int query, int *v)
+    void GL_GetMapdv(unsigned int target, unsigned int query, double* v)
+    void GL_GetMapfv(unsigned int target, unsigned int query, float* v)
+    void GL_GetMapiv(unsigned int target, unsigned int query, int* v)
     void GL_GetMaterialfv(unsigned int face, unsigned int pname, float* params)
     void GL_GetMaterialiv(unsigned int face, unsigned int pname, int* params)
-    void GL_GetPixelMapfv(unsigned int map, float *values)
-    void GL_GetPixelMapuiv(unsigned int map, unsigned int *values)
-    void GL_GetPixelMapusv(unsigned int map, unsigned short *values)
-    void GL_GetPointerv(unsigned int pname, void **params)
-    void GL_GetPolygonStipple(unsigned char *mask)
-    void GL_GetProgramiv(unsigned int program, unsigned int pname, int *params)
-    void GL_GetProgramInfoLog(unsigned int program, int buf_size, int *length, char *info_log)
-    void GL_GetShaderiv(unsigned int shader, unsigned int pname, int *params)
-    void GL_GetShaderInfoLog(unsigned int shader, int buf_size, int *length, char *info_log)
+    void GL_GetPixelMapfv(unsigned int map, float* values)
+    void GL_GetPixelMapuiv(unsigned int map, unsigned int* values)
+    void GL_GetPixelMapusv(unsigned int map, unsigned short* values)
+    void GL_GetPointerv(unsigned int pname, void** params)
+    void GL_GetPolygonStipple(unsigned char* mask)
+    void GL_GetProgramiv(unsigned int program, unsigned int pname, int* params)
+    void GL_GetProgramInfoLog(unsigned int program, int buf_size, int* length, char* info_log)
+    void GL_GetShaderiv(unsigned int shader, unsigned int pname, int* params)
+    void GL_GetShaderInfoLog(unsigned int shader, int buf_size, int* length, char* info_log)
     const char* GL_GetString(unsigned int name)
     void GL_GetTexEnvfv(unsigned int target, unsigned int pname, float* params)
     void GL_GetTexEnviv(unsigned int target, unsigned int pname, int* params)
     void GL_GetTexGendv(unsigned int coord, unsigned int pname, double* params)
     void GL_GetTexGenfv(unsigned int coord, unsigned int pname, float* params)
     void GL_GetTexGeniv(unsigned int coord, unsigned int pname, int* params)
+
+    void GL_GetTexImage(unsigned int target, int level, unsigned int format,
+                                            unsigned int type, void* pixels)
+
+    void GL_GetTexLevelParameterfv(unsigned int target, int level,
+                                unsigned int pname, float* params)
+
+    void GL_GetTexLevelParameteriv(unsigned int target, int level,
+                                unsigned int pname, int * params)
+
     void GL_GetTexParameterfv(unsigned int target, unsigned int pname, float* params)
     void GL_GetTexParameteriv(unsigned int target, unsigned int pname, int* params)
     void GL_Hint(unsigned int target, unsigned int mode)
+    void GL_IndexMask(unsigned int mask)
+    void GL_IndexPointer(unsigned int type, int stride, const void* ptr)
+    void GL_Indexd(double c)
+    void GL_Indexdv(const double* c)
+    void GL_Indexf(float c)
+    void GL_Indexfv(const float* c)
+    void GL_Indexi(int c)
+    void GL_Indexiv(const int* c)
+    void GL_Indexs(short c)
+    void GL_Indexsv(const short* c)
+    void GL_Indexub(unsigned char c)
+    void GL_Indexubv(const unsigned char* c)
+    void GL_InitNames()
     void GL_InterleavedArrays(unsigned int format, int stride, const void* pointer)
     unsigned char GL_IsBuffer(unsigned int buffer_id)
     unsigned char GL_IsEnabled(unsigned int cap)
@@ -207,37 +231,131 @@ cdef extern from "gl_core.h":
     unsigned char GL_IsShader(unsigned int shader_id)
     unsigned char GL_IsTexture(unsigned int texture_id)
     unsigned char GL_IsVertexArray(unsigned int array_id)
-    void GL_Lightfv(unsigned int light, unsigned int pname, const float* params)
+    void GL_LightModelf(unsigned int pname, float param)
+    void GL_LightModelfv(unsigned int pname, const float* params)
+    void GL_LightModeli(unsigned int pname, int param)
+    void GL_LightModeliv(unsigned int pname, const int* params)
     void GL_Lightf(unsigned int light, unsigned int pname, float param)
+    void GL_Lightfv(unsigned int light, unsigned int pname, const float* params)
+    void GL_Lighti(unsigned int light, unsigned int pname, int param)
+    void GL_Lightiv(unsigned int light, unsigned int pname, const int* params)
+    void GL_LineStipple(int factor, unsigned short pattern)
     void GL_LineWidth(float width)
     void GL_LinkProgram(unsigned int program)
+    void GL_ListBase(unsigned int base)
     void GL_LoadIdentity()
+    void GL_LoadMatrixd(const double *m)
+    void GL_LoadMatrixf(const float *m)
+    void GL_LoadName(unsigned int name)
     void GL_LogicOp(unsigned int opcode)
-    void GL_Materialfv(unsigned int face, unsigned int pname, const float* params)
+
+    void GL_Map1d(unsigned int target, double u1, double u2, int stride,
+                                        int order, const double* points)
+
+    void GL_Map1f(unsigned int target, float u1, float u2, int stride,
+                                    int order, const float * points)
+
+    void GL_Map2d(unsigned int target, double u1, double u2, int ustride, int uorder,
+                double v1, double v2, int vstride, int vorder, const double* points)
+
+    void GL_Map2f(unsigned int target, float u1, float u2, int ustride, int uorder,
+                float v1, float v2, int vstride, int vorder, const float * points)
+
+    void* GL_MapBuffer(unsigned int target, unsigned int access)
+    void* GL_MapBufferRange(unsigned int, ptrdiff_t, ptrdiff_t, unsigned int)
+    void GL_MapGrid1d(int un, double u1, double u2)
+    void GL_MapGrid1f(int un, float u1, float u2)
+    void GL_MapGrid2d(int un, double u1, double u2, int vn, double v1, double v2)
+    void GL_MapGrid2f(int un, float u1, float u2, int vn, float v1, float v2)
     void GL_Materialf(unsigned int face, unsigned int pname, float param)
+    void GL_Materialfv(unsigned int face, unsigned int pname, const float* params)
+    void GL_Materiali(unsigned int face, unsigned int pname, int param)
+    void GL_Materialiv(unsigned int face, unsigned int pname, const int* params)
     void GL_MatrixMode(unsigned int mode)
+    void GL_MultMatrixd(const double *m)
     void GL_MultMatrixf(const float* m)
+    void GL_NewList(unsigned int list, unsigned int mode)
+    void GL_Normal3b(char nx, char ny, char nz)
+    void GL_Normal3bv(const char *v)
+    void GL_Normal3d(double nx, double ny, double nz)
+    void GL_Normal3dv(const double *v)
     void GL_Normal3f(float x, float y, float z)
     void GL_Normal3fv(const float* normal)
+    void GL_Normal3i(int nx, int ny, int nz)
+    void GL_Normal3iv(const int* v)
+    void GL_Normal3s(short nx, short ny, short nz)
+    void GL_Normal3sv(const short* v)
     void GL_NormalPointer(unsigned int type, int stride, const void* data)
     void GL_Ortho(double lf, double rt, double btm, double tp, double nr, double fr)
+    void GL_PassThrough(float token)
+    void GL_PixelMapfv(unsigned int map, int mapsize, const float *values)
+    void GL_PixelMapuiv(unsigned int map, int mapsize, const unsigned int *values)
+    void GL_PixelMapusv(unsigned int map, int mapsize, const unsigned short *values)
+    void GL_PixelStoref(unsigned int pname, float param)
+    void GL_PixelStorei(unsigned int pname, int param)
+    void GL_PixelTransferf(unsigned int pname, float param)
+    void GL_PixelTransferi(unsigned int pname, int param)
+    void GL_PixelZoom(float xfactor, float yfactor)
     void GL_PointParameterfv(unsigned int pname, const float* data)
     void GL_PointParameterf(unsigned int pname, float param)
     void GL_PointSize(float size)
     void GL_PolygonMode(unsigned int face, unsigned int mode)
     void GL_PolygonOffset(float factor, float units)
+    void GL_PolygonStipple(const unsigned char *mask)
     void GL_PopAttrib()
     void GL_PushAttrib(unsigned int mask)
     void GL_PopClientAttrib()
     void GL_PushClientAttrib(unsigned int mask)
     void GL_PopMatrix()
     void GL_PushMatrix()
+    void GL_PopName()
+    void GL_PushName(unsigned int name)
     void GL_PrioritizeTextures(int n, const unsigned int* tex, const float* priorities)
     void GL_ProvokingVertex(unsigned int mode)
+    void GL_RasterPos2d(double x, double y)
+    void GL_RasterPos2dv(const double *v)
+    void GL_RasterPos2f(float x, float y)
+    void GL_RasterPos2fv(const float *v)
+    void GL_RasterPos2i(int x, int y)
+    void GL_RasterPos2iv(const int *v)
+    void GL_RasterPos2s(short x, short y)
+    void GL_RasterPos2sv(const short *v)
+    void GL_RasterPos3d(double x, double y, double z)
+    void GL_RasterPos3dv(const double *v)
+    void GL_RasterPos3f(float x, float y, float z)
+    void GL_RasterPos3fv(const float *v)
+    void GL_RasterPos3i(int x, int y, int z)
+    void GL_RasterPos3iv(const int *v)
+    void GL_RasterPos3s(short x, short y, short z)
+    void GL_RasterPos3sv(const short *v)
+    void GL_RasterPos4d(double x, double y, double z, double w)
+    void GL_RasterPos4dv(const double *v)
+    void GL_RasterPos4f(float x, float y, float z, float w)
+    void GL_RasterPos4fv(const float *v)
+    void GL_RasterPos4i(int x, int y, int z, int w)
+    void GL_RasterPos4iv(const int *v)
+    void GL_RasterPos4s(short x, short y, short z, short w)
+    void GL_RasterPos4sv(const short *v)
+    void GL_ReadBuffer(unsigned int mode)
+
+    void GL_ReadPixels(int x, int y, int width, int height, unsigned int format,
+                                                unsigned int type, void *pixels)
+
+    void GL_Rectd(double x1, double y1, double x2, double y2)
+    void GL_Rectdv(const double *v1, const double *v2)
+    void GL_Rectf(float x1, float y1, float x2, float y2)
+    void GL_Rectfv(const float *v1, const float *v2)
+    void GL_Recti(int x1, int y1, int x2, int y2)
+    void GL_Rectiv(const int *v1, const int *v2)
+    void GL_Rects(short x1, short y1, short x2, short y2)
+    void GL_Rectsv(const short *v1, const short *v2)
     int GL_RenderMode(unsigned int mode)
+    void GL_Rotated(double angle, double x, double y, double z)
     void GL_Rotatef(float theta, float x, float y, float z)
+    void GL_Scaled(double x, double y, double z)
     void GL_Scalef(float x, float y, float z)
     void GL_Scissor(int x, int y, int width, int height)
+    void GL_SelectBuffer(int size, unsigned int* buffer)
     void GL_ShadeModel(unsigned int mode)
 
     #
@@ -246,40 +364,99 @@ cdef extern from "gl_core.h":
     #void GL_ShaderSource(unsigned int shader, int count, const char** const string,
     #                                                            const int * length)
 
+    void GL_StencilFunc(unsigned int func, int ref, unsigned int mask)
+    void GL_StencilMask(unsigned int mask)
+    void GL_StencilOp(unsigned int fail, unsigned int zfail, unsigned int zpass)
+    void GL_TexCoord1d(double s)
+    void GL_TexCoord1dv(const double *v)
+    void GL_TexCoord1f(float s)
+    void GL_TexCoord1fv(const float *v)
+    void GL_TexCoord1i(int s)
+    void GL_TexCoord1iv(const int *v)
+    void GL_TexCoord1s(short s)
+    void GL_TexCoord1sv(const short *v)
+    void GL_TexCoord2d(double s, double t)
+    void GL_TexCoord2dv(const double *v)
     void GL_TexCoord2f(float s, float t)
     void GL_TexCoord2fv(const float* st)
+    void GL_TexCoord2i(int s, int t)
+    void GL_TexCoord2iv(const int *v)
+    void GL_TexCoord2s(short s, short t)
+    void GL_TexCoord2sv(const short *v)
+    void GL_TexCoord3d(double s, double t, double r)
+    void GL_TexCoord3dv(const double *v)
     void GL_TexCoord3f(float s, float t, float r)
     void GL_TexCoord3fv(const float* str)
+    void GL_TexCoord3i(int s, int t, int r)
+    void GL_TexCoord3iv(const int *v)
+    void GL_TexCoord3s(short s, short t, short r)
+    void GL_TexCoord3sv(const short *v)
+    void GL_TexCoord4d(double s, double t, double r, double q)
+    void GL_TexCoord4dv(const double *v)
     void GL_TexCoord4f(float s, float t, float r, float q)
     void GL_TexCoord4fv(const float* strq)
+    void GL_TexCoord4i(int s, int t, int r, int q)
+    void GL_TexCoord4iv(const int* v)
+    void GL_TexCoord4s(short s, short t, short r, short q)
+    void GL_TexCoord4sv(const short* v)
     void GL_TexCoordPointer(int size, unsigned int type, int stride, const void* data)
-    void GL_TexEnvfv(unsigned int target, unsigned int pname, const float *params)
-    void GL_TexEnviv(unsigned int target, unsigned int pname, const int *params)
+    void GL_TexEnvfv(unsigned int target, unsigned int pname, const float* params)
+    void GL_TexEnviv(unsigned int target, unsigned int pname, const int* params)
     void GL_TexEnvf(unsigned int target, unsigned int pname, float param)
     void GL_TexEnvi(unsigned int target, unsigned int pname, int param)
-    void GL_TexGeniv(unsigned int coord, unsigned int pname, const int *params)
-    void GL_TexGenfv(unsigned int coord, unsigned int pname, const float *params)
-    void GL_TexGendv(unsigned int coord, unsigned int pname, const double *params)
+    void GL_TexGeniv(unsigned int coord, unsigned int pname, const int* params)
+    void GL_TexGenfv(unsigned int coord, unsigned int pname, const float* params)
+    void GL_TexGendv(unsigned int coord, unsigned int pname, const double* params)
     void GL_TexGeni(unsigned int coord, unsigned int pname, int param)
     void GL_TexGenf(unsigned int coord, unsigned int pname, float param)
     void GL_TexGend(unsigned int coord, unsigned int pname, double param)
 
+    void GL_TexImage1D(unsigned int target, int level, int internal_format, int w,
+                int border, unsigned int format, unsigned int type, const void* p)
+
     void GL_TexImage2D(unsigned int target, int level, int internal_format, int w,
             int h, int border, unsigned int fmt, unsigned int type, const void* p)
 
+    void GL_TexParameterf(unsigned int target, unsigned int pname, float param)
+    void GL_TexParameterfv(unsigned int target, unsigned int pname, const float *params)
     void GL_TexParameteri(unsigned int target, unsigned int pname, int param)
+    void GL_TexParameteriv(unsigned int target, unsigned int pname, const int *params)
+
+    void GL_TexSubImage1D(unsigned int target, int level, int xoffset, int width,
+                        unsigned int format, unsigned int type, const void* pix)
 
     void GL_TexSubImage2D(unsigned int target, int level, int xoffset, int yoffset,
             int w, int h, unsigned int format, unsigned int type, const void* pix)
 
+    void GL_Translated(double x, double y, double z)
     void GL_Translatef(float x, float y, float z)
+    unsigned char GL_UnmapBuffer(unsigned int target)
     void GL_UseProgram(unsigned int program)
+    void GL_ValidateProgram(unsigned int program)
+    void GL_Vertex2d(double x, double y)
+    void GL_Vertex2dv(const double *v)
     void GL_Vertex2f(float x, float y)
     void GL_Vertex2fv(const float* xy)
+    void GL_Vertex2i(int x, int y)
+    void GL_Vertex2iv(const int *v)
+    void GL_Vertex2s(short x, short y)
+    void GL_Vertex2sv(const short *v)
+    void GL_Vertex3d(double x, double y, double z)
+    void GL_Vertex3dv(const double *v)
     void GL_Vertex3f(float x, float y, float z)
     void GL_Vertex3fv(const float* xyz)
+    void GL_Vertex3i(int x, int y, int z)
+    void GL_Vertex3iv(const int *v)
+    void GL_Vertex3s(short x, short y, short z)
+    void GL_Vertex3sv(const short *v)
+    void GL_Vertex4d(double x, double y, double z, double w)
+    void GL_Vertex4dv(const double *v)
     void GL_Vertex4f(float x, float y, float z, float w)
     void GL_Vertex4fv(const float* xyzw)
+    void GL_Vertex4i(int x, int y, int z, int w)
+    void GL_Vertex4iv(const int *v)
+    void GL_Vertex4s(short x, short y, short z, short w)
+    void GL_Vertex4sv(const short *v)
 
     void GL_VertexAttribPointer(unsigned int index, int size, unsigned int type,
                         unsigned char normalized, int stride, const void * data)
@@ -3120,7 +3297,10 @@ def BlendFuncSeparate(unsigned sRGB, unsigned dRGB, unsigned sA, unsigned dA):
     GL_BlendFuncSeparate(sRGB, dRGB, sA, dA)
 
 def BufferData(unsigned int target, ptrdiff_t size, size_t data, unsigned int usage):
-    GL_BufferData(target, size, <const void*>data, usage)
+    GL_BufferData(target, size, <const void *>data, usage)
+
+def BufferSubData(unsigned int target, ptrdiff_t offset, ptrdiff_t size, size_t data):
+    GL_BufferSubData(target, offset, size, <const void *>data)
 
 def CallList(unsigned int list_id):
     GL_CallList(list_id)
@@ -3534,6 +3714,16 @@ def GetTexGenfv(unsigned int coord, unsigned int pname, size_t params):
 def GetTexGeniv(unsigned int coord, unsigned int pname, size_t params):
     GL_GetTexGeniv(coord, pname, <int*>params)
 
+def GetTexImage(unsigned int target, int level, unsigned int format,
+                                unsigned int type, size_t pixels):
+    GL_GetTexImage(target, level, format, type, < void *> pixels)
+
+def GetTexLevelParameterfv(unsigned int target, int level, unsigned int pname, size_t params):
+    GL_GetTexLevelParameterfv(target, level, pname, <float*>params)
+
+def GetTexLevelParameteriv(unsigned int target, int level, unsigned int pname, size_t params):
+    GL_GetTexLevelParameteriv(target, level, pname, <int*>params)
+
 def GetTexParameterfv(unsigned int target, unsigned int pname, size_t params):
     GL_GetTexParameterfv(target, pname, <float*>params)
 
@@ -3543,8 +3733,47 @@ def GetTexParameteriv(unsigned int target, unsigned int pname, size_t params):
 def Hint(unsigned int target, unsigned int mode):
     GL_Hint(target, mode)
 
+def IndexMask(unsigned int mask):
+    GL_IndexMask(mask)
+
+def IndexPointer(unsigned int type, int stride, size_t ptr):
+    GL_IndexPointer(type, stride, <const void *>ptr)
+
+def Indexd(double c):
+    GL_Indexd(c)
+
+def Indexdv(size_t c):
+    GL_Indexdv(<const double*>c)
+
+def Indexf(float c):
+    GL_Indexf(c)
+
+def Indexfv(size_t c):
+    GL_Indexfv(<const float*>c)
+
+def Indexi(int c):
+    GL_Indexi(c)
+
+def Indexiv(size_t c):
+    GL_Indexiv(<const int*>c)
+
+def Indexs(short c):
+    GL_Indexs(c)
+
+def Indexsv(size_t c):
+    GL_Indexsv(<const short*>c)
+
+def Indexub(unsigned char c):
+    GL_Indexub(c)
+
+def Indexubv(size_t c):
+    GL_Indexubv(<const unsigned char*>c)
+
+def InitNames():
+    GL_InitNames()
+
 def InterleavedArrays(unsigned int format, int stride, size_t data):
-    GL_InterleavedArrays(format, stride, <const void*>data)
+    GL_InterleavedArrays(format, stride, <const void *>data)
 
 def IsBuffer(unsigned int buffer_id):
     return GL_IsBuffer(buffer_id)
@@ -3567,11 +3796,32 @@ def IsTexture(unsigned int texture_id):
 def IsVertexArray(unsigned int array_id):
     return GL_IsVertexArray(array_id)
 
-def Lightfv(unsigned int light, unsigned int pname, size_t params):
-    GL_Lightfv(light, pname, <const float*>params)
+def LightModelf(unsigned int pname, float param):
+    GL_LightModelf(pname, param)
+
+def LightModelfv(unsigned int pname, size_t params):
+    GL_LightModelfv(pname, <const float*>params)
+
+def LightModeli(unsigned int pname, int param):
+    GL_LightModeli(pname, param)
+
+def LightModeliv(unsigned int pname, size_t params):
+    GL_LightModeliv(pname, <const int*>params)
 
 def Lightf(unsigned int light, unsigned int pname, float param):
     GL_Lightf(light, pname, param)
+
+def Lightfv(unsigned int light, unsigned int pname, size_t params):
+    GL_Lightfv(light, pname, <const float*>params)
+
+def Lighti(unsigned int light, unsigned int pname, int param):
+    GL_Lighti(light, pname, param)
+
+def Lightiv(unsigned int light, unsigned int pname, size_t params):
+    GL_Lightiv(light, pname, <const int*>params)
+
+def LineStipple(int factor, unsigned short pattern):
+    GL_LineStipple(factor, pattern)
 
 def LineWidth(float width):
     GL_LineWidth(width)
@@ -3579,23 +3829,91 @@ def LineWidth(float width):
 def LinkProgram(unsigned int program):
     GL_LinkProgram(program)
 
+def ListBase(unsigned int base):
+    GL_ListBase(base)
+
 def LoadIdentity():
     GL_LoadIdentity()
+
+def LoadMatrixd(size_t m):
+    GL_LoadMatrixd(<const double*>m)
+
+def LoadMatrixf(Mat4x4 m):
+    GL_LoadMatrixf(m.m)
+
+def LoadName(unsigned int name):
+    GL_LoadName(name)
 
 def LogicOp(unsigned int opcode):
     GL_LogicOp(opcode)
 
-def Materialfv(unsigned int face, unsigned int pname, size_t params):
-    GL_Materialfv(face, pname, <const float*>params)
+def Map1d(unsigned int target, double u1, double u2, int stride, int order, size_t points):
+    GL_Map1d(target, u1, u2, stride, order, <const double*>points)
+
+def Map1f(unsigned int target, float u1, float u2, int stride, int order, size_t points):
+    GL_Map1f(target, u1, u2, stride, order, <const float*>points)
+
+def Map2d(unsigned int target, double u1, double u2, int ustride, int uorder,
+                double v1, double v2, int vstride, int vorder, size_t points):
+    GL_Map2d(target, u1, u2, ustride, uorder, v1, v2, vstride, vorder, <const double*>points)
+
+def Map2f(unsigned int target, float u1, float u2, int ustride, int uorder,
+                float v1, float v2, int vstride, int vorder, size_t points):
+    GL_Map2f(target, u1, u2, ustride, uorder, v1, v2, vstride, vorder, <const float*>points)
+
+def MapBuffer(unsigned int target, unsigned int access):
+    return <size_t>GL_MapBuffer(target, access)
+
+def MapBufferRange(unsigned int target, ptrdiff_t offset, ptrdiff_t length, unsigned int access):
+    return <size_t>GL_MapBufferRange(target, offset, length, access)
+
+def MapGrid1d(int un, double u1, double u2):
+    GL_MapGrid1d(un, u1, u2)
+
+def MapGrid1f(int un, float u1, float u2):
+    GL_MapGrid1f(un, u1, u2)
+
+def MapGrid2d(int un, double u1, double u2, int vn, double v1, double v2):
+    GL_MapGrid2d(un, u1, u2, vn, v1, v2)
+
+def MapGrid2f(int un, float u1, float u2, int vn, float v1, float v2):
+    GL_MapGrid2f(un, u1, u2, vn, v1, v2)
 
 def Materialf(unsigned int face, unsigned int pname, float param):
     GL_Materialf(face, pname, param)
 
+def Materialfv(unsigned int face, unsigned int pname, size_t params):
+    GL_Materialfv(face, pname, <const float*>params)
+
+def Materiali(unsigned int face, unsigned int pname, int param):
+    GL_Materiali(face, pname, param)
+
+def Materialiv(unsigned int face, unsigned int pname, size_t params):
+    GL_Materialiv(face, pname, <const int*>params)
+
 def MatrixMode(unsigned int mode):
     GL_MatrixMode(mode)
 
-def MultMatrixf(Mat4x4 matrix):
-    GL_MultMatrixf(matrix.m)
+def MultMatrixd(size_t m):
+    GL_MultMatrixd(<const double*>m)
+
+def MultMatrixf(Mat4x4 m):
+    GL_MultMatrixf(m.m)
+
+def NewList(unsigned int list, unsigned int mode):
+    GL_NewList(list, mode)
+
+def Normal3b(char nx, char ny, char nz):
+    GL_Normal3b(nx, ny, nz)
+
+def Normal3bv(size_t v):
+    GL_Normal3bv(<const char*>v)
+
+def Normal3d(double nx, double ny, double nz):
+    GL_Normal3d(nx, ny, nz)
+
+def Normal3dv(size_t v):
+    GL_Normal3dv(<const double*>v)
 
 def Normal3f(float x, float y, float z):
     GL_Normal3f(x, y, z)
@@ -3603,11 +3921,50 @@ def Normal3f(float x, float y, float z):
 def Normal3fv(Vec3 normal):
     GL_Normal3fv(normal.v)
 
+def Normal3i(int nx, int ny, int nz):
+    GL_Normal3i(nx, ny, nz)
+
+def Normal3iv(size_t v):
+    GL_Normal3iv(<const int*>v)
+
+def Normal3s(short nx, short ny, short nz):
+    GL_Normal3s(nx, ny, nz)
+
+def Normal3sv(size_t v):
+    GL_Normal3sv(<const short*>v)
+
 def NormalPointer(unsigned int type, int stride, size_t data):
     GL_NormalPointer(type, stride, <const void*>data)
 
 def Ortho(double lf, double rt, double btm, double top, double near, double far):
     GL_Ortho(lf, rt, btm, top, near, far)
+
+def PassThrough(float token):
+    GL_PassThrough(token)
+
+def PixelMapfv(unsigned int map, int mapsize, size_t values):
+    GL_PixelMapfv(map, mapsize, <const float*>values)
+
+def PixelMapuiv(unsigned int map, int mapsize, size_t values):
+    GL_PixelMapuiv(map, mapsize, <const unsigned int*>values)
+
+def PixelMapusv(unsigned int map, int mapsize, size_t values):
+    GL_PixelMapusv(map, mapsize, <const unsigned short*>values)
+
+def PixelStoref(unsigned int pname, float param):
+    GL_PixelStoref(pname, param)
+
+def PixelStorei(unsigned int pname, int param):
+    GL_PixelStorei(pname, param)
+
+def PixelTransferf(unsigned int pname, float param):
+    GL_PixelTransferf(pname, param)
+
+def PixelTransferi(unsigned int pname, int param):
+    GL_PixelTransferi(pname, param)
+
+def PixelZoom(float xfactor, float yfactor):
+    GL_PixelZoom(xfactor, yfactor)
 
 def PointParameterfv(unsigned int pname, size_t data):
     GL_PointParameterfv(pname, <const float*>data)
@@ -3623,6 +3980,9 @@ def PolygonMode(unsigned int face, unsigned int mode):
 
 def PolygonOffset(float factor, float units):
     GL_PolygonOffset(factor, units)
+
+def PolygonStipple(size_t mask):
+    GL_PolygonStipple(<const unsigned char*>mask)
 
 def PopAttrib():
     GL_PopAttrib()
@@ -3642,6 +4002,12 @@ def PopMatrix():
 def PushMatrix():
     GL_PushMatrix()
 
+def PopName():
+    GL_PopName()
+
+def PushName(unsigned int name):
+    GL_PushName(name)
+
 def PrioritizeTextures(int n, size_t textures, size_t priorities):
     # TODO: use Array for textures and priorities arrays? GL_PrioritizeTexture wrapper?
     GL_PrioritizeTextures(n, <const unsigned int *>textures, <const float *>priorities)
@@ -3649,11 +4015,120 @@ def PrioritizeTextures(int n, size_t textures, size_t priorities):
 def ProvokingVertex(unsigned int mode):
     GL_ProvokingVertex(mode)
 
+def RasterPos2d(double x, double y):
+    GL_RasterPos2d(x, y)
+
+def RasterPos2dv(size_t v):
+    GL_RasterPos2dv(<const double*>v)
+
+def RasterPos2f(float x, float y):
+    GL_RasterPos2f(x, y)
+
+def RasterPos2fv(Vec2 v):
+    GL_RasterPos2fv(v.v)
+
+def RasterPos2i(int x, int y):
+    GL_RasterPos2i(x, y)
+
+def RasterPos2iv(size_t v):
+    GL_RasterPos2iv(<const int*>v)
+
+def RasterPos2s(short x, short y):
+    GL_RasterPos2s(x, y)
+
+def RasterPos2sv(size_t v):
+    GL_RasterPos2sv(<const short*>v)
+
+def RasterPos3d(double x, double y, double z):
+    GL_RasterPos3d(x, y, z)
+
+def RasterPos3dv(size_t v):
+    GL_RasterPos3dv(<const double*>v)
+
+def RasterPos3f(float x, float y, float z):
+    GL_RasterPos3f(x, y, z)
+
+def RasterPos3fv(Vec3 v):
+    GL_RasterPos3fv(v.v)
+
+def RasterPos3i(int x, int y, int z):
+    GL_RasterPos3i(x, y, z)
+
+def RasterPos3iv(size_t v):
+    GL_RasterPos3iv(<const int*>v)
+
+def RasterPos3s(short x, short y, short z):
+    GL_RasterPos3s(x, y, z)
+
+def RasterPos3sv(size_t v):
+    GL_RasterPos3sv(<const short*>v)
+
+def RasterPos4d(double x, double y, double z, double w):
+    GL_RasterPos4d(x, y, z, w)
+
+def RasterPos4dv(size_t v):
+    GL_RasterPos4dv(<const double*>v)
+
+def RasterPos4f(float x, float y, float z, float w):
+    GL_RasterPos4f(x, y, z, w)
+
+def RasterPos4fv(Vec4 v):
+    GL_RasterPos4fv(v.v)
+
+def RasterPos4i(int x, int y, int z, int w):
+    GL_RasterPos4i(x, y, z, w)
+
+def RasterPos4iv(size_t v):
+    GL_RasterPos4iv(<const int*>v)
+
+def RasterPos4s(short x, short y, short z, short w):
+    GL_RasterPos4s(x, y, z, w)
+
+def RasterPos4sv(size_t v):
+    GL_RasterPos4sv(<const short*>v)
+
+def ReadBuffer(unsigned int mode):
+    GL_ReadBuffer(mode)
+
+def ReadPixels(int x, int y, int width, int height, unsigned int format,
+                                    unsigned int type, size_t pixel_p):
+    GL_ReadPixels(x, y, width, height, format, type, < void* >pixel_p)
+
+def Rectd(double x1, double y1, double x2, double y2):
+    GL_Rectd(x1, y1, x2, y2)
+
+def Rectdv(size_t v1, size_t v2):
+    GL_Rectdv(<const double*>v1, <const double*>v2)
+
+def Rectf(float x1, float y1, float x2, float y2):
+    GL_Rectf(x1, y1, x2, y2)
+
+def Rectfv(Vec2 v1, Vec2 v2):
+    GL_Rectfv(v1.v, v2.v)
+
+def Recti(int x1, int y1, int x2, int y2):
+    GL_Recti(x1, y1, x2, y2)
+
+def Rectiv(size_t v1, size_t v2):
+    GL_Rectiv(<const int*>v1, <const int*>v2)
+
+def Rects(short x1, short y1, short x2, short y2):
+    GL_Rects(x1, y1, x2, y2)
+
+def Rectsv(size_t v1, size_t v2):
+    GL_Rectsv(<const short*>v1, <const short*>v2)
+
 def RenderMode(unsigned int mode):
     return GL_RenderMode(mode)
 
+def Rotated(double angle, double x, double y, double z):
+    GL_Rotated(angle, x, y, z)
+
 def Rotatef(float theta, float x, float y, float z):
     GL_Rotatef(theta, x, y, z)
+
+def Scaled(double x, double y, double z):
+    GL_Scaled(x, y, z)
 
 def Scalef(float x, float y, float z):
     GL_Scalef(x, y, z)
@@ -3661,10 +4136,52 @@ def Scalef(float x, float y, float z):
 def Scissor(int x, int y, int width, int height):
     GL_Scissor(x, y, width, height)
 
+def SelectBuffer(int size, size_t buffer):
+    GL_SelectBuffer(size, <unsigned int*>buffer)
+
 def ShadeModel(unsigned int mode):
     GL_ShadeModel(mode)
 
 # TODO: ShaderSource (handle source string argument and length argument)
+
+def StencilFunc(unsigned int func, int ref, unsigned int mask):
+    GL_StencilFunc(func, ref, mask)
+
+def StencilMask(unsigned int mask):
+    GL_StencilMask(mask)
+
+def StencilOp(unsigned int fail, unsigned int zfail, unsigned int zpass):
+    GL_StencilOp(fail, zfail, zpass)
+
+def TexCoord1d(double s):
+    GL_TexCoord1d(s)
+
+def TexCoord1dv(size_t v):
+    GL_TexCoord1dv(<const double*>v)
+
+def TexCoord1f(float s):
+    GL_TexCoord1f(s)
+
+def TexCoord1fv(size_t v):
+    GL_TexCoord1fv(<const float*>v)
+
+def TexCoord1i(int s):
+    GL_TexCoord1i(s)
+
+def TexCoord1iv(size_t v):
+    GL_TexCoord1iv(<const int*>v)
+
+def TexCoord1s(short s):
+    GL_TexCoord1s(s)
+
+def TexCoord1sv(size_t v):
+    GL_TexCoord1sv(<const short*>v)
+
+def TexCoord2d(double s, double t):
+    GL_TexCoord2d(s, t)
+
+def TexCoord2dv(size_t v):
+    GL_TexCoord2dv(<const double*>v)
 
 def TexCoord2f(float s, float t):
     GL_TexCoord2f(s, t)
@@ -3672,17 +4189,65 @@ def TexCoord2f(float s, float t):
 def TexCoord2fv(Vec2 st):
     GL_TexCoord2fv(st.v)
 
+def TexCoord2i(int s, int t):
+    GL_TexCoord2i(s, t)
+
+def TexCoord2iv(size_t v):
+    GL_TexCoord2iv(<const int*>v)
+
+def TexCoord2s(short s, short t):
+    GL_TexCoord2s(s, t)
+
+def TexCoord2sv(size_t v):
+    GL_TexCoord2sv(<const short*>v)
+
+def TexCoord3d(double s, double t, double r):
+    GL_TexCoord3d(s, t, r)
+
+def TexCoord3dv(size_t v):
+    GL_TexCoord3dv(<const double*>v)
+
 def TexCoord3f(float s, float t, float r):
     GL_TexCoord3f(s, t, r)
 
 def TexCoord3fv(Vec3 str):
     GL_TexCoord3fv(str.v)
 
+def TexCoord3i(int s, int t, int r):
+    GL_TexCoord3i(s, t, r)
+
+def TexCoord3iv(size_t v):
+    GL_TexCoord3iv(<const int*>v)
+
+def TexCoord3s(short s, short t, short r):
+    GL_TexCoord3s(s, t, r)
+
+def TexCoord3sv(size_t v):
+    GL_TexCoord3sv(<const short*>v)
+
+def TexCoord4d(double s, double t, double r, double q):
+    GL_TexCoord4d(s, t, r, q)
+
+def TexCoord4dv(size_t v):
+    GL_TexCoord4dv(<const double*>v)
+
 def TexCoord4f(float s, float t, float r, float q):
     GL_TexCoord4f(s, t, r, q)
 
 def TexCoord4fv(Vec4 strq):
     GL_TexCoord4fv(strq.v)
+
+def TexCoord4i(int s, int t, int r, int q):
+    GL_TexCoord4i(s, t, r, q)
+
+def TexCoord4iv(size_t v):
+    GL_TexCoord4iv(<const int*>v)
+
+def TexCoord4s(short s, short t, short r, short q):
+    GL_TexCoord4s(s, t, r, q)
+
+def TexCoord4sv(size_t v):
+    GL_TexCoord4sv(<const short*>v)
 
 def TexCoordPointer(int size, unsigned int type, int stride, size_t data):
     GL_TexCoordPointer(size, type, stride, <const void*>data)
@@ -3717,24 +4282,58 @@ def TexGenf(unsigned int coord, unsigned int pname, float param):
 def TexGend(unsigned int coord, unsigned int pname, double param):
     GL_TexGend(coord, pname, param)
 
+def TexImage1D(unsigned int target, int level, int internal_format, int w, int border,
+                                    unsigned int format, unsigned int type, size_t p):
+    # TODO: take Array arg instead?
+    GL_TexImage1D(target, level, internal_format, w, border, format, type, <const void*>p)
+
 def TexImage2D( unsigned int target, int level, int internal_format, int w, int h, int border,
                                             unsigned int fmt, unsigned int ptype, size_t pix):
     # TODO: take Image arg instead?
     GL_TexImage2D(target, level, internal_format, w, h, border, fmt, ptype, <const void*>pix)
 
+def TexParameterf(unsigned int target, unsigned int pname, float param):
+    GL_TexParameterf(target, pname, param)
+
+def TexParameterfv(unsigned int target, unsigned int pname, size_t params):
+    GL_TexParameterfv(target, pname, <const float*>params)
+
 def TexParameteri(unsigned int target, unsigned int pname, int param):
     GL_TexParameteri(target, pname, param)
+
+def TexParameteriv(unsigned int target, unsigned int pname, size_t params):
+    GL_TexParameteriv(target, pname, <const int*>params)
+
+def TexSubImage1D(unsigned int target, int level, int xoffset, int w, unsigned int format,
+                                                        unsigned int type, size_t pixels):
+    # TODO: take Array arg instead?
+    GL_TexSubImage1D(target, level, xoffset, w, format, type, <const void*>pixels)
 
 def TexSubImage2D( unsigned int target, int level, int xoffset, int yoffset, int w, int h,
                                         unsigned int fmt, unsigned int ptype, size_t pix):
     # TODO: take Image arg instead?
     GL_TexSubImage2D(target, level, xoffset, yoffset, w, h, fmt, ptype, <const void*>pix)
 
+def Translated(double x, double y, double z):
+    GL_Translated(x, y, z)
+
 def Translatef(float x, float y, float z):
     GL_Translatef(x, y, z)
 
+def UnmapBuffer(unsigned int target):
+    return GL_UnmapBuffer(target)
+
 def UseProgram(unsigned int program):
     GL_UseProgram(program)
+
+def ValidateProgram(unsigned int program):
+    GL_ValidateProgram(program)
+
+def Vertex2d(double x, double y):
+    GL_Vertex2d(x, y)
+
+def Vertex2dv(size_t v):
+    GL_Vertex2dv(<const double*>v)
 
 def Vertex2f(float x, float y):
     GL_Vertex2f(x, y)
@@ -3742,17 +4341,65 @@ def Vertex2f(float x, float y):
 def Vertex2fv(Vec2 xy):
     GL_Vertex2fv(xy.v)
 
+def Vertex2i(int x, int y):
+    GL_Vertex2i(x, y)
+
+def Vertex2iv(size_t v):
+    GL_Vertex2iv(<const int*>v)
+
+def Vertex2s(short x, short y):
+    GL_Vertex2s(x, y)
+
+def Vertex2sv(size_t v):
+    GL_Vertex2sv(<const short*>v)
+
+def Vertex3d(double x, double y, double z):
+    GL_Vertex3d(x, y, z)
+
+def Vertex3dv(size_t v):
+    GL_Vertex3dv(<const double*>v)
+
 def Vertex3f(float x, float y, float z):
     GL_Vertex3f(x, y, z)
 
 def Vertex3fv(Vec3 xyz):
     GL_Vertex3fv(xyz.v)
 
+def Vertex3i(int x, int y, int z):
+    GL_Vertex3i(x, y, z)
+
+def Vertex3iv(size_t v):
+    GL_Vertex3iv(<const int*>v)
+
+def Vertex3s(short x, short y, short z):
+    GL_Vertex3s(x, y, z)
+
+def Vertex3sv(size_t v):
+    GL_Vertex3sv(<const short*>v)
+
+def Vertex4d(double x, double y, double z, double w):
+    GL_Vertex4d(x, y, z, w)
+
+def Vertex4dv(size_t v):
+    GL_Vertex4dv(<const double*>v)
+
 def Vertex4f(float x, float y, float z, float w):
     GL_Vertex4f(x, y, z, w)
 
 def Vertex4fv(Vec4 xyzw):
     GL_Vertex4fv(xyzw.v)
+
+def Vertex4i(int x, int y, int z, int w):
+    GL_Vertex4i(x, y, z, w)
+
+def Vertex4iv(size_t v):
+    GL_Vertex4iv(<const int*>v)
+
+def Vertex4s(short x, short y, short z, short w):
+    GL_Vertex4s(x, y, z, w)
+
+def Vertex4sv(size_t v):
+    GL_Vertex4sv(<const short*>v)
 
 def VertexAttribPointer(unsigned int index, int size, unsigned int type,
                     unsigned char normalized, int stride, size_t d_ptr):

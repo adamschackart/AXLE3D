@@ -130,6 +130,28 @@ AE_STATIC_ASSERT(ae_integer64_t, sizeof(ae_integer64_t) == sizeof(u64));
 
 /*
 ================================================================================
+ * ~~ [ broadcasting ] ~~ *
+--------------------------------------------------------------------------------
+*/
+
+#define ae_repeat_byte_into_halfword ae_repeat_u8_into_u16
+#define ae_repeat_byte_into_word ae_repeat_u8_into_u32
+#define ae_repeat_halfword_into_word ae_repeat_u16_into_u32
+
+static c_inline u16 // mirror byte into halfword: 0x12 -> 0x1212
+ae_repeat_u8_into_u16(const u8 x) { return x | (x << 8); }
+
+static c_inline u32 // mirror byte into word: 0x12 -> 0x12121212
+ae_repeat_u8_into_u32(const u8 x) { return x * 0x01010101; }
+
+static c_inline u32 // mirror halfword into word: 0xCAFE -> 0xCAFECAFE
+ae_repeat_u16_into_u32(const u16 x) { return x | (x << 16); }
+
+static c_inline u32 // mirror nibble into word: 0x1 -> 0x11111111
+ae_repeat_nibble_into_word(const u32 x) { return x * 0x11111111; }
+
+/*
+================================================================================
  * ~~ [ misc. utilities ] ~~ *
 --------------------------------------------------------------------------------
 */
@@ -174,6 +196,27 @@ ptr_in_array(const void* const ptr, const void* const array, const size_t size)
 
 /* round up to the nearest multiple of align (which must be a power of 2!) */
 #define num_pow2_align(num, align) (((num) + ((align) - 1)) & ~((align) - 1))
+
+/* ===== [ memset ] ========================================================= */
+
+/* Wide/strided memsets. Use vtx_flt_copy(_ex) for floating-point broadcasting.
+ */
+AE_DECL u8 * AE_CALL
+memset8_ex (u8 * dst, u8  value, size_t count, size_t offset, size_t stride);
+
+AE_DECL u16* AE_CALL
+memset16_ex(u16* dst, u16 value, size_t count, size_t offset, size_t stride);
+
+AE_DECL u32* AE_CALL
+memset32_ex(u32* dst, u32 value, size_t count, size_t offset, size_t stride);
+
+AE_DECL u64* AE_CALL
+memset64_ex(u64* dst, u64 value, size_t count, size_t offset, size_t stride);
+
+AE_DECL u8 * AE_CALL memset8 (u8 * dst, u8  value, size_t count);
+AE_DECL u16* AE_CALL memset16(u16* dst, u16 value, size_t count);
+AE_DECL u32* AE_CALL memset32(u32* dst, u32 value, size_t count);
+AE_DECL u64* AE_CALL memset64(u64* dst, u64 value, size_t count);
 
 /*
 ================================================================================
@@ -414,7 +457,11 @@ AE_DECL void* AE_CALL ae_heap_realloc_ex(ae_memory_heap_t* heap, void* ptr, size
 #define _ae_clear(p, type) memset((p), 0, sizeof(type))
 #define _ae_noclear(p, type) (p)
 
+// allocate a structure, and depending on mode, clear all structure bytes to zero.
 #define ae_create(type, mode) ((type*)_ae_ ## mode(ae_malloc(sizeof(type)), type))
+
+// free a block of memory and reset to zero.
+#define ae_destroy(p) ae_free(p); (p) = NULL
 
 #define ae_malloc(s) ae_malloc_ex((s), __FILE__, __FUNCTION__, __LINE__)
 #define ae_free(p) ae_free_ex((p), __FILE__, __FUNCTION__, __LINE__)

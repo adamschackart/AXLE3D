@@ -1962,6 +1962,48 @@ void ae_image_unary_clut(ae_image_t* image, int* rect, u8* r, u8* g, u8* b, u8* 
 
 /* ===== [ filters ] ======================================================== */
 
+#define AE_IMAGE_DEFINE_UNARY_OP(NAME, OP)                                      \
+                                                                                \
+    static void                                                                 \
+    ae_image_unary_ ## NAME ## _u8(u8* pix, u8* end, size_t comp, void* data)   \
+    {                                                                           \
+        int r = ((int*)data)[0];                                                \
+        int g = ((int*)data)[1];                                                \
+        int b = ((int*)data)[2];                                                \
+                                                                                \
+        for (; pix < end; pix += comp)                                          \
+        {                                                                       \
+            const u8 clr = (pix[0] OP                                           \
+                            pix[1] OP                                           \
+                            pix[2]);                                            \
+                                                                                \
+            if (r) pix[0] = clr;                                                \
+            if (g) pix[1] = clr;                                                \
+            if (b) pix[2] = clr;                                                \
+        }                                                                       \
+    }                                                                           \
+                                                                                \
+    void                                                                        \
+    ae_image_unary_ ## NAME (ae_image_t* image, int* rect, int r, int g, int b) \
+    {                                                                           \
+        AE_PROFILE_ENTER();                                                     \
+                                                                                \
+        ae_image_unary_op_t op = AE_ZERO_STRUCT;                                \
+        int rgb[3] = { r, g, b };                                               \
+                                                                                \
+        op.u8_func[3] = op.u8_func[4] = ae_image_unary_ ## NAME ## _u8;         \
+        op.name = "unary_" #NAME;                                               \
+                                                                                \
+        ae_image_unary_op(image, rect, &op, rgb);                               \
+        AE_PROFILE_LEAVE();                                                     \
+    }                                                                           \
+
+AE_IMAGE_DEFINE_UNARY_OP(and, &);
+AE_IMAGE_DEFINE_UNARY_OP(xor, ^);
+AE_IMAGE_DEFINE_UNARY_OP( or, |);
+AE_IMAGE_DEFINE_UNARY_OP(add, +);
+AE_IMAGE_DEFINE_UNARY_OP(mul, *);
+
 void ae_image_negative(ae_image_t* image, int* rect, int r, int g, int b)
 {
     AE_PROFILE_ENTER();
@@ -2338,6 +2380,59 @@ void ae_image_isolate_channel(ae_image_t* image, int* rect, int channel, int r, 
     ae_assert(channel >= 0 && channel <= 2, "%i", channel);
     ae_image_unary_op(image, rect, &op, rgb);
 
+    AE_PROFILE_LEAVE();
+}
+
+static void ae_image_randomize_u8(u8* pix, u8* end, size_t comp, void* data)
+{
+    const int r = ((int*)data)[0];
+    const int g = ((int*)data)[1];
+    const int b = ((int*)data)[2];
+    const int a = ((int*)data)[3];
+
+    ae_integer32_t i; // fill with random vals
+
+    for (; pix < end; pix += comp)
+    {
+        i.u_value = ae_random_u32();
+
+        if (r && comp > 0) pix[0] = i.as_u8[0];
+        if (g && comp > 1) pix[1] = i.as_u8[1];
+        if (b && comp > 2) pix[2] = i.as_u8[2];
+        if (a && comp > 3) pix[3] = i.as_u8[3];
+    }
+}
+
+static void ae_image_randomize_flt(float* pix, float* end, size_t comp, void* data)
+{
+    const int r = ((int*)data)[0];
+    const int g = ((int*)data)[1];
+    const int b = ((int*)data)[2];
+    const int a = ((int*)data)[3];
+
+    for (; pix < end; pix += comp)
+    {
+        if (r && comp > 0) pix[0] = ae_random_flt();
+        if (g && comp > 1) pix[1] = ae_random_flt();
+        if (b && comp > 2) pix[2] = ae_random_flt();
+        if (a && comp > 3) pix[3] = ae_random_flt();
+    }
+}
+
+void ae_image_randomize(ae_image_t* image, int* rect, int r, int g, int b, int a)
+{
+    AE_PROFILE_ENTER();
+
+    int rgba[4] = { r, g, b, a };
+    ae_image_unary_op_t op;
+
+    memset(&op, 0, sizeof(ae_image_unary_op_t));
+    op.name = "randomize";
+
+    op.flt_func[1] = op.flt_func[2] = op.flt_func[3] = op.flt_func[4] = ae_image_randomize_flt;
+    op.u8_func [1] = op.u8_func [2] = op.u8_func [3] = op.u8_func [4] = ae_image_randomize_u8;
+
+    ae_image_unary_op(image, rect, &op, rgba);
     AE_PROFILE_LEAVE();
 }
 
@@ -3080,6 +3175,7 @@ void ae_image_lerp(ae_image_t* dst, const ae_image_t* const src, const int x,
  * ~~ [ blitting ] ~~ *
 --------------------------------------------------------------------------------
 TODO: tiled rendering across x and y axes, rotated blitting, subpixel precision
+TODO: add `const` to all color params to allow easier use of ae_color constants
 --------------------------------------------------------------------------------
 */
 

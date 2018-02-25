@@ -32,6 +32,46 @@ size_t memfilter(void* dst, const void* const src, size_t count, size_t size,
     AE_STUB(); return 0;
 }
 
+u8* memset8_ex(u8* dst, u8 value, size_t count, size_t offset, size_t stride)
+{
+    AE_STUB(); return dst;
+}
+
+u16* memset16_ex(u16* dst, u16 value, size_t count, size_t offset, size_t stride)
+{
+    AE_STUB(); return dst;
+}
+
+u32* memset32_ex(u32* dst, u32 value, size_t count, size_t offset, size_t stride)
+{
+    AE_STUB(); return dst;
+}
+
+u64* memset64_ex(u64* dst, u64 value, size_t count, size_t offset, size_t stride)
+{
+    AE_STUB(); return dst;
+}
+
+u8* memset8(u8* dst, u8 value, size_t count)
+{
+    AE_STUB(); return dst;
+}
+
+u16* memset16(u16* dst, u16 value, size_t count)
+{
+    AE_STUB(); return dst;
+}
+
+u32* memset32(u32* dst, u32 value, size_t count)
+{
+    AE_STUB(); return dst;
+}
+
+u64* memset64(u64* dst, u64 value, size_t count)
+{
+    AE_STUB(); return dst;
+}
+
 int ae_vsnprintf(char* buf, size_t size, const char* fmt, va_list args)
 {
     AE_STUB(); return -1;

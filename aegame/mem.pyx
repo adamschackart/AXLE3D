@@ -74,6 +74,18 @@ cdef extern from "ae_memory.h":
         double as_dbl[1]
         double f_value
 
+    # ===== [ broadcasting ] ===================================================
+
+    # these are aliases
+    u16 ae_repeat_byte_into_halfword(const u8  x)
+    u32 ae_repeat_byte_into_word    (const u8  x)
+    u32 ae_repeat_halfword_into_word(const u16 x)
+
+    u16 ae_repeat_u8_into_u16       (const u8  x)
+    u32 ae_repeat_u8_into_u32       (const u8  x)
+    u32 ae_repeat_u16_into_u32      (const u16 x)
+    u32 ae_repeat_nibble_into_word  (const u32 x)
+
     # ===== [ misc. utilities ] ================================================
 
     char** ae_argv(int* argc)
@@ -93,6 +105,18 @@ cdef extern from "ae_memory.h":
 
     enum: AE_HEAP_ALIGNMENT # round up to multiple of align
     size_t num_pow2_align(size_t number, size_t alignment)
+
+    # ===== [ memset ] =========================================================
+
+    u8 * memset8_ex (u8 * dst, u8  val, size_t num, size_t offset, size_t stride)
+    u16* memset16_ex(u16* dst, u16 val, size_t num, size_t offset, size_t stride)
+    u32* memset32_ex(u32* dst, u32 val, size_t num, size_t offset, size_t stride)
+    u64* memset64_ex(u64* dst, u64 val, size_t num, size_t offset, size_t stride)
+
+    u8 * memset8 (u8 * dst, u8  val, size_t num)
+    u16* memset16(u16* dst, u16 val, size_t num)
+    u32* memset32(u32* dst, u32 val, size_t num)
+    u64* memset64(u64* dst, u64 val, size_t num)
 
     # ===== [ string formatting ] ==============================================
 
@@ -491,6 +515,26 @@ cdef class Array:
                 "{} {}".format(self, elem_size)
 
         memreverse(self.array.data, self.array.size // elem_size, elem_size)
+        return self
+
+    def memset8(self, u8  value, size_t offset=0, size_t stride=1):
+        memset8_ex(< u8* >self.array.data, value, self.array.size \
+                                    // sizeof(u8), offset, stride)
+        return self
+
+    def memset16(self, u16 value, size_t offset=0, size_t stride=1):
+        memset16_ex(<u16 *>self.array.data, value, self.array.size \
+                                    // sizeof(u16), offset, stride)
+        return self
+
+    def memset32(self, u32 value, size_t offset=0, size_t stride=1):
+        memset32_ex(<u32 *>self.array.data, value, self.array.size \
+                                    // sizeof(u32), offset, stride)
+        return self
+
+    def memset64(self, u64 value, size_t offset=0, size_t stride=1):
+        memset64_ex(<u64 *>self.array.data, value, self.array.size \
+                                    // sizeof(u64), offset, stride)
         return self
 
     def append(self, size_t ptr, size_t size):

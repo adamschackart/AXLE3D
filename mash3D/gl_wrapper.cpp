@@ -525,7 +525,7 @@ void GL_BlendFuncSeparate(unsigned int srcRGB, unsigned int dstRGB,
 void GL_BufferData(unsigned int target, ptrdiff_t size,
                 const void * data, unsigned int usage)
 {
-    /* TODO: let this be ret to NULL on gl_quit */
+    /* TODO: let this be set to NULL on gl_quit */
     static PFNGLBUFFERDATAPROC exBufferData = NULL;
 
     X(); if (exBufferData)
@@ -550,7 +550,31 @@ void GL_BufferData(unsigned int target, ptrdiff_t size,
 
 // TODO: GL_BufferStorage
 
-// TODO: GL_BufferSubData
+void GL_BufferSubData(unsigned int target, ptrdiff_t offset,
+                        ptrdiff_t size, const void * data)
+{
+    // TODO: let this pointer be reset to NULL on gl_quit
+    static PFNGLBUFFERSUBDATAPROC exBufferSubData = NULL;
+
+    X(); if (exBufferSubData)
+    {
+        exBufferSubData(target, offset, size, data);
+    }
+    else
+    {
+        exBufferSubData = (PFNGLBUFFERSUBDATAPROC)
+                        gl_func("glBufferSubData");
+
+        if (exBufferSubData)
+        {
+            exBufferSubData(target, offset, size, data);
+        }
+        else
+        {
+            AE_WARN("glBufferSubData not found");
+        }
+    }
+}
 
 void GL_CallList(unsigned int list)
 {
@@ -658,7 +682,7 @@ void GL_Color3i(int red, int green, int blue)
     X(); glColor3i(red, green, blue);
 }
 
-void GL_Color3iv(const int *v)
+void GL_Color3iv(const int* v)
 {
     X(); glColor3iv(v);
 }
@@ -668,7 +692,7 @@ void GL_Color3s(short red, short green, short blue)
     X(); glColor3s(red, green, blue);
 }
 
-void GL_Color3sv(const short *v)
+void GL_Color3sv(const short* v)
 {
     X(); glColor3sv(v);
 }
@@ -678,7 +702,7 @@ void GL_Color3ub(unsigned char red, unsigned char green, unsigned char blue)
     X(); glColor3ub(red, green, blue);
 }
 
-void GL_Color3ubv(const unsigned char *v)
+void GL_Color3ubv(const unsigned char* v)
 {
     X(); glColor3ubv(v);
 }
@@ -688,7 +712,7 @@ void GL_Color3ui(unsigned int red, unsigned int green, unsigned int blue)
     X(); glColor3ui(red, green, blue);
 }
 
-void GL_Color3uiv(const unsigned int *v)
+void GL_Color3uiv(const unsigned int* v)
 {
     X(); glColor3uiv(v);
 }
@@ -698,7 +722,7 @@ void GL_Color3us(unsigned short red, unsigned short green, unsigned short blue)
     X(); glColor3us(red, green, blue);
 }
 
-void GL_Color3usv(const unsigned short *v)
+void GL_Color3usv(const unsigned short* v)
 {
     X(); glColor3usv(v);
 }
@@ -708,7 +732,7 @@ void GL_Color4b(char red, char green, char blue, char alpha)
     X(); glColor4b(red, green, blue, alpha);
 }
 
-void GL_Color4bv(const char *v)
+void GL_Color4bv(const char* v)
 {
     X(); glColor4bv((const GLbyte*)v);
 }
@@ -718,7 +742,7 @@ void GL_Color4d(double red, double green, double blue, double alpha)
     X(); glColor4d(red, green, blue, alpha);
 }
 
-void GL_Color4dv(const double *v)
+void GL_Color4dv(const double* v)
 {
     X(); glColor4dv(v);
 }
@@ -738,7 +762,7 @@ void GL_Color4i(int red, int green, int blue, int alpha)
     X(); glColor4i(red, green, blue, alpha);
 }
 
-void GL_Color4iv(const int *v)
+void GL_Color4iv(const int* v)
 {
     X(); glColor4iv(v);
 }
@@ -748,7 +772,7 @@ void GL_Color4s(short red, short green, short blue, short alpha)
     X(); glColor4s(red, green, blue, alpha);
 }
 
-void GL_Color4sv(const short *v)
+void GL_Color4sv(const short* v)
 {
     X(); glColor4sv(v);
 }
@@ -758,7 +782,7 @@ void GL_Color4ub(unsigned char red, unsigned char green, unsigned char blue, uns
     X(); glColor4ub(red, green, blue, alpha);
 }
 
-void GL_Color4ubv(const unsigned char *v)
+void GL_Color4ubv(const unsigned char* v)
 {
     X(); glColor4ubv(v);
 }
@@ -768,7 +792,7 @@ void GL_Color4ui(unsigned int red, unsigned int green, unsigned int blue, unsign
     X(); glColor4ui(red, green, blue, alpha);
 }
 
-void GL_Color4uiv(const unsigned int *v)
+void GL_Color4uiv(const unsigned int* v)
 {
     X(); glColor4uiv(v);
 }
@@ -778,7 +802,7 @@ void GL_Color4us(unsigned short red, unsigned short green, unsigned short blue, 
     X(); glColor4us(red, green, blue, alpha);
 }
 
-void GL_Color4usv(const unsigned short *v)
+void GL_Color4usv(const unsigned short* v)
 {
     X(); glColor4usv(v);
 }
@@ -1053,7 +1077,7 @@ void GL_DeleteTextures(int n, const unsigned int* textures)
 
 // TODO: GL_DeleteTransformFeedbacks
 
-void GL_DeleteVertexArrays(int n, const unsigned int *arrays)
+void GL_DeleteVertexArrays(int n, const unsigned int* arrays)
 {
     /* TODO: allow this function to be reset to NULL on gl_quit */
     static PFNGLDELETEVERTEXARRAYSPROC exDeleteVertexArrays = NULL;
@@ -1178,7 +1202,7 @@ void GL_DrawElements(unsigned int mode, int n, unsigned int type, const void* in
 // TODO: GL_DrawElementsInstancedBaseVertexBaseInstance
 
 void GL_DrawPixels(int width, int height, unsigned int format,
-                        unsigned int type, const void *pixels)
+                        unsigned int type, const void* pixels)
 {
     X(); glDrawPixels(width, height, format, type, pixels);
 }
@@ -1200,12 +1224,12 @@ void GL_EdgeFlag(unsigned char flag)
     X(); glEdgeFlag(flag);
 }
 
-void GL_EdgeFlagPointer(int stride, const void *ptr)
+void GL_EdgeFlagPointer(int stride, const void* ptr)
 {
     X(); glEdgeFlagPointer(stride, ptr);
 }
 
-void GL_EdgeFlagv(const unsigned char *flag)
+void GL_EdgeFlagv(const unsigned char* flag)
 {
     X(); glEdgeFlagv(flag);
 }
@@ -1362,7 +1386,7 @@ void GL_EvalCoord1d(double u)
     X(); glEvalCoord1d(u);
 }
 
-void GL_EvalCoord1dv(const double *u)
+void GL_EvalCoord1dv(const double* u)
 {
     X(); glEvalCoord1dv(u);
 }
@@ -1372,7 +1396,7 @@ void GL_EvalCoord1f(float u)
     X(); glEvalCoord1f(u);
 }
 
-void GL_EvalCoord1fv(const float *u)
+void GL_EvalCoord1fv(const float* u)
 {
     X(); glEvalCoord1fv(u);
 }
@@ -1382,7 +1406,7 @@ void GL_EvalCoord2d(double u, double v)
     X(); glEvalCoord2d(u, v);
 }
 
-void GL_EvalCoord2dv(const double *u)
+void GL_EvalCoord2dv(const double* u)
 {
     X(); glEvalCoord2dv(u);
 }
@@ -1392,7 +1416,7 @@ void GL_EvalCoord2f(float u, float v)
     X(); glEvalCoord2f(u, v);
 }
 
-void GL_EvalCoord2fv(const float *u)
+void GL_EvalCoord2fv(const float* u)
 {
     X(); glEvalCoord2fv(u);
 }
@@ -1586,7 +1610,7 @@ void GL_GenVertexArrays(int n, unsigned int *arrays)
 
 // TODO: GL_GetAttachedShaders
 
-int GL_GetAttribLocation(unsigned int program, const char *name)
+int GL_GetAttribLocation(unsigned int program, const char* name)
 {
     /* TODO: allow this gl func to be reset to NULL on gl_quit */
     static PFNGLGETATTRIBLOCATIONPROC exGetAttribLocation = NULL;
@@ -1613,7 +1637,7 @@ int GL_GetAttribLocation(unsigned int program, const char *name)
     return -1;
 }
 
-void GL_GetBooleanv(unsigned int pname, unsigned char *params)
+void GL_GetBooleanv(unsigned int pname, unsigned char* params)
 {
     X(); glGetBooleanv(pname, params);
 }
@@ -1628,7 +1652,7 @@ void GL_GetBooleanv(unsigned int pname, unsigned char *params)
 
 // TODO: GL_GetBufferSubData
 
-void GL_GetClipPlane(unsigned int plane, double *equation)
+void GL_GetClipPlane(unsigned int plane, double* equation)
 {
     X(); glGetClipPlane(plane, equation);
 }
@@ -1654,7 +1678,7 @@ unsigned int GL_GetError(void)
 
 // TODO: GL_GetCompressedTexImage
 
-void GL_GetDoublev(unsigned int pname, double *params)
+void GL_GetDoublev(unsigned int pname, double* params)
 {
     X(); glGetDoublev(pname, params);
 }
@@ -1707,17 +1731,17 @@ void GL_GetLightiv(unsigned int light, unsigned int pname, int* params)
     X(); glGetLightiv(light, pname, params);
 }
 
-void GL_GetMapdv(unsigned int target, unsigned int query, double *v)
+void GL_GetMapdv(unsigned int target, unsigned int query, double* v)
 {
     X(); glGetMapdv(target, query, v);
 }
 
-void GL_GetMapfv(unsigned int target, unsigned int query, float *v)
+void GL_GetMapfv(unsigned int target, unsigned int query, float* v)
 {
     X(); glGetMapfv(target, query, v);
 }
 
-void GL_GetMapiv(unsigned int target, unsigned int query, int *v)
+void GL_GetMapiv(unsigned int target, unsigned int query, int* v)
 {
     X(); glGetMapiv(target, query, v);
 }
@@ -1744,36 +1768,36 @@ void GL_GetMaterialiv(unsigned int face, unsigned int pname, int* params)
 
 // TODO: GL_GetObjectPtrLabel
 
-void GL_GetPixelMapfv(unsigned int map, float *values)
+void GL_GetPixelMapfv(unsigned int map, float* values)
 {
     X(); glGetPixelMapfv(map, values);
 }
 
-void GL_GetPixelMapuiv(unsigned int map, unsigned int *values)
+void GL_GetPixelMapuiv(unsigned int map, unsigned int* values)
 {
     X(); glGetPixelMapuiv(map, values);
 }
 
-void GL_GetPixelMapusv(unsigned int map, unsigned short *values)
+void GL_GetPixelMapusv(unsigned int map, unsigned short* values)
 {
     X(); glGetPixelMapusv(map, values);
 }
 
 // TODO: GL_GetPixelMapxv
 
-void GL_GetPointerv(unsigned int pname, void **params)
+void GL_GetPointerv(unsigned int pname, void** params)
 {
     X(); glGetPointerv(pname, params);
 }
 
-void GL_GetPolygonStipple(unsigned char *mask)
+void GL_GetPolygonStipple(unsigned char* mask)
 {
     X(); glGetPolygonStipple(mask);
 }
 
 // TODO: GL_GetProgramBinary
 
-void GL_GetProgramiv(unsigned int program, unsigned int pname, int *params)
+void GL_GetProgramiv(unsigned int program, unsigned int pname, int* params)
 {
     /* TODO: allow this to be set to NULL on gl_quit */
     static PFNGLGETPROGRAMIVPROC exGetProgramiv = NULL;
@@ -1798,7 +1822,7 @@ void GL_GetProgramiv(unsigned int program, unsigned int pname, int *params)
     }
 }
 
-void GL_GetProgramInfoLog(unsigned int program, int buf_size, int *length, char *info_log)
+void GL_GetProgramInfoLog(unsigned int program, int buf_size, int* length, char* info_log)
 {
     /* TODO: allow this function to be reset to NULL on gl_quit */
     static PFNGLGETPROGRAMINFOLOGPROC exGetProgramInfoLog = NULL;
@@ -1865,7 +1889,7 @@ void GL_GetProgramInfoLog(unsigned int program, int buf_size, int *length, char 
 
 // TODO: GL_GetSeparableFilter
 
-void GL_GetShaderiv(unsigned int shader, unsigned int pname, int *params)
+void GL_GetShaderiv(unsigned int shader, unsigned int pname, int* params)
 {
     /* TODO: let this be reset to NULL on gl_quit */
     static PFNGLGETSHADERIVPROC exGetShaderiv = NULL;
@@ -1890,7 +1914,7 @@ void GL_GetShaderiv(unsigned int shader, unsigned int pname, int *params)
     }
 }
 
-void GL_GetShaderInfoLog(unsigned int shader, int buf_size, int *length, char *info_log)
+void GL_GetShaderInfoLog(unsigned int shader, int buf_size, int* length, char* info_log)
 {
     // TODO: allow this function to be reset to NULL on gl_quit
     static PFNGLGETSHADERINFOLOGPROC exGetShaderInfoLog = NULL;
@@ -1957,11 +1981,23 @@ void GL_GetTexGeniv(unsigned int coord, unsigned int pname, int* params)
     X(); glGetTexGeniv(coord, pname, params);
 }
 
-// TODO: GL_GetTexImage
+void GL_GetTexImage(unsigned int target, int level, unsigned int format,
+                                        unsigned int type, void* pixels)
+{
+    X(); glGetTexImage(target, level, format, type, pixels);
+}
 
-// TODO: GL_GetTexLevelParameterfv
+void GL_GetTexLevelParameterfv(unsigned int target, int level,
+                            unsigned int pname, float* params)
+{
+    X(); glGetTexLevelParameterfv(target, level, pname, params);
+}
 
-// TODO: GL_GetTexLevelParameteriv
+void GL_GetTexLevelParameteriv(unsigned int target, int level,
+                            unsigned int pname, int * params)
+{
+    X(); glGetTexLevelParameteriv(target, level, pname, params);
+}
 
 void GL_GetTexParameterfv(unsigned int target, unsigned int pname, float* params)
 {
@@ -2016,11 +2052,70 @@ void GL_Hint(unsigned int target, unsigned int mode)
 
 // TODO: GL_Histogram
 
-// TODO: GL_IndexMask
+void GL_IndexMask(unsigned int mask)
+{
+    X(); glIndexMask(mask);
+}
 
-// TODO: GL_IndexPointer
+void GL_IndexPointer(unsigned int type, int stride, const void* ptr)
+{
+    X(); glIndexPointer(type, stride, ptr);
+}
 
-// TODO: GL_InitNames
+void GL_Indexd(double c)
+{
+    X(); glIndexd(c);
+}
+
+void GL_Indexdv(const double* c)
+{
+    X(); glIndexdv(c);
+}
+
+void GL_Indexf(float c)
+{
+    X(); glIndexf(c);
+}
+
+void GL_Indexfv(const float* c)
+{
+    X(); glIndexfv(c);
+}
+
+void GL_Indexi(int c)
+{
+    X(); glIndexi(c);
+}
+
+void GL_Indexiv(const int* c)
+{
+    X(); glIndexiv(c);
+}
+
+void GL_Indexs(short c)
+{
+    X(); glIndexs(c);
+}
+
+void GL_Indexsv(const short* c)
+{
+    X(); glIndexsv(c);
+}
+
+void GL_Indexub(unsigned char c)
+{
+    X(); glIndexub(c);
+}
+
+void GL_Indexubv(const unsigned char* c)
+{
+    X(); glIndexubv(c);
+}
+
+void GL_InitNames(void)
+{
+    X(); glInitNames();
+}
 
 void GL_InterleavedArrays(unsigned int format, int stride, const void* pointer)
 {
@@ -2178,9 +2273,24 @@ unsigned char GL_IsVertexArray(unsigned int array)
     return 0;
 }
 
-void GL_Lightfv(unsigned int light, unsigned int pname, const float* params)
+void GL_LightModelf(unsigned int pname, float param)
 {
-    X(); glLightfv(light, pname, params);
+    X(); glLightModelf(pname, param);
+}
+
+void GL_LightModelfv(unsigned int pname, const float* params)
+{
+    X(); glLightModelfv(pname, params);
+}
+
+void GL_LightModeli(unsigned int pname, int param)
+{
+    X(); glLightModeli(pname, param);
+}
+
+void GL_LightModeliv(unsigned int pname, const int* params)
+{
+    X(); glLightModeliv(pname, params);
 }
 
 void GL_Lightf(unsigned int light, unsigned int pname, float param)
@@ -2188,19 +2298,25 @@ void GL_Lightf(unsigned int light, unsigned int pname, float param)
     X(); glLightf(light, pname, param);
 }
 
-// TODO: GL_Lightiv
+void GL_Lightfv(unsigned int light, unsigned int pname, const float* params)
+{
+    X(); glLightfv(light, pname, params);
+}
 
-// TODO: GL_Lighti
+void GL_Lighti(unsigned int light, unsigned int pname, int param)
+{
+    X(); glLighti(light, pname, param);
+}
 
-// TODO: GL_LightModelfv
+void GL_Lightiv(unsigned int light, unsigned int pname, const int* params)
+{
+    X(); glLightiv(light, pname, params);
+}
 
-// TODO: GL_LightModelf
-
-// TODO: GL_LightModeliv
-
-// TODO: GL_LightModeli
-
-// TODO: GL_LineStipple
+void GL_LineStipple(int factor, unsigned short pattern)
+{
+    X(); glLineStipple(factor, pattern);
+}
 
 void GL_LineWidth(float width)
 {
@@ -2232,18 +2348,30 @@ void GL_LinkProgram(unsigned int program)
     }
 }
 
-// TODO: GL_ListBase
+void GL_ListBase(unsigned int base)
+{
+    X(); glListBase(base);
+}
 
 void GL_LoadIdentity(void)
 {
     X(); glLoadIdentity();
 }
 
-// TODO: GL_LoadMatrixd
+void GL_LoadMatrixd(const double* m)
+{
+    X(); glLoadMatrixd(m);
+}
 
-// TODO: GL_LoadMatrixf
+void GL_LoadMatrixf(const float* m)
+{
+    X(); glLoadMatrixf(m);
+}
 
-// TODO: GL_LoadName
+void GL_LoadName(unsigned int name)
+{
+    X(); glLoadName(name);
+}
 
 // TODO: GL_LoadTransposeMatrixd
 
@@ -2254,13 +2382,103 @@ void GL_LogicOp(unsigned int opcode)
     X(); glLogicOp(opcode);
 }
 
-// TODO: GL_MapBuffer
-
-// TODO: GL_MapBufferRange
-
-void GL_Materialfv(unsigned int face, unsigned int pname, const float* params)
+void GL_Map1d(unsigned int target, double u1, double u2, int stride,
+                                    int order, const double* points)
 {
-    X(); glMaterialfv(face, pname, params);
+    X(); glMap1d(target, u1, u2, stride, order, points);
+}
+
+void GL_Map1f(unsigned int target, float u1, float u2, int stride,
+                                int order, const float * points)
+{
+    X(); glMap1f(target, u1, u2, stride, order, points);
+}
+
+void GL_Map2d(unsigned int target, double u1, double u2, int ustride, int uorder,
+            double v1, double v2, int vstride, int vorder, const double* points)
+{
+    X(); glMap2d(target, u1, u2, ustride, uorder, v1, v2, vstride, vorder, points);
+}
+
+void GL_Map2f(unsigned int target, float u1, float u2, int ustride, int uorder,
+            float v1, float v2, int vstride, int vorder, const float * points)
+{
+    X(); glMap2f(target, u1, u2, ustride, uorder, v1, v2, vstride, vorder, points);
+}
+
+void* GL_MapBuffer(unsigned int target, unsigned int access)
+{
+    // TODO: let this be reset to NULL on gl_quit
+    static PFNGLMAPBUFFERPROC exMapBuffer = NULL;
+
+    X(); if (exMapBuffer)
+    {
+        return exMapBuffer(target, access);
+    }
+    else
+    {
+        exMapBuffer = (PFNGLMAPBUFFERPROC)
+                    gl_func("glMapBuffer");
+
+        if (exMapBuffer)
+        {
+            return exMapBuffer(target, access);
+        }
+        else
+        {
+            AE_WARN("glMapBuffer not found");
+        }
+    }
+
+    return NULL;
+}
+
+void* GL_MapBufferRange(unsigned int target, ptrdiff_t offset,
+                        ptrdiff_t length, unsigned int access)
+{
+    /* TODO let this pointer be reset to NULL on gl_quit */
+    static PFNGLMAPBUFFERRANGEPROC exMapBufferRange = NULL;
+
+    X(); if (exMapBufferRange)
+    {
+        return exMapBufferRange(target, offset, length, access);
+    }
+    else
+    {
+        exMapBufferRange = (PFNGLMAPBUFFERRANGEPROC)
+                        gl_func("glMapBufferRange");
+
+        if (exMapBufferRange)
+        {
+            return exMapBufferRange(target, offset, length, access);
+        }
+        else
+        {
+            AE_WARN("glMapBufferRange not found");
+        }
+    }
+
+    return NULL;
+}
+
+void GL_MapGrid1d(int un, double u1, double u2)
+{
+    X(); glMapGrid1d(un, u1, u2);
+}
+
+void GL_MapGrid1f(int un, float u1, float u2)
+{
+    X(); glMapGrid1f(un, u1, u2);
+}
+
+void GL_MapGrid2d(int un, double u1, double u2, int vn, double v1, double v2)
+{
+    X(); glMapGrid2d(un, u1, u2, vn, v1, v2);
+}
+
+void GL_MapGrid2f(int un, float u1, float u2, int vn, float v1, float v2)
+{
+    X(); glMapGrid2f(un, u1, u2, vn, v1, v2);
 }
 
 void GL_Materialf(unsigned int face, unsigned int pname, float param)
@@ -2268,9 +2486,20 @@ void GL_Materialf(unsigned int face, unsigned int pname, float param)
     X(); glMaterialf(face, pname, param);
 }
 
-// TODO: GL_Materialiv
+void GL_Materialfv(unsigned int face, unsigned int pname, const float* params)
+{
+    X(); glMaterialfv(face, pname, params);
+}
 
-// TODO: GL_Materiali
+void GL_Materiali(unsigned int face, unsigned int pname, int param)
+{
+    X(); glMateriali(face, pname, param);
+}
+
+void GL_Materialiv(unsigned int face, unsigned int pname, const int* params)
+{
+    X(); glMaterialiv(face, pname, params);
+}
 
 void GL_MatrixMode(unsigned int mode)
 {
@@ -2373,7 +2602,10 @@ void GL_MatrixMode(unsigned int mode)
 
 // TODO: GL_MultiTexCoordP4uiv
 
-// TODO: GL_MultMatrixd
+void GL_MultMatrixd(const double *m)
+{
+    X(); glMultMatrixd(m);
+}
 
 void GL_MultMatrixf(const float* matrix)
 {
@@ -2384,7 +2616,30 @@ void GL_MultMatrixf(const float* matrix)
 
 // TODO: GL_MultTransposeMatrixf
 
-// TODO: GL_NewList
+void GL_NewList(unsigned int list, unsigned int mode)
+{
+    X(); glNewList(list, mode);
+}
+
+void GL_Normal3b(char nx, char ny, char nz)
+{
+    X(); glNormal3b(nx, ny, nz);
+}
+
+void GL_Normal3bv(const char *v)
+{
+    X(); glNormal3bv((const GLbyte*)v);
+}
+
+void GL_Normal3d(double nx, double ny, double nz)
+{
+    X(); glNormal3d(nx, ny, nz);
+}
+
+void GL_Normal3dv(const double *v)
+{
+    X(); glNormal3dv(v);
+}
 
 void GL_Normal3f(float x, float y, float z)
 {
@@ -2394,6 +2649,26 @@ void GL_Normal3f(float x, float y, float z)
 void GL_Normal3fv(const float* normal)
 {
     X(); glNormal3fv(normal);
+}
+
+void GL_Normal3i(int nx, int ny, int nz)
+{
+    X(); glNormal3i(nx, ny, nz);
+}
+
+void GL_Normal3iv(const int* v)
+{
+    X(); glNormal3iv(v);
+}
+
+void GL_Normal3s(short nx, short ny, short nz)
+{
+    X(); glNormal3s(nx, ny, nz);
+}
+
+void GL_Normal3sv(const short* v)
+{
+    X(); glNormal3sv(v);
 }
 
 // TODO: GL_NormalP3ui
@@ -2415,7 +2690,10 @@ void GL_Ortho(  double left, double right, double bottom,
     X(); glOrtho(left, right, bottom, top, near_v, far_v);
 }
 
-// TODO: GL_PassThrough
+void GL_PassThrough(float token)
+{
+    X(); glPassThrough(token);
+}
 
 // TODO: GL_PatchParameterfv
 
@@ -2423,25 +2701,49 @@ void GL_Ortho(  double left, double right, double bottom,
 
 // TODO: GL_PauseTransformFeedback
 
-// TODO: GL_PixelMapfv
+void GL_PixelMapfv(unsigned int map, int mapsize, const float *values)
+{
+    X(); glPixelMapfv(map, mapsize, values);
+}
 
-// TODO: GL_PixelMapuiv
+void GL_PixelMapuiv(unsigned int map, int mapsize, const unsigned int *values)
+{
+    X(); glPixelMapuiv(map, mapsize, values);
+}
 
-// TODO: GL_PixelMapusv
+void GL_PixelMapusv(unsigned int map, int mapsize, const unsigned short *values)
+{
+    X(); glPixelMapusv(map, mapsize, values);
+}
 
 // TODO: GL_PixelMapx
 
-// TODO: GL_PixelStoref
+void GL_PixelStoref(unsigned int pname, float param)
+{
+    X(); glPixelStoref(pname, param);
+}
 
-// TODO: GL_PixelStorei
+void GL_PixelStorei(unsigned int pname, int param)
+{
+    X(); glPixelStorei(pname, param);
+}
 
 // TODO: GL_PixelStorex
 
-// TODO: GL_PixelTransferf
+void GL_PixelTransferf(unsigned int pname, float param)
+{
+    X(); glPixelTransferf(pname, param);
+}
 
-// TODO: GL_PixelTransferi
+void GL_PixelTransferi(unsigned int pname, int param)
+{
+    X(); glPixelTransferi(pname, param);
+}
 
-// TODO: GL_PixelZoom
+void GL_PixelZoom(float xfactor, float yfactor)
+{
+    X(); glPixelZoom(xfactor, yfactor);
+}
 
 void GL_PointParameterfv(unsigned int pname, const float* data)
 {
@@ -2512,7 +2814,10 @@ void GL_PolygonOffset(float factor, float units)
     X(); glPolygonOffset(factor, units);
 }
 
-// TODO: GL_PolygonStipple
+void GL_PolygonStipple(const unsigned char *mask)
+{
+    X(); glPolygonStipple(mask);
+}
 
 void GL_PopAttrib(void)
 {
@@ -2548,9 +2853,15 @@ void GL_PushMatrix(void)
     X(); glPushMatrix();
 }
 
-// TODO: GL_PopName
+void GL_PopName(void)
+{
+    X(); glPopName();
+}
 
-// TODO: GL_PushName
+void GL_PushName(unsigned int name)
+{
+    X(); glPushName(name);
+}
 
 // TODO: GL_PrimitiveRestartIndex
 
@@ -2690,13 +3001,176 @@ void GL_ProvokingVertex(unsigned int mode)
 
 // TODO: GL_QueryCounter
 
-// TODO: GL_ReadBuffer
+void GL_RasterPos2d(double x, double y)
+{
+    X(); glRasterPos2d(x, y);
+}
 
-// TODO: GL_ReadPixels
+void GL_RasterPos2dv(const double *v)
+{
+    X(); glRasterPos2dv(v);
+}
 
-// TODO: GL_Rectf
+void GL_RasterPos2f(float x, float y)
+{
+    X(); glRasterPos2f(x, y);
+}
 
-// TODO: GL_Rectfv
+void GL_RasterPos2fv(const float *v)
+{
+    X(); glRasterPos2fv(v);
+}
+
+void GL_RasterPos2i(int x, int y)
+{
+    X(); glRasterPos2i(x, y);
+}
+
+void GL_RasterPos2iv(const int *v)
+{
+    X(); glRasterPos2iv(v);
+}
+
+void GL_RasterPos2s(short x, short y)
+{
+    X(); glRasterPos2s(x, y);
+}
+
+void GL_RasterPos2sv(const short *v)
+{
+    X(); glRasterPos2sv(v);
+}
+
+void GL_RasterPos3d(double x, double y, double z)
+{
+    X(); glRasterPos3d(x, y, z);
+}
+
+void GL_RasterPos3dv(const double *v)
+{
+    X(); glRasterPos3dv(v);
+}
+
+void GL_RasterPos3f(float x, float y, float z)
+{
+    X(); glRasterPos3f(x, y, z);
+}
+
+void GL_RasterPos3fv(const float *v)
+{
+    X(); glRasterPos3fv(v);
+}
+
+void GL_RasterPos3i(int x, int y, int z)
+{
+    X(); glRasterPos3i(x, y, z);
+}
+
+void GL_RasterPos3iv(const int *v)
+{
+    X(); glRasterPos3iv(v);
+}
+
+void GL_RasterPos3s(short x, short y, short z)
+{
+    X(); glRasterPos3s(x, y, z);
+}
+
+void GL_RasterPos3sv(const short *v)
+{
+    X(); glRasterPos3sv(v);
+}
+
+void GL_RasterPos4d(double x, double y, double z, double w)
+{
+    X(); glRasterPos4d(x, y, z, w);
+}
+
+void GL_RasterPos4dv(const double *v)
+{
+    X(); glRasterPos4dv(v);
+}
+
+void GL_RasterPos4f(float x, float y, float z, float w)
+{
+    X(); glRasterPos4f(x, y, z, w);
+}
+
+void GL_RasterPos4fv(const float *v)
+{
+    X(); glRasterPos4fv(v);
+}
+
+void GL_RasterPos4i(int x, int y, int z, int w)
+{
+    X(); glRasterPos4i(x, y, z, w);
+}
+
+void GL_RasterPos4iv(const int *v)
+{
+    X(); glRasterPos4iv(v);
+}
+
+void GL_RasterPos4s(short x, short y, short z, short w)
+{
+    X(); glRasterPos4s(x, y, z, w);
+}
+
+void GL_RasterPos4sv(const short *v)
+{
+    X(); glRasterPos4sv(v);
+}
+
+void GL_ReadBuffer(unsigned int mode)
+{
+    X(); glReadBuffer(mode);
+}
+
+void GL_ReadPixels(int x, int y, int width, int height, unsigned int format,
+                                            unsigned int type, void *pixels)
+{
+    X(); glReadPixels(x, y, width, height, format, type, pixels);
+}
+
+void GL_Rectd(double x1, double y1, double x2, double y2)
+{
+    X(); glRectd(x1, y1, x2, y2);
+}
+
+void GL_Rectdv(const double *v1, const double *v2)
+{
+    X(); glRectdv(v1, v2);
+}
+
+void GL_Rectf(float x1, float y1, float x2, float y2)
+{
+    X(); glRectf(x1, y1, x2, y2);
+}
+
+void GL_Rectfv(const float *v1, const float *v2)
+{
+    X(); glRectfv(v1, v2);
+}
+
+void GL_Recti(int x1, int y1, int x2, int y2)
+{
+    X(); glRecti(x1, y1, x2, y2);
+}
+
+void GL_Rectiv(const int *v1, const int *v2)
+{
+    X(); glRectiv(v1, v2);
+}
+
+void GL_Rects(short x1, short y1, short x2, short y2)
+{
+    X(); glRects(x1, y1, x2, y2);
+}
+
+void GL_Rectsv(const short *v1, const short *v2)
+{
+    X(); glRectsv(v1, v2);
+}
 
 // TODO: GL_ReleaseShaderCompiler
 
@@ -2715,7 +3189,10 @@ int GL_RenderMode(unsigned int mode)
 
 // TODO: GL_ResumeTransformFeedback
 
-// TODO: GL_Rotated
+void GL_Rotated(double angle, double x, double y, double z)
+{
+    X(); glRotated(angle, x, y, z);
+}
 
 void GL_Rotatef(float theta, float x, float y, float z)
 {
@@ -2738,7 +3215,10 @@ void GL_Rotatef(float theta, float x, float y, float z)
 
 // TODO: GL_SamplerParameteriv
 
-// TODO: GL_Scaled
+void GL_Scaled(double x, double y, double z)
+{
+    X(); glScaled(x, y, z);
+}
 
 void GL_Scalef(float x, float y, float z)
 {
@@ -2794,7 +3274,10 @@ void GL_Scissor(int x, int y, int width, int height)
 
 // TODO: GL_SecondaryColorPointer
 
-// TODO: GL_SelectBuffer
+void GL_SelectBuffer(int size, unsigned int* buffer)
+{
+    X(); glSelectBuffer(size, buffer);
+}
 
 // TODO: GL_SeparableFilter2D
 
@@ -2833,15 +3316,24 @@ void GL_ShaderSource(unsigned int shader, int count, const char** const string,
 
 // TODO: GL_ShaderStorageBlockBinding
 
-// TODO: GL_StencilFunc
+void GL_StencilFunc(unsigned int func, int ref, unsigned int mask)
+{
+    X(); glStencilFunc(func, ref, mask);
+}
 
 // TODO: GL_StencilFuncSeparate
 
-// TODO: GL_StencilMask
+void GL_StencilMask(unsigned int mask)
+{
+    X(); glStencilMask(mask);
+}
 
 // TODO: GL_StencilMaskSeparate
 
-// TODO: GL_StencilOp
+void GL_StencilOp(unsigned int fail, unsigned int zfail, unsigned int zpass)
+{
+    X(); glStencilOp(fail, zfail, zpass);
+}
 
 // TODO: GL_StencilOpSeparate
 
@@ -2849,9 +3341,55 @@ void GL_ShaderSource(unsigned int shader, int count, const char** const string,
 
 // TODO: GL_TexBufferRange
 
-// TODO: GL_TexCoord1f
+void GL_TexCoord1d(double s)
+{
+    X(); glTexCoord1d(s);
+}
 
-// TODO: GL_TexCoord1fv
+void GL_TexCoord1dv(const double *v)
+{
+    X(); glTexCoord1dv(v);
+}
+
+void GL_TexCoord1f(float s)
+{
+    X(); glTexCoord1f(s);
+}
+
+void GL_TexCoord1fv(const float *v)
+{
+    X(); glTexCoord1fv(v);
+}
+
+void GL_TexCoord1i(int s)
+{
+    X(); glTexCoord1i(s);
+}
+
+void GL_TexCoord1iv(const int *v)
+{
+    X(); glTexCoord1iv(v);
+}
+
+void GL_TexCoord1s(short s)
+{
+    X(); glTexCoord1s(s);
+}
+
+void GL_TexCoord1sv(const short *v)
+{
+    X(); glTexCoord1sv(v);
+}
+
+void GL_TexCoord2d(double s, double t)
+{
+    X(); glTexCoord2d(s, t);
+}
+
+void GL_TexCoord2dv(const double *v)
+{
+    X(); glTexCoord2dv(v);
+}
 
 void GL_TexCoord2f(float s, float t)
 {
@@ -2861,6 +3399,36 @@ void GL_TexCoord2f(float s, float t)
 void GL_TexCoord2fv(const float* st)
 {
     X(); glTexCoord2fv(st);
+}
+
+void GL_TexCoord2i(int s, int t)
+{
+    X(); glTexCoord2i(s, t);
+}
+
+void GL_TexCoord2iv(const int *v)
+{
+    X(); glTexCoord2iv(v);
+}
+
+void GL_TexCoord2s(short s, short t)
+{
+    X(); glTexCoord2s(s, t);
+}
+
+void GL_TexCoord2sv(const short *v)
+{
+    X(); glTexCoord2sv(v);
+}
+
+void GL_TexCoord3d(double s, double t, double r)
+{
+    X(); glTexCoord3d(s, t, r);
+}
+
+void GL_TexCoord3dv(const double *v)
+{
+    X(); glTexCoord3dv(v);
 }
 
 void GL_TexCoord3f(float s, float t, float r)
@@ -2873,6 +3441,36 @@ void GL_TexCoord3fv(const float* str)
     X(); glTexCoord3fv(str);
 }
 
+void GL_TexCoord3i(int s, int t, int r)
+{
+    X(); glTexCoord3i(s, t, r);
+}
+
+void GL_TexCoord3iv(const int *v)
+{
+    X(); glTexCoord3iv(v);
+}
+
+void GL_TexCoord3s(short s, short t, short r)
+{
+    X(); glTexCoord3s(s, t, r);
+}
+
+void GL_TexCoord3sv(const short *v)
+{
+    X(); glTexCoord3sv(v);
+}
+
+void GL_TexCoord4d(double s, double t, double r, double q)
+{
+    X(); glTexCoord4d(s, t, r, q);
+}
+
+void GL_TexCoord4dv(const double *v)
+{
+    X(); glTexCoord4dv(v);
+}
+
 void GL_TexCoord4f(float s, float t, float r, float q)
 {
     X(); glTexCoord4f(s, t, r, q);
@@ -2881,6 +3479,26 @@ void GL_TexCoord4f(float s, float t, float r, float q)
 void GL_TexCoord4fv(const float* strq)
 {
     X(); glTexCoord4fv(strq);
+}
+
+void GL_TexCoord4i(int s, int t, int r, int q)
+{
+    X(); glTexCoord4i(s, t, r, q);
+}
+
+void GL_TexCoord4iv(const int *v)
+{
+    X(); glTexCoord4iv(v);
+}
+
+void GL_TexCoord4s(short s, short t, short r, short q)
+{
+    X(); glTexCoord4s(s, t, r, q);
+}
+
+void GL_TexCoord4sv(const short *v)
+{
+    X(); glTexCoord4sv(v);
 }
 
 // TODO: GL_TexCoordP1ui
@@ -2954,7 +3572,11 @@ void GL_TexGend(unsigned int coord, unsigned int pname, double param)
     X(); glTexGend(coord, pname, param);
 }
 
-// TODO: GL_TexImage1D
+void GL_TexImage1D(unsigned int target, int level, int internal_format, int w,
+            int border, unsigned int format, unsigned int type, const void* p)
+{
+    X(); glTexImage1D(target, level, internal_format, w, border, format, type, p);
+}
 
 void GL_TexImage2D(unsigned int target, int level, int internal_format, int w,
         int h, int border, unsigned int fmt, unsigned int type, const void* p)
@@ -2968,15 +3590,24 @@ void GL_TexImage2D(unsigned int target, int level, int internal_format, int w,
 
 // TODO: GL_TexImage3DMultisample
 
-// TODO: GL_TexParameterfv
+void GL_TexParameterf(unsigned int target, unsigned int pname, float param)
+{
+    X(); glTexParameterf(target, pname, param);
+}
 
-// TODO: GL_TexParameterf
-
-// TODO: GL_TexParameteriv
+void GL_TexParameterfv(unsigned int target, unsigned int pname, const float *params)
+{
+    X(); glTexParameterfv(target, pname, params);
+}
 
 void GL_TexParameteri(unsigned int target, unsigned int pname, int param)
 {
     X(); glTexParameteri(target, pname, param);
+}
+
+void GL_TexParameteriv(unsigned int target, unsigned int pname, const int *params)
+{
+    X(); glTexParameteriv(target, pname, params);
 }
 
 // TODO: GL_TexParameterIiv
@@ -2993,7 +3624,11 @@ void GL_TexParameteri(unsigned int target, unsigned int pname, int param)
 
 // TODO: GL_TexStorage3DMultisample
 
-// TODO: GL_TexSubImage1D
+void GL_TexSubImage1D(unsigned int target, int level, int xoffset, int width,
+                unsigned int format, unsigned int type, const void * pixels)
+{
+    X(); glTexSubImage1D(target, level, xoffset, width, format, type, pixels);
+}
 
 void GL_TexSubImage2D(unsigned int target, int level, int xoffset, int yoffset,
         int w, int h, unsigned int format, unsigned int type, const void* pix)
@@ -3007,7 +3642,10 @@ void GL_TexSubImage2D(unsigned int target, int level, int xoffset, int yoffset,
 
 // TODO: GL_TransformFeedbackVaryings
 
-// TODO: GL_Translated
+void GL_Translated(double x, double y, double z)
+{
+    X(); glTranslated(x, y, z);
+}
 
 void GL_Translatef(float x, float y, float z)
 {
@@ -3118,7 +3756,32 @@ void GL_Translatef(float x, float y, float z)
 
 // TODO: GL_UniformSubroutinesuiv
 
-// TODO: GL_UnmapBuffer
+unsigned char GL_UnmapBuffer(unsigned int target)
+{
+    /* TODO: let this be reset to NULL on gl_quit */
+    static PFNGLUNMAPBUFFERPROC exUnmapBuffer = NULL;
+
+    X(); if (exUnmapBuffer)
+    {
+        return exUnmapBuffer(target);
+    }
+    else
+    {
+        exUnmapBuffer = ( PFNGLUNMAPBUFFERPROC )
+                        gl_func("glUnmapBuffer");
+
+        if (exUnmapBuffer)
+        {
+            return exUnmapBuffer(target);
+        }
+        else
+        {
+            AE_WARN("glUnmapBuffer not found");
+        }
+    }
+
+    return 0;
+}
 
 void GL_UseProgram(unsigned int program)
 {
@@ -3147,9 +3810,42 @@ void GL_UseProgram(unsigned int program)
 
 // TODO: GL_UseProgramStages
 
-// TODO: GL_ValidateProgram
+void GL_ValidateProgram(unsigned int program)
+{
+    /* TODO: let this pointer be reset to NULL on gl_quit */
+    static PFNGLVALIDATEPROGRAMPROC exValidateProgram = NULL;
+
+    X(); if (exValidateProgram)
+    {
+        exValidateProgram(program);
+    }
+    else
+    {
+        exValidateProgram = ( PFNGLVALIDATEPROGRAMPROC )
+                            gl_func("glValidateProgram");
+
+        if (exValidateProgram)
+        {
+            exValidateProgram(program);
+        }
+        else
+        {
+            AE_WARN("glValidateProgram not found");
+        }
+    }
+}
 
 // TODO: GL_ValidateProgramPipeline
+
+void GL_Vertex2d(double x, double y)
+{
+    X(); glVertex2d(x, y);
+}
+
+void GL_Vertex2dv(const double *v)
+{
+    X(); glVertex2dv(v);
+}
 
 void GL_Vertex2f(float x, float y)
 {
@@ -3159,6 +3855,36 @@ void GL_Vertex2f(float x, float y)
 void GL_Vertex2fv(const float* xy)
 {
     X(); glVertex2fv(xy);
+}
+
+void GL_Vertex2i(int x, int y)
+{
+    X(); glVertex2i(x, y);
+}
+
+void GL_Vertex2iv(const int *v)
+{
+    X(); glVertex2iv(v);
+}
+
+void GL_Vertex2s(short x, short y)
+{
+    X(); glVertex2s(x, y);
+}
+
+void GL_Vertex2sv(const short *v)
+{
+    X(); glVertex2sv(v);
+}
+
+void GL_Vertex3d(double x, double y, double z)
+{
+    X(); glVertex3d(x, y, z);
+}
+
+void GL_Vertex3dv(const double *v)
+{
+    X(); glVertex3dv(v);
 }
 
 void GL_Vertex3f(float x, float y, float z)
@@ -3171,6 +3897,36 @@ void GL_Vertex3fv(const float* xyz)
     X(); glVertex3fv(xyz);
 }
 
+void GL_Vertex3i(int x, int y, int z)
+{
+    X(); glVertex3i(x, y, z);
+}
+
+void GL_Vertex3iv(const int *v)
+{
+    X(); glVertex3iv(v);
+}
+
+void GL_Vertex3s(short x, short y, short z)
+{
+    X(); glVertex3s(x, y, z);
+}
+
+void GL_Vertex3sv(const short *v)
+{
+    X(); glVertex3sv(v);
+}
+
+void GL_Vertex4d(double x, double y, double z, double w)
+{
+    X(); glVertex4d(x, y, z, w);
+}
+
+void GL_Vertex4dv(const double *v)
+{
+    X(); glVertex4dv(v);
+}
+
 void GL_Vertex4f(float x, float y, float z, float w)
 {
     X(); glVertex4f(x, y, z, w);
@@ -3179,6 +3935,26 @@ void GL_Vertex4f(float x, float y, float z, float w)
 void GL_Vertex4fv(const float* xyzw)
 {
     X(); glVertex4fv(xyzw);
+}
+
+void GL_Vertex4i(int x, int y, int z, int w)
+{
+    X(); glVertex4i(x, y, z, w);
+}
+
+void GL_Vertex4iv(const int *v)
+{
+    X(); glVertex4iv(v);
+}
+
+void GL_Vertex4s(short x, short y, short z, short w)
+{
+    X(); glVertex4s(x, y, z, w);
+}
+
+void GL_Vertex4sv(const short *v)
+{
+    X(); glVertex4sv(v);
 }
 
 // TODO: GL_VertexAttrib1d

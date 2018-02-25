@@ -131,6 +131,12 @@ void GL_BufferData(unsigned int target, ptrdiff_t size,
     AE_STUB();
 }
 
+void GL_BufferSubData(unsigned int target, ptrdiff_t offset,
+                        ptrdiff_t size, const void * data)
+{
+    AE_STUB();
+}
+
 void GL_CallList(unsigned int list)
 {
     AE_STUB();
@@ -806,6 +812,24 @@ void GL_GetTexGeniv(unsigned int coord, unsigned int pname, int* params)
     AE_STUB();
 }
 
+void GL_GetTexImage(unsigned int target, int level, unsigned int format,
+                                        unsigned int type, void *pixels)
+{
+    AE_STUB();
+}
+
+void GL_GetTexLevelParameterfv(unsigned int target, int level,
+                            unsigned int pname, float *params)
+{
+    AE_STUB();
+}
+
+void GL_GetTexLevelParameteriv(unsigned int target, int level,
+                            unsigned int pname, int * params)
+{
+    AE_STUB();
+}
+
 void GL_GetTexParameterfv(unsigned int target, unsigned int pname, float* params)
 {
     AE_STUB();
@@ -817,6 +841,71 @@ void GL_GetTexParameteriv(unsigned int target, unsigned int pname, int* params)
 }
 
 void GL_Hint(unsigned int target, unsigned int mode)
+{
+    AE_STUB();
+}
+
+void GL_IndexMask(unsigned int mask)
+{
+    AE_STUB();
+}
+
+void GL_IndexPointer(unsigned int type, int stride, const void* ptr)
+{
+    AE_STUB();
+}
+
+void GL_Indexd(double c)
+{
+    AE_STUB();
+}
+
+void GL_Indexdv(const double* c)
+{
+    AE_STUB();
+}
+
+void GL_Indexf(float c)
+{
+    AE_STUB();
+}
+
+void GL_Indexfv(const float* c)
+{
+    AE_STUB();
+}
+
+void GL_Indexi(int c)
+{
+    AE_STUB();
+}
+
+void GL_Indexiv(const int* c)
+{
+    AE_STUB();
+}
+
+void GL_Indexs(short c)
+{
+    AE_STUB();
+}
+
+void GL_Indexsv(const short* c)
+{
+    AE_STUB();
+}
+
+void GL_Indexub(unsigned char c)
+{
+    AE_STUB();
+}
+
+void GL_Indexubv(const unsigned char* c)
+{
+    AE_STUB();
+}
+
+void GL_InitNames(void)
 {
     AE_STUB();
 }
@@ -861,12 +950,47 @@ unsigned char GL_IsVertexArray(unsigned int array)
     AE_STUB(); return 0;
 }
 
-void GL_Lightfv(unsigned int light, unsigned int pname, const float* params)
+void GL_LightModelf(unsigned int pname, float param)
+{
+    AE_STUB();
+}
+
+void GL_LightModelfv(unsigned int pname, const float* params)
+{
+    AE_STUB();
+}
+
+void GL_LightModeli(unsigned int pname, int param)
+{
+    AE_STUB();
+}
+
+void GL_LightModeliv(unsigned int pname, const int* params)
 {
     AE_STUB();
 }
 
 void GL_Lightf(unsigned int light, unsigned int pname, float param)
+{
+    AE_STUB();
+}
+
+void GL_Lightfv(unsigned int light, unsigned int pname, const float* params)
+{
+    AE_STUB();
+}
+
+void GL_Lighti(unsigned int light, unsigned int pname, int param)
+{
+    AE_STUB();
+}
+
+void GL_Lightiv(unsigned int light, unsigned int pname, const int* params)
+{
+    AE_STUB();
+}
+
+void GL_LineStipple(int factor, unsigned short pattern)
 {
     AE_STUB();
 }
@@ -881,7 +1005,27 @@ void GL_LinkProgram(unsigned int program)
     AE_STUB();
 }
 
+void GL_ListBase(unsigned int base)
+{
+    AE_STUB();
+}
+
 void GL_LoadIdentity(void)
+{
+    AE_STUB();
+}
+
+void GL_LoadMatrixd(const double *m)
+{
+    AE_STUB();
+}
+
+void GL_LoadMatrixf(const float *m)
+{
+    AE_STUB();
+}
+
+void GL_LoadName(unsigned int name)
 {
     AE_STUB();
 }
@@ -891,7 +1035,57 @@ void GL_LogicOp(unsigned int opcode)
     AE_STUB();
 }
 
-void GL_Materialfv(unsigned int face, unsigned int pname, const float* params)
+void GL_Map1d(unsigned int target, double u1, double u2, int stride,
+                                    int order, const double* points)
+{
+    AE_STUB();
+}
+
+void GL_Map1f(unsigned int target, float u1, float u2, int stride,
+                                int order, const float * points)
+{
+    AE_STUB();
+}
+
+void GL_Map2d(unsigned int target, double u1, double u2, int ustride, int uorder,
+            double v1, double v2, int vstride, int vorder, const double* points)
+{
+    AE_STUB();
+}
+
+void GL_Map2f(unsigned int target, float u1, float u2, int ustride, int uorder,
+            float v1, float v2, int vstride, int vorder, const float * points)
+{
+    AE_STUB();
+}
+
+void* GL_MapBuffer(unsigned int target, unsigned int access)
+{
+    AE_STUB(); return NULL;
+}
+
+void* GL_MapBufferRange(unsigned int target, ptrdiff_t offset,
+                        ptrdiff_t length, unsigned int access)
+{
+    AE_STUB(); return NULL;
+}
+
+void GL_MapGrid1d(int un, double u1, double u2)
+{
+    AE_STUB();
+}
+
+void GL_MapGrid1f(int un, float u1, float u2)
+{
+    AE_STUB();
+}
+
+void GL_MapGrid2d(int un, double u1, double u2, int vn, double v1, double v2)
+{
+    AE_STUB();
+}
+
+void GL_MapGrid2f(int un, float u1, float u2, int vn, float v1, float v2)
 {
     AE_STUB();
 }
@@ -901,12 +1095,57 @@ void GL_Materialf(unsigned int face, unsigned int pname, float param)
     AE_STUB();
 }
 
+void GL_Materialfv(unsigned int face, unsigned int pname, const float* params)
+{
+    AE_STUB();
+}
+
+void GL_Materiali(unsigned int face, unsigned int pname, int param)
+{
+    AE_STUB();
+}
+
+void GL_Materialiv(unsigned int face, unsigned int pname, const int* params)
+{
+    AE_STUB();
+}
+
 void GL_MatrixMode(unsigned int mode)
 {
     AE_STUB();
 }
 
+void GL_MultMatrixd(const double *m)
+{
+    AE_STUB();
+}
+
 void GL_MultMatrixf(const float* matrix)
+{
+    AE_STUB();
+}
+
+void GL_NewList(unsigned int list, unsigned int mode)
+{
+    AE_STUB();
+}
+
+void GL_Normal3b(char nx, char ny, char nz)
+{
+    AE_STUB();
+}
+
+void GL_Normal3bv(const char *v)
+{
+    AE_STUB();
+}
+
+void GL_Normal3d(double nx, double ny, double nz)
+{
+    AE_STUB();
+}
+
+void GL_Normal3dv(const double *v)
 {
     AE_STUB();
 }
@@ -921,12 +1160,77 @@ void GL_Normal3fv(const float* normal)
     AE_STUB();
 }
 
+void GL_Normal3i(int nx, int ny, int nz)
+{
+    AE_STUB();
+}
+
+void GL_Normal3iv(const int* v)
+{
+    AE_STUB();
+}
+
+void GL_Normal3s(short nx, short ny, short nz)
+{
+    AE_STUB();
+}
+
+void GL_Normal3sv(const short* v)
+{
+    AE_STUB();
+}
+
 void GL_NormalPointer(unsigned int type, int stride, const void* data)
 {
     AE_STUB();
 }
 
 void GL_Ortho(double lf, double rt, double btm, double tp, double nr, double fr)
+{
+    AE_STUB();
+}
+
+void GL_PassThrough(float token)
+{
+    AE_STUB();
+}
+
+void GL_PixelMapfv(unsigned int map, int mapsize, const float *values)
+{
+    AE_STUB();
+}
+
+void GL_PixelMapuiv(unsigned int map, int mapsize, const unsigned int *values)
+{
+    AE_STUB();
+}
+
+void GL_PixelMapusv(unsigned int map, int mapsize, const unsigned short *values)
+{
+    AE_STUB();
+}
+
+void GL_PixelStoref(unsigned int pname, float param)
+{
+    AE_STUB();
+}
+
+void GL_PixelStorei(unsigned int pname, int param)
+{
+    AE_STUB();
+}
+
+void GL_PixelTransferf(unsigned int pname, float param)
+{
+    AE_STUB();
+}
+
+void GL_PixelTransferi(unsigned int pname, int param)
+{
+    AE_STUB();
+}
+
+void GL_PixelZoom(float xfactor, float yfactor)
 {
     AE_STUB();
 }
@@ -952,6 +1256,11 @@ void GL_PolygonMode(unsigned int face, unsigned int mode)
 }
 
 void GL_PolygonOffset(float factor, float units)
+{
+    AE_STUB();
+}
+
+void GL_PolygonStipple(const unsigned char *mask)
 {
     AE_STUB();
 }
@@ -986,6 +1295,16 @@ void GL_PushMatrix(void)
     AE_STUB();
 }
 
+void GL_PopName(void)
+{
+    AE_STUB();
+}
+
+void GL_PushName(unsigned int name)
+{
+    AE_STUB();
+}
+
 void GL_PrioritizeTextures(int n, const unsigned int* textures, const float* priorities)
 {
     AE_STUB();
@@ -996,12 +1315,192 @@ void GL_ProvokingVertex(unsigned int mode)
     AE_STUB();
 }
 
+void GL_RasterPos2d(double x, double y)
+{
+    AE_STUB();
+}
+
+void GL_RasterPos2dv(const double *v)
+{
+    AE_STUB();
+}
+
+void GL_RasterPos2f(float x, float y)
+{
+    AE_STUB();
+}
+
+void GL_RasterPos2fv(const float *v)
+{
+    AE_STUB();
+}
+
+void GL_RasterPos2i(int x, int y)
+{
+    AE_STUB();
+}
+
+void GL_RasterPos2iv(const int *v)
+{
+    AE_STUB();
+}
+
+void GL_RasterPos2s(short x, short y)
+{
+    AE_STUB();
+}
+
+void GL_RasterPos2sv(const short *v)
+{
+    AE_STUB();
+}
+
+void GL_RasterPos3d(double x, double y, double z)
+{
+    AE_STUB();
+}
+
+void GL_RasterPos3dv(const double *v)
+{
+    AE_STUB();
+}
+
+void GL_RasterPos3f(float x, float y, float z)
+{
+    AE_STUB();
+}
+
+void GL_RasterPos3fv(const float *v)
+{
+    AE_STUB();
+}
+
+void GL_RasterPos3i(int x, int y, int z)
+{
+    AE_STUB();
+}
+
+void GL_RasterPos3iv(const int *v)
+{
+    AE_STUB();
+}
+
+void GL_RasterPos3s(short x, short y, short z)
+{
+    AE_STUB();
+}
+
+void GL_RasterPos3sv(const short *v)
+{
+    AE_STUB();
+}
+
+void GL_RasterPos4d(double x, double y, double z, double w)
+{
+    AE_STUB();
+}
+
+void GL_RasterPos4dv(const double *v)
+{
+    AE_STUB();
+}
+
+void GL_RasterPos4f(float x, float y, float z, float w)
+{
+    AE_STUB();
+}
+
+void GL_RasterPos4fv(const float *v)
+{
+    AE_STUB();
+}
+
+void GL_RasterPos4i(int x, int y, int z, int w)
+{
+    AE_STUB();
+}
+
+void GL_RasterPos4iv(const int *v)
+{
+    AE_STUB();
+}
+
+void GL_RasterPos4s(short x, short y, short z, short w)
+{
+    AE_STUB();
+}
+
+void GL_RasterPos4sv(const short *v)
+{
+    AE_STUB();
+}
+
+void GL_ReadBuffer(unsigned int mode)
+{
+    AE_STUB();
+}
+
+void GL_ReadPixels(int x, int y, int width, int height, unsigned int format, unsigned int type, void *pixels)
+{
+    AE_STUB();
+}
+
+void GL_Rectd(double x1, double y1, double x2, double y2)
+{
+    AE_STUB();
+}
+
+void GL_Rectdv(const double *v1, const double *v2)
+{
+    AE_STUB();
+}
+
+void GL_Rectf(float x1, float y1, float x2, float y2)
+{
+    AE_STUB();
+}
+
+void GL_Rectfv(const float *v1, const float *v2)
+{
+    AE_STUB();
+}
+
+void GL_Recti(int x1, int y1, int x2, int y2)
+{
+    AE_STUB();
+}
+
+void GL_Rectiv(const int *v1, const int *v2)
+{
+    AE_STUB();
+}
+
+void GL_Rects(short x1, short y1, short x2, short y2)
+{
+    AE_STUB();
+}
+
+void GL_Rectsv(const short *v1, const short *v2)
+{
+    AE_STUB();
+}
+
 int GL_RenderMode(unsigned int mode)
 {
     AE_STUB(); return 0;
 }
 
+void GL_Rotated(double angle, double x, double y, double z)
+{
+    AE_STUB();
+}
+
 void GL_Rotatef(float theta, float x, float y, float z)
+{
+    AE_STUB();
+}
+
+void GL_Scaled(double x, double y, double z)
 {
     AE_STUB();
 }
@@ -1012,6 +1511,11 @@ void GL_Scalef(float x, float y, float z)
 }
 
 void GL_Scissor(int x, int y, int width, int height)
+{
+    AE_STUB();
+}
+
+void GL_SelectBuffer(int size, unsigned int* buffer)
 {
     AE_STUB();
 }
@@ -1027,12 +1531,107 @@ void GL_ShaderSource(unsigned int shader, int count, const char** const string,
     AE_STUB();
 }
 
+void GL_StencilFunc(unsigned int func, int ref, unsigned int mask)
+{
+    AE_STUB();
+}
+
+void GL_StencilMask(unsigned int mask)
+{
+    AE_STUB();
+}
+
+void GL_StencilOp(unsigned int fail, unsigned int zfail, unsigned int zpass)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord1d(double s)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord1dv(const double *v)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord1f(float s)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord1fv(const float *v)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord1i(int s)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord1iv(const int *v)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord1s(short s)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord1sv(const short *v)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord2d(double s, double t)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord2dv(const double *v)
+{
+    AE_STUB();
+}
+
 void GL_TexCoord2f(float s, float t)
 {
     AE_STUB();
 }
 
 void GL_TexCoord2fv(const float* st)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord2i(int s, int t)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord2iv(const int *v)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord2s(short s, short t)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord2sv(const short *v)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord3d(double s, double t, double r)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord3dv(const double *v)
 {
     AE_STUB();
 }
@@ -1047,12 +1646,62 @@ void GL_TexCoord3fv(const float* str)
     AE_STUB();
 }
 
+void GL_TexCoord3i(int s, int t, int r)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord3iv(const int *v)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord3s(short s, short t, short r)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord3sv(const short *v)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord4d(double s, double t, double r, double q)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord4dv(const double *v)
+{
+    AE_STUB();
+}
+
 void GL_TexCoord4f(float s, float t, float r, float q)
 {
     AE_STUB();
 }
 
 void GL_TexCoord4fv(const float* strq)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord4i(int s, int t, int r, int q)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord4iv(const int* v)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord4s(short s, short t, short r, short q)
+{
+    AE_STUB();
+}
+
+void GL_TexCoord4sv(const short* v)
 {
     AE_STUB();
 }
@@ -1112,13 +1761,40 @@ void GL_TexGend(unsigned int coord, unsigned int pname, double param)
     AE_STUB();
 }
 
+void GL_TexImage1D(unsigned int target, int level, int internal_format, int w,
+            int border, unsigned int format, unsigned int type, const void* p)
+{
+    AE_STUB();
+}
+
 void GL_TexImage2D(unsigned int target, int level, int internal_format, int w,
         int h, int border, unsigned int fmt, unsigned int type, const void* p)
 {
     AE_STUB();
 }
 
+void GL_TexParameterf(unsigned int target, unsigned int pname, float param)
+{
+    AE_STUB();
+}
+
+void GL_TexParameterfv(unsigned int target, unsigned int pname, const float *params)
+{
+    AE_STUB();
+}
+
 void GL_TexParameteri(unsigned int target, unsigned int pname, int param)
+{
+    AE_STUB();
+}
+
+void GL_TexParameteriv(unsigned int target, unsigned int pname, const int *params)
+{
+    AE_STUB();
+}
+
+void GL_TexSubImage1D(unsigned int target, int level, int xoffset, int width,
+                    unsigned int format, unsigned int type, const void* pix)
 {
     AE_STUB();
 }
@@ -1129,12 +1805,37 @@ void GL_TexSubImage2D(unsigned int target, int level, int xoffset, int yoffset,
     AE_STUB();
 }
 
+void GL_Translated(double x, double y, double z)
+{
+    AE_STUB();
+}
+
 void GL_Translatef(float x, float y, float z)
 {
     AE_STUB();
 }
 
+unsigned char GL_UnmapBuffer(unsigned int target)
+{
+    AE_STUB(); return 0;
+}
+
 void GL_UseProgram(unsigned int program)
+{
+    AE_STUB();
+}
+
+void GL_ValidateProgram(unsigned int program)
+{
+    AE_STUB();
+}
+
+void GL_Vertex2d(double x, double y)
+{
+    AE_STUB();
+}
+
+void GL_Vertex2dv(const double *v)
 {
     AE_STUB();
 }
@@ -1149,6 +1850,36 @@ void GL_Vertex2fv(const float* xy)
     AE_STUB();
 }
 
+void GL_Vertex2i(int x, int y)
+{
+    AE_STUB();
+}
+
+void GL_Vertex2iv(const int *v)
+{
+    AE_STUB();
+}
+
+void GL_Vertex2s(short x, short y)
+{
+    AE_STUB();
+}
+
+void GL_Vertex2sv(const short *v)
+{
+    AE_STUB();
+}
+
+void GL_Vertex3d(double x, double y, double z)
+{
+    AE_STUB();
+}
+
+void GL_Vertex3dv(const double *v)
+{
+    AE_STUB();
+}
+
 void GL_Vertex3f(float x, float y, float z)
 {
     AE_STUB();
@@ -1159,12 +1890,62 @@ void GL_Vertex3fv(const float* xyz)
     AE_STUB();
 }
 
+void GL_Vertex3i(int x, int y, int z)
+{
+    AE_STUB();
+}
+
+void GL_Vertex3iv(const int *v)
+{
+    AE_STUB();
+}
+
+void GL_Vertex3s(short x, short y, short z)
+{
+    AE_STUB();
+}
+
+void GL_Vertex3sv(const short *v)
+{
+    AE_STUB();
+}
+
+void GL_Vertex4d(double x, double y, double z, double w)
+{
+    AE_STUB();
+}
+
+void GL_Vertex4dv(const double *v)
+{
+    AE_STUB();
+}
+
 void GL_Vertex4f(float x, float y, float z, float w)
 {
     AE_STUB();
 }
 
 void GL_Vertex4fv(const float* xyzw)
+{
+    AE_STUB();
+}
+
+void GL_Vertex4i(int x, int y, int z, int w)
+{
+    AE_STUB();
+}
+
+void GL_Vertex4iv(const int *v)
+{
+    AE_STUB();
+}
+
+void GL_Vertex4s(short x, short y, short z, short w)
+{
+    AE_STUB();
+}
+
+void GL_Vertex4sv(const short *v)
 {
     AE_STUB();
 }

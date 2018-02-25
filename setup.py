@@ -244,7 +244,8 @@ if 'clean' in sys.argv:
     except Exception as e: print e
     """
 else:
-    headerize('external/SDL2/GameControllerData', 'gamecontrollerdb.txt', 'mapping.inl')
+    headerize_multi_line('external/SDL2/GameControllerData', # button data
+                                    'gamecontrollerdb.txt', 'mapping.inl')
 
 # ==============================================================================
 # ~ [ mash3D ]

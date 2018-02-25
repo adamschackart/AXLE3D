@@ -76,6 +76,7 @@ static void ae_argv_copy_quit(void)
 --------------------------------------------------------------------------------
 TODO: early fast path for pointer-sized memswap and memiszero; benchmark changes
 TODO: memshift - move a block of memory "right" or "left" via signed integer arg
+TODO: special packed wide memset paths for zero that just call the libc memset()
 --------------------------------------------------------------------------------
 */
 
@@ -193,6 +194,105 @@ size_t memfilter(void* dst, const void* const src, size_t count, size_t size,
     }
 
     return (dp - (u8*)dst) / size;
+}
+
+/* ===== [ memset ] ========================================================= */
+
+#define MEMSET_EX(T)                \
+                                    \
+    T* ptr = dst + offset;          \
+    T* end = dst + count;           \
+                                    \
+    assert(stride > 0);             \
+                                    \
+    for(; ptr < end; ptr += stride) \
+    {                               \
+        *ptr = value;               \
+    }                               \
+                                    \
+    return dst;                     \
+
+u8 * memset8_ex (u8 * dst, u8  value, size_t count, size_t offset, size_t stride)
+{
+    if (ae_likely(stride == 1))
+    {
+        /* platform-provided (libc) memsets are usually very well optimized */
+        return (u8*)memset((void*)(dst + offset), (int)value, count - offset);
+    }
+    else
+    {
+        MEMSET_EX(u8);
+    }
+}
+
+u16* memset16_ex(u16* dst, u16 value, size_t count, size_t offset, size_t stride)
+{
+    u16* ptr = dst + offset;
+    u16* end = dst + count;
+
+    assert(stride > 0);
+
+    #if defined(__SSE2__) // TODO: common code path - make a macro!
+    if (ae_cpuinfo_sse2() && offset == 0 && stride == 1)
+    {
+        u16 * unr = end - (count % (sizeof(__m128i) / sizeof(u16)));
+        const __m128i v = _mm_set1_epi16((s16)value);
+
+        if (num_is_aligned((size_t)ptr, 16))
+        {
+            for (; ptr < unr; ptr += sizeof(__m128i) / sizeof(u16))
+            {
+                _mm_store_si128((__m128i*)ptr, v);
+            }
+        }
+        else
+        {
+            for (; ptr < unr; ptr += sizeof(__m128i) / sizeof(u16))
+            {
+                _mm_storeu_si128((__m128i*)ptr, v);
+            }
+        }
+    }
+    #endif
+
+    for (; ptr < end; ptr += stride)
+    {
+        *ptr = value;
+    }
+
+    return dst;
+}
+
+u32* memset32_ex(u32* dst, u32 value, size_t count, size_t offset, size_t stride)
+{
+    // NOTE: at this point (on MSVC x64) we're speed-limited by memory bandwidth.
+    MEMSET_EX(u32);
+}
+
+u64* memset64_ex(u64* dst, u64 value, size_t count, size_t offset, size_t stride)
+{
+    // NOTE: at this point (on MSVC x64) we're speed-limited by memory bandwidth.
+    MEMSET_EX(u64);
+}
+
+u8 * memset8 (u8 * dst, u8  value, size_t count)
+{
+    return memset8_ex (dst, value, count, 0, 1);
+}
+
+u16* memset16(u16* dst, u16 value, size_t count)
+{
+    return memset16_ex(dst, value, count, 0, 1);
+}
+
+u32* memset32(u32* dst, u32 value, size_t count)
+{
+    return memset32_ex(dst, value, count, 0, 1);
+}
+
+u64* memset64(u64* dst, u64 value, size_t count)
+{
+    return memset64_ex(dst, value, count, 0, 1);
 }
 
 /*

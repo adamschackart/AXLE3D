@@ -352,6 +352,21 @@ AE_DECL void AE_CALL ae_image_unary_clut(ae_image_t * image,
 /* ===== [ filters ] ======================================================== */
 
 AE_DECL void AE_CALL
+ae_image_unary_and(ae_image_t* image, int* rect, int r, int g, int b);
+
+AE_DECL void AE_CALL
+ae_image_unary_xor(ae_image_t* image, int* rect, int r, int g, int b);
+
+AE_DECL void AE_CALL
+ae_image_unary_or(ae_image_t* image, int* rect, int r, int g, int b);
+
+AE_DECL void AE_CALL
+ae_image_unary_add(ae_image_t* image, int* rect, int r, int g, int b);
+
+AE_DECL void AE_CALL
+ae_image_unary_mul(ae_image_t* image, int* rect, int r, int g, int b);
+
+AE_DECL void AE_CALL
 ae_image_negative(ae_image_t* image, int* rect, int r, int g, int b);
 
 AE_DECL void AE_CALL
@@ -376,6 +391,9 @@ ae_image_pastelize(ae_image_t* image, int* rect, u8 threshold, int lr, int lg, i
 
 AE_DECL void AE_CALL
 ae_image_isolate_channel(ae_image_t* image, int* rect, int channel, int r, int g, int b);
+
+AE_DECL void AE_CALL
+ae_image_randomize(ae_image_t* image, int* rect, int r, int g, int b, int a);
 
 AE_DECL void AE_CALL
 ae_image_set_color( ae_image_t* image, int* rect, const float color[4],

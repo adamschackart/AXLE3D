@@ -2056,7 +2056,7 @@ typedef struct xl_internal_texture_t
 
         ae_image_t image =
         {
-            NULL, // temp image full of random pixels to indicate an un-set state
+            NULL, // temp image full of random pixels to indicate un-set state
 
             xl_texture_get_width ((xl_texture_t*)data),
             xl_texture_get_height((xl_texture_t*)data),
@@ -2064,26 +2064,23 @@ typedef struct xl_internal_texture_t
             AE_IMAGE_FORMAT_RGBA, AE_IMAGE_TYPE_U8, NULL
         };
 
-        ae_image_alloc(&image);
+        ae_image_alloc(&image); // random RGBA values
+        ae_image_randomize(&image, NULL, 1, 1, 1, 1);
 
-        // TODO: implement a new ae_image function that fills with random pixels
+        // de-randomize alpha, or "tag" images with unique colors in one corner
+        if (1)
         {
-            const float color[4] = { 0, 0, 0, 1 };
-            size_t num = image.width * image.height;
-            u32 *ptr = (u32*)image.pixels, *end = ptr + num;
-            while (ptr < end) *ptr++ = ae_random_u32();
-        //  ae_image_set_color(&image, NULL, color, 0, 0, 0, 1);
+            ae_image_set_color(&image, NULL, ae_color_black, 0, 0, 0, 1);
         }
-
-        if (0) // "tag" images with unique colors in the bottom-left corner
+        else
         {
-            const int bl_rect[4] = { 5, 5, 20, 20 };
+            const int bl_rect[4] = { 4, 4, 20, 20 };
             const float color[4] =
             {
                 ae_random_flt(), ae_random_flt(), ae_random_flt(), 1.0f,
             };
 
-            ae_image_set_color(&image, bl_rect, color, 1, 1, 1, 1);
+            ae_image_set_color(&image, (int*)bl_rect, color, 1, 1, 1, 1);
         }
 
         xl_texture_set_image((xl_texture_t*)data, &image);
@@ -6188,6 +6185,7 @@ NOTE: a portion of this is inspired by http://www.coranac.com/tonc/text/keys.htm
 --------------------------------------------------------------------------------
 TODO: handle non-gamecontroller joysticks like driving wheels, arcade and flight
 sticks, dance pads, rock band guitars / drumkits, and flight simulator throttles.
+SDL 2.0.6 adds the new function SDL_JoystickGetType; expose type as string prop?
 --------------------------------------------------------------------------------
 TODO: handle battery level and rumble effects (don't rumble if battery is < 30%)
 TODO: apply automatic easing to stick & shoulder inputs (default mode is linear)
@@ -10501,6 +10499,57 @@ static void xl_set_sdl_hints(void)
     {
         AE_WARN("SDL_HINT_RENDER_VSYNC hint failed to register as 1");
     }
+
+    // Try to disable all touch input until it's properly implemented.
+    if (SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0") == SDL_FALSE)
+    {
+        AE_WARN("SDL_HINT_TOUCH_MOUSE_EVENTS failed to register as 0");
+    }
+}
+
+static void xl_add_game_controller_mapping(void)
+{
+    // XXX: this now exceeds MSVC's wonderful 65535-char string literal limit!
+    // data used to be generated with headerize, now we're using multi_line...
+    #if 0
+        // NOTE: Steam automatically adds its own mapping from Valve's config.
+        static const char * controller_mapping =
+                            #include <SDL2/GameControllerData/mapping.inl>
+
+        if (SDL_GameControllerAddMapping(controller_mapping) < 0)
+        {
+            ae_error("failed to add controller mapping: %s", SDL_GetError());
+        }
+    #else
+        ae_array_t map_string = AE_ZERO_STRUCT; // TODO: string builder utils
+
+        static const char* controller_mapping[] =
+        {
+            #include <SDL2/GameControllerData/mapping.inl>
+        };
+
+        size_t i = 0; // TODO: use ae_stack_realloc (avoid dynamic allocation)
+        while (1)
+        {
+            const char * string = controller_mapping[i++];
+            if (string == NULL) { break; }
+
+            // TODO: this is around 48k (as of 2018/02/09), reserve 64k bytes
+            ae_array_append(&map_string, (void*)string, strlen(string));
+        }
+
+        /* stamp down the null terminator at the end of the controller mapping
+         */
+        ae_array_resize(&map_string, map_string.size + 1);
+        ((char*)map_string.data)[map_string.size - 1] = 0;
+
+        if (SDL_GameControllerAddMapping((const char*)map_string.data) < 0)
+        {
+            ae_error("failed to add controller mapping: %s", SDL_GetError());
+        }
+
+        ae_array_free(&map_string);
+    #endif
 }
 
 void xl_init(void)
@@ -10508,10 +10557,6 @@ void xl_init(void)
     if (!xlcore_is_initialized)
     {
         const double init_time = ae_internal_seconds();
-
-        // NOTE: Steam automatically adds its own mapping from Valve's config.
-        static const char * controller_mapping =
-                            #include <SDL2/GameControllerData/mapping.inl>
 
         if (!ae_is_init())
         {
@@ -10563,10 +10608,7 @@ void xl_init(void)
             ae_error("failed to load OS opengl library: %s", SDL_GetError());
         }
 
-        if (SDL_GameControllerAddMapping(controller_mapping) < 0)
-        {
-            ae_error("failed to add controller mapping: %s", SDL_GetError());
-        }
+        xl_add_game_controller_mapping();
 
         /* keyboard remove events are never fired, as there's only one keyboard
          * connected, so we don't need to register a custom user event for it.
@@ -10725,6 +10767,48 @@ static void xl_log_mix_version_info(void)
                 cl.major, cl.minor, cl.patch, ld.major, ld.minor, ld.patch);
 }
 
+static void xl_log_mix_decoders(void)
+{
+    int i, n; /* this logs all available music and sound effect decoders */
+#if 0
+    for (i = 0, n = Mix_GetNumChunkDecoders(); i < n; i++)
+    {
+        ae_log(SDL, "available chunk decoder: %s", Mix_GetChunkDecoder(i));
+    }
+
+    for (i = 0, n = Mix_GetNumMusicDecoders(); i < n; i++)
+    {
+        ae_log(SDL, "available music decoder: %s", Mix_GetMusicDecoder(i));
+    }
+#else
+    /* consolidate all this log information into two lines for easy reading
+     */
+    char chunk_decoders[4096];
+    char music_decoders[4096];
+
+    if (ae_log_is_enabled(AE_LOG_CATEGORY_SDL)) // this is expensive
+    {
+        chunk_decoders[0] = '\0';
+        music_decoders[0] = '\0';
+
+        for (i = 0, n = Mix_GetNumChunkDecoders(); i < n; i++)
+        {
+            strcat(chunk_decoders, Mix_GetChunkDecoder(i));
+            if (i != n - 1) { strcat(chunk_decoders, ", "); }
+        }
+
+        for (i = 0, n = Mix_GetNumMusicDecoders(); i < n; i++)
+        {
+            strcat(music_decoders, Mix_GetMusicDecoder(i));
+            if (i != n - 1) { strcat(music_decoders, ", "); }
+        }
+
+        ae_log(SDL, "available chunk decoders: %s", chunk_decoders);
+        ae_log(SDL, "available music decoders: %s", music_decoders);
+    }
+#endif
+}
+
 void xl_audio_init(void)
 {
     xl_init();
@@ -10733,14 +10817,27 @@ void xl_audio_init(void)
     {
         const double init_time = ae_seconds();
 
-        // audio chunk bytes to process during hook (latency/throughput tradeoff)
+        // Audio chunk bytes to process during hook (latency / throughput tradeoff).
         int chunk_size = 2048;
 
         ae_atexit_ex(xl_audio_quit);
 
+        // Not called in xl_init to avoid potential conflict with other sound libs.
         if (SDL_Init(SDL_INIT_AUDIO) < 0)
         {
             ae_error("audio library initialization failed: %s", SDL_GetError());
+        }
+
+        // This must be called before any other SDL_mixer function (even Mix_Init)!
+        if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, chunk_size) < 0)
+        {
+            AE_WARN("failed to set high sound quality: %s", Mix_GetError());
+            chunk_size /= 2;
+
+            if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, chunk_size) < 0)
+            {
+                ae_error("failed to set low sound quality: %s", Mix_GetError());
+            }
         }
 
         /* NOTE: MP3 support is no guarantee, as it requires certain packages to be
@@ -10755,17 +10852,6 @@ void xl_audio_init(void)
             if ((Mix_Init(MIX_INIT_OGG) & MIX_INIT_OGG) != MIX_INIT_OGG)
             {
                 ae_error("mixer library initialization failed: %s", Mix_GetError());
-            }
-        }
-
-        if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, chunk_size) < 0)
-        {
-            AE_WARN("failed to set high sound quality: %s", Mix_GetError());
-            chunk_size /= 2;
-
-            if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, chunk_size) < 0)
-            {
-                ae_error("failed to set low sound quality: %s", Mix_GetError());
             }
         }
 
@@ -10790,6 +10876,7 @@ void xl_audio_init(void)
         Mix_ChannelFinished(xl_channel_finished_callback);
 
         xl_log_mix_version_info();
+        xl_log_mix_decoders();
 
         ae_log(TIME, "xl_audio_init done in %.2f milliseconds",
                         (ae_seconds() - init_time) * 1000.0);
@@ -10818,6 +10905,10 @@ void xl_audio_quit(void)
             AE_WARN("failed to deallocate sound channels: %s", Mix_GetError());
         }
 
+        /* XXX: CloseAudio is supposed to be called after Quit according to the
+         * docs, but this caused a crash of some sort on my windows 10 machine,
+         * and possibly on other Mix 2.0.2 platforms as well (I haven't tested).
+         */
         Mix_CloseAudio();
         Mix_Quit();
 

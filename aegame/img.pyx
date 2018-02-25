@@ -210,10 +210,16 @@ cdef extern from "ae_image.h":
     void ae_image_unary_clut(ae_image_t* image,
         int* rect, u8* r, u8* g, u8* b, u8* a)
 
-    void ae_image_negative(ae_image_t* image, int* rect, int r, int g, int b)
+    void ae_image_unary_and(ae_image_t* image, int* rect, int r, int g, int b)
+    void ae_image_unary_xor(ae_image_t* image, int* rect, int r, int g, int b)
+    void ae_image_unary_or (ae_image_t* image, int* rect, int r, int g, int b)
+    void ae_image_unary_add(ae_image_t* image, int* rect, int r, int g, int b)
+    void ae_image_unary_mul(ae_image_t* image, int* rect, int r, int g, int b)
+
+    void ae_image_negative(ae_image_t* image, int* rect, int r, int g, int b) # invert color
     void ae_image_solarize(ae_image_t* image, int* rect, u8 threshold, int r, int g, int b)
 
-    void ae_image_greyscale(ae_image_t* image, int* rect, int r, int g, int b)
+    void ae_image_greyscale(ae_image_t* image, int* rect, int r, int g, int b) # average rgb
     void ae_image_threshold(ae_image_t* image, int* rect, u8 threshold, int r, int g, int b)
     void ae_image_bleach(ae_image_t* image, int* rect, u8 threshold, int r, int g, int b)
 
@@ -225,6 +231,8 @@ cdef extern from "ae_image.h":
 
     void ae_image_isolate_channel(ae_image_t* image,
         int* rect, int channel, int r, int g, int b)
+
+    void ae_image_randomize(ae_image_t* image, int* rect, int r, int g, int b, int a)
 
     void ae_image_set_color(ae_image_t * image, int * rect, const float color[4],
                             int r, int g, int b, int a)
@@ -1123,6 +1131,26 @@ cdef class Image:
         ae_image_unary_clut(&self.image, prect, r_lut, g_lut, b_lut, a_lut)
         return self
 
+    def unary_and(self, bint r=True, bint g=True, bint b=True, IntRect rect=None):
+        ae_image_unary_and(&self.image, NULL if rect is None else rect.rect, r, g, b)
+        return self
+
+    def unary_xor(self, bint r=True, bint g=True, bint b=True, IntRect rect=None):
+        ae_image_unary_xor(&self.image, NULL if rect is None else rect.rect, r, g, b)
+        return self
+
+    def unary_or(self, bint r=True, bint g=True, bint b=True, IntRect rect=None):
+        ae_image_unary_or(&self.image, NULL if rect is None else rect.rect, r, g, b)
+        return self
+
+    def unary_add(self, bint r=True, bint g=True, bint b=True, IntRect rect=None):
+        ae_image_unary_add(&self.image, NULL if rect is None else rect.rect, r, g, b)
+        return self
+
+    def unary_mul(self, bint r=True, bint g=True, bint b=True, IntRect rect=None):
+        ae_image_unary_mul(&self.image, NULL if rect is None else rect.rect, r, g, b)
+        return self
+
     def negative(self, bint r=True, bint g=True, bint b=True, IntRect rect=None):
         """
         Photo negative effect. Disable on one or more color channels for cool neon effects.
@@ -1178,6 +1206,10 @@ cdef class Image:
 
     def isolate_channel(self, int channel, bint r=True, bint g=True, bint b=True, IntRect rect=None):
         ae_image_isolate_channel(&self.image, NULL if rect is None else rect.rect, channel, r, g, b)
+        return self
+
+    def randomize(self, bint r=True, bint g=True, bint b=True, bint a=True, IntRect rect=None):
+        ae_image_randomize(&self.image, NULL if rect is None else rect.rect, r, g, b, a)
         return self
 
     def set_color(self, Vec4 color, bint r=True, bint g=True,

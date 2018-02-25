@@ -126,6 +126,9 @@ GL_DECL void GL_CALL
 GL_BufferData(unsigned int target, ptrdiff_t size, const void *data, unsigned int usage);
 
 GL_DECL void GL_CALL
+GL_BufferSubData(unsigned int target, ptrdiff_t offset, ptrdiff_t size, const void* data);
+
+GL_DECL void GL_CALL
 GL_CallList(unsigned int list);
 
 GL_DECL void GL_CALL
@@ -533,6 +536,15 @@ GL_DECL void GL_CALL
 GL_GetTexGeniv(unsigned int coord, unsigned int pname, int* params);
 
 GL_DECL void GL_CALL
+GL_GetTexImage(unsigned int target, int level, unsigned int format, unsigned int type, void *pixels);
+
+GL_DECL void GL_CALL
+GL_GetTexLevelParameterfv(unsigned int target, int level, unsigned int pname, float *params);
+
+GL_DECL void GL_CALL
+GL_GetTexLevelParameteriv(unsigned int target, int level, unsigned int pname, int *params);
+
+GL_DECL void GL_CALL
 GL_GetTexParameterfv(unsigned int target, unsigned int pname, float* params);
 
 GL_DECL void GL_CALL
@@ -540,6 +552,45 @@ GL_GetTexParameteriv(unsigned int target, unsigned int pname, int* params);
 
 GL_DECL void GL_CALL
 GL_Hint(unsigned int target, unsigned int mode);
+
+GL_DECL void GL_CALL
+GL_IndexMask(unsigned int mask);
+
+GL_DECL void GL_CALL
+GL_IndexPointer(unsigned int type, int stride, const void* ptr);
+
+GL_DECL void GL_CALL
+GL_Indexd(double c);
+
+GL_DECL void GL_CALL
+GL_Indexdv(const double* c);
+
+GL_DECL void GL_CALL
+GL_Indexf(float c);
+
+GL_DECL void GL_CALL
+GL_Indexfv(const float* c);
+
+GL_DECL void GL_CALL
+GL_Indexi(int c);
+
+GL_DECL void GL_CALL
+GL_Indexiv(const int* c);
+
+GL_DECL void GL_CALL
+GL_Indexs(short c);
+
+GL_DECL void GL_CALL
+GL_Indexsv(const short* c);
+
+GL_DECL void GL_CALL
+GL_Indexub(unsigned char c);
+
+GL_DECL void GL_CALL
+GL_Indexubv(const unsigned char* c);
+
+GL_DECL void GL_CALL
+GL_InitNames(void);
 
 GL_DECL void GL_CALL
 GL_InterleavedArrays(unsigned int format, int stride, const void* pointer);
@@ -566,10 +617,31 @@ GL_DECL unsigned char GL_CALL
 GL_IsVertexArray(unsigned int array);
 
 GL_DECL void GL_CALL
-GL_Lightfv(unsigned int light, unsigned int pname, const float* params);
+GL_LightModelf(unsigned int pname, float param);
+
+GL_DECL void GL_CALL
+GL_LightModelfv(unsigned int pname, const float* params);
+
+GL_DECL void GL_CALL
+GL_LightModeli(unsigned int pname, int param);
+
+GL_DECL void GL_CALL
+GL_LightModeliv(unsigned int pname, const int* params);
 
 GL_DECL void GL_CALL
 GL_Lightf(unsigned int light, unsigned int pname, float param);
+
+GL_DECL void GL_CALL
+GL_Lightfv(unsigned int light, unsigned int pname, const float* params);
+
+GL_DECL void GL_CALL
+GL_Lighti(unsigned int light, unsigned int pname, int param);
+
+GL_DECL void GL_CALL
+GL_Lightiv(unsigned int light, unsigned int pname, const int* params);
+
+GL_DECL void GL_CALL
+GL_LineStipple(int factor, unsigned short pattern);
 
 GL_DECL void GL_CALL
 GL_LineWidth(float width);
@@ -578,22 +650,90 @@ GL_DECL void GL_CALL
 GL_LinkProgram(unsigned int program);
 
 GL_DECL void GL_CALL
+GL_ListBase(unsigned int base);
+
+GL_DECL void GL_CALL
 GL_LoadIdentity(void);
+
+GL_DECL void GL_CALL
+GL_LoadMatrixd(const double* m);
+
+GL_DECL void GL_CALL
+GL_LoadMatrixf(const float* m);
+
+GL_DECL void GL_CALL
+GL_LoadName(unsigned int name);
 
 GL_DECL void GL_CALL
 GL_LogicOp(unsigned int opcode);
 
 GL_DECL void GL_CALL
-GL_Materialfv(unsigned int face, unsigned int pname, const float* params);
+GL_Map1d(unsigned int target, double u1, double u2, int stride, int order, const double* points);
+
+GL_DECL void GL_CALL
+GL_Map1f(unsigned int target, float u1, float u2, int stride, int order, const float* points);
+
+GL_DECL void GL_CALL
+GL_Map2d(unsigned int target, double u1, double u2, int ustride, int uorder,
+        double v1, double v2, int vstride, int vorder, const double* points);
+
+GL_DECL void GL_CALL
+GL_Map2f(unsigned int target, float u1, float u2, int ustride, int uorder,
+        float v1, float v2, int vstride, int vorder, const float* points);
+
+GL_DECL void* GL_CALL
+GL_MapBuffer(unsigned int target, unsigned int access);
+
+GL_DECL void* GL_CALL
+GL_MapBufferRange(unsigned int target, ptrdiff_t offset, ptrdiff_t length, unsigned int access);
+
+GL_DECL void GL_CALL
+GL_MapGrid1d(int un, double u1, double u2);
+
+GL_DECL void GL_CALL
+GL_MapGrid1f(int un, float u1, float u2);
+
+GL_DECL void GL_CALL
+GL_MapGrid2d(int un, double u1, double u2, int vn, double v1, double v2);
+
+GL_DECL void GL_CALL
+GL_MapGrid2f(int un, float u1, float u2, int vn, float v1, float v2);
 
 GL_DECL void GL_CALL
 GL_Materialf(unsigned int face, unsigned int pname, float param);
 
 GL_DECL void GL_CALL
+GL_Materialfv(unsigned int face, unsigned int pname, const float* params);
+
+GL_DECL void GL_CALL
+GL_Materiali(unsigned int face, unsigned int pname, int param);
+
+GL_DECL void GL_CALL
+GL_Materialiv(unsigned int face, unsigned int pname, const int *params);
+
+GL_DECL void GL_CALL
 GL_MatrixMode(unsigned int mode);
 
 GL_DECL void GL_CALL
+GL_MultMatrixd(const double *m);
+
+GL_DECL void GL_CALL
 GL_MultMatrixf(const float* m);
+
+GL_DECL void GL_CALL
+GL_NewList(unsigned int list, unsigned int mode);
+
+GL_DECL void GL_CALL
+GL_Normal3b(char nx, char ny, char nz);
+
+GL_DECL void GL_CALL
+GL_Normal3bv(const char *v);
+
+GL_DECL void GL_CALL
+GL_Normal3d(double nx, double ny, double nz);
+
+GL_DECL void GL_CALL
+GL_Normal3dv(const double *v);
 
 GL_DECL void GL_CALL
 GL_Normal3f(float x, float y, float z);
@@ -602,10 +742,49 @@ GL_DECL void GL_CALL
 GL_Normal3fv(const float* normal);
 
 GL_DECL void GL_CALL
+GL_Normal3i(int nx, int ny, int nz);
+
+GL_DECL void GL_CALL
+GL_Normal3iv(const int* v);
+
+GL_DECL void GL_CALL
+GL_Normal3s(short nx, short ny, short nz);
+
+GL_DECL void GL_CALL
+GL_Normal3sv(const short* v);
+
+GL_DECL void GL_CALL
 GL_NormalPointer(unsigned int type, int stride, const void* data);
 
 GL_DECL void GL_CALL
 GL_Ortho(double lf, double rt, double btm, double top, double near, double far);
+
+GL_DECL void GL_CALL
+GL_PassThrough(float token);
+
+GL_DECL void GL_CALL
+GL_PixelMapfv(unsigned int map, int mapsize, const float* values);
+
+GL_DECL void GL_CALL
+GL_PixelMapuiv(unsigned int map, int mapsize, const unsigned int* values);
+
+GL_DECL void GL_CALL
+GL_PixelMapusv(unsigned int map, int mapsize, const unsigned short* values);
+
+GL_DECL void GL_CALL
+GL_PixelStoref(unsigned int pname, float param);
+
+GL_DECL void GL_CALL
+GL_PixelStorei(unsigned int pname, int param);
+
+GL_DECL void GL_CALL
+GL_PixelTransferf(unsigned int pname, float param);
+
+GL_DECL void GL_CALL
+GL_PixelTransferi(unsigned int pname, int param);
+
+GL_DECL void GL_CALL
+GL_PixelZoom(float xfactor, float yfactor);
 
 GL_DECL void GL_CALL
 GL_PointParameterfv(unsigned int pname, const float* data);
@@ -621,6 +800,9 @@ GL_PolygonMode(unsigned int face, unsigned int mode);
 
 GL_DECL void GL_CALL
 GL_PolygonOffset(float factor, float units);
+
+GL_DECL void GL_CALL
+GL_PolygonStipple(const unsigned char* mask);
 
 GL_DECL void GL_CALL
 GL_PopAttrib(void);
@@ -641,22 +823,139 @@ GL_DECL void GL_CALL
 GL_PushMatrix(void);
 
 GL_DECL void GL_CALL
+GL_PopName(void);
+
+GL_DECL void GL_CALL
+GL_PushName(unsigned int name);
+
+GL_DECL void GL_CALL
 GL_PrioritizeTextures(int n, const unsigned int* tex, const float* priorities);
 
 GL_DECL void GL_CALL
 GL_ProvokingVertex(unsigned int mode);
 
+GL_DECL void GL_CALL
+GL_RasterPos2d(double x, double y);
+
+GL_DECL void GL_CALL
+GL_RasterPos2dv(const double* v);
+
+GL_DECL void GL_CALL
+GL_RasterPos2f(float x, float y);
+
+GL_DECL void GL_CALL
+GL_RasterPos2fv(const float* v);
+
+GL_DECL void GL_CALL
+GL_RasterPos2i(int x, int y);
+
+GL_DECL void GL_CALL
+GL_RasterPos2iv(const int* v);
+
+GL_DECL void GL_CALL
+GL_RasterPos2s(short x, short y);
+
+GL_DECL void GL_CALL
+GL_RasterPos2sv(const short* v);
+
+GL_DECL void GL_CALL
+GL_RasterPos3d(double x, double y, double z);
+
+GL_DECL void GL_CALL
+GL_RasterPos3dv(const double* v);
+
+GL_DECL void GL_CALL
+GL_RasterPos3f(float x, float y, float z);
+
+GL_DECL void GL_CALL
+GL_RasterPos3fv(const float* v);
+
+GL_DECL void GL_CALL
+GL_RasterPos3i(int x, int y, int z);
+
+GL_DECL void GL_CALL
+GL_RasterPos3iv(const int* v);
+
+GL_DECL void GL_CALL
+GL_RasterPos3s(short x, short y, short z);
+
+GL_DECL void GL_CALL
+GL_RasterPos3sv(const short* v);
+
+GL_DECL void GL_CALL
+GL_RasterPos4d(double x, double y, double z, double w);
+
+GL_DECL void GL_CALL
+GL_RasterPos4dv(const double* v);
+
+GL_DECL void GL_CALL
+GL_RasterPos4f(float x, float y, float z, float w);
+
+GL_DECL void GL_CALL
+GL_RasterPos4fv(const float* v);
+
+GL_DECL void GL_CALL
+GL_RasterPos4i(int x, int y, int z, int w);
+
+GL_DECL void GL_CALL
+GL_RasterPos4iv(const int* v);
+
+GL_DECL void GL_CALL
+GL_RasterPos4s(short x, short y, short z, short w);
+
+GL_DECL void GL_CALL
+GL_RasterPos4sv(const short* v);
+
+GL_DECL void GL_CALL
+GL_ReadBuffer(unsigned int mode);
+
+GL_DECL void GL_CALL
+GL_ReadPixels(int x, int y, int width, int height, unsigned int format, unsigned int type, void *pixels);
+
+GL_DECL void GL_CALL
+GL_Rectd(double x1, double y1, double x2, double y2);
+
+GL_DECL void GL_CALL
+GL_Rectdv(const double* v1, const double* v2);
+
+GL_DECL void GL_CALL
+GL_Rectf(float x1, float y1, float x2, float y2);
+
+GL_DECL void GL_CALL
+GL_Rectfv(const float* v1, const float* v2);
+
+GL_DECL void GL_CALL
+GL_Recti(int x1, int y1, int x2, int y2);
+
+GL_DECL void GL_CALL
+GL_Rectiv(const int* v1, const int* v2);
+
+GL_DECL void GL_CALL
+GL_Rects(short x1, short y1, short x2, short y2);
+
+GL_DECL void GL_CALL
+GL_Rectsv(const short* v1, const short* v2);
+
 GL_DECL int GL_CALL
 GL_RenderMode(unsigned int mode);
 
 GL_DECL void GL_CALL
+GL_Rotated(double angle, double x, double y, double z);
+
+GL_DECL void GL_CALL
 GL_Rotatef(float theta, float x, float y, float z);
+
+GL_DECL void GL_CALL
+GL_Scaled(double x, double y, double z);
 
 GL_DECL void GL_CALL
 GL_Scalef(float x, float y, float z);
 
 GL_DECL void GL_CALL
 GL_Scissor(int x, int y, int width, int height);
+
+GL_DECL void GL_CALL
+GL_SelectBuffer(int size, unsigned int* buffer);
 
 GL_DECL void GL_CALL
 GL_ShadeModel(unsigned int mode);
@@ -666,10 +965,67 @@ GL_ShaderSource(unsigned int shader, int count, const char ** const string,
                                                         const int *length);
 
 GL_DECL void GL_CALL
+GL_StencilFunc(unsigned int func, int ref, unsigned int mask);
+
+GL_DECL void GL_CALL
+GL_StencilMask(unsigned int mask);
+
+GL_DECL void GL_CALL
+GL_StencilOp(unsigned int fail, unsigned int zfail, unsigned int zpass);
+
+GL_DECL void GL_CALL
+GL_TexCoord1d(double s);
+
+GL_DECL void GL_CALL
+GL_TexCoord1dv(const double* v);
+
+GL_DECL void GL_CALL
+GL_TexCoord1f(float s);
+
+GL_DECL void GL_CALL
+GL_TexCoord1fv(const float* v);
+
+GL_DECL void GL_CALL
+GL_TexCoord1i(int s);
+
+GL_DECL void GL_CALL
+GL_TexCoord1iv(const int* v);
+
+GL_DECL void GL_CALL
+GL_TexCoord1s(short s);
+
+GL_DECL void GL_CALL
+GL_TexCoord1sv(const short* v);
+
+GL_DECL void GL_CALL
+GL_TexCoord2d(double s, double t);
+
+GL_DECL void GL_CALL
+GL_TexCoord2dv(const double* v);
+
+GL_DECL void GL_CALL
 GL_TexCoord2f(float s, float t);
 
 GL_DECL void GL_CALL
 GL_TexCoord2fv(const float* st);
+
+GL_DECL void GL_CALL
+GL_TexCoord2i(int s, int t);
+
+GL_DECL void GL_CALL
+GL_TexCoord2iv(const int* v);
+
+GL_DECL void GL_CALL
+GL_TexCoord2s(short s, short t);
+
+GL_DECL void GL_CALL
+GL_TexCoord2sv(const short* v);
+
+GL_DECL void GL_CALL
+GL_TexCoord3d(double s, double t, double r);
+
+GL_DECL void GL_CALL
+GL_TexCoord3dv(const double* v);
 
 GL_DECL void GL_CALL
 GL_TexCoord3f(float s, float t, float r);
@@ -678,10 +1034,40 @@ GL_DECL void GL_CALL
 GL_TexCoord3fv(const float* str);
 
 GL_DECL void GL_CALL
+GL_TexCoord3i(int s, int t, int r);
+
+GL_DECL void GL_CALL
+GL_TexCoord3iv(const int* v);
+
+GL_DECL void GL_CALL
+GL_TexCoord3s(short s, short t, short r);
+
+GL_DECL void GL_CALL
+GL_TexCoord3sv(const short* v);
+
+GL_DECL void GL_CALL
+GL_TexCoord4d(double s, double t, double r, double q);
+
+GL_DECL void GL_CALL
+GL_TexCoord4dv(const double* v);
+
+GL_DECL void GL_CALL
 GL_TexCoord4f(float s, float t, float r, float q);
 
 GL_DECL void GL_CALL
 GL_TexCoord4fv(const float* strq);
+
+GL_DECL void GL_CALL
+GL_TexCoord4i(int s, int t, int r, int q);
+
+GL_DECL void GL_CALL
+GL_TexCoord4iv(const int* v);
+
+GL_DECL void GL_CALL
+GL_TexCoord4s(short s, short t, short r, short q);
+
+GL_DECL void GL_CALL
+GL_TexCoord4sv(const short* v);
 
 GL_DECL void GL_CALL
 GL_TexCoordPointer(int size, unsigned int type, int stride, const void* data);
@@ -717,21 +1103,53 @@ GL_DECL void GL_CALL
 GL_TexGend(unsigned int coord, unsigned int pname, double param);
 
 GL_DECL void GL_CALL
+GL_TexImage1D(unsigned int target, int level, int internal_format, int w, int border,
+                            unsigned int format, unsigned int type, const void* pix);
+
+GL_DECL void GL_CALL
 GL_TexImage2D(unsigned int target, int level, int internal_format, int w, int h,
             int border, unsigned int format, unsigned int type, const void * p);
 
 GL_DECL void GL_CALL
+GL_TexParameterf(unsigned int target, unsigned int pname, float param);
+
+GL_DECL void GL_CALL
+GL_TexParameterfv(unsigned int target, unsigned int pname, const float *params);
+
+GL_DECL void GL_CALL
 GL_TexParameteri(unsigned int target, unsigned int pname, int param);
+
+GL_DECL void GL_CALL
+GL_TexParameteriv(unsigned int target, unsigned int pname, const int *params);
+
+GL_DECL void GL_CALL
+GL_TexSubImage1D(unsigned int target, int level, int xoffset, int width,
+            unsigned int format, unsigned int type, const void* pixels);
 
 GL_DECL void GL_CALL
 GL_TexSubImage2D(unsigned int target, int level, int xoffset, int yoffset, int width,
                 int height, unsigned int format, unsigned int type, const void *pix);
 
 GL_DECL void GL_CALL
+GL_Translated(double x, double y, double z);
+
+GL_DECL void GL_CALL
 GL_Translatef(float x, float y, float z);
+
+GL_DECL unsigned char GL_CALL
+GL_UnmapBuffer(unsigned int target);
 
 GL_DECL void GL_CALL
 GL_UseProgram(unsigned int program);
+
+GL_DECL void GL_CALL
+GL_ValidateProgram(unsigned int program);
+
+GL_DECL void GL_CALL
+GL_Vertex2d(double x, double y);
+
+GL_DECL void GL_CALL
+GL_Vertex2dv(const double* v);
 
 GL_DECL void GL_CALL
 GL_Vertex2f(float x, float y);
@@ -740,10 +1158,46 @@ GL_DECL void GL_CALL
 GL_Vertex2fv(const float* xy);
 
 GL_DECL void GL_CALL
+GL_Vertex2i(int x, int y);
+
+GL_DECL void GL_CALL
+GL_Vertex2iv(const int* v);
+
+GL_DECL void GL_CALL
+GL_Vertex2s(short x, short y);
+
+GL_DECL void GL_CALL
+GL_Vertex2sv(const short* v);
+
+GL_DECL void GL_CALL
+GL_Vertex3d(double x, double y, double z);
+
+GL_DECL void GL_CALL
+GL_Vertex3dv(const double* v);
+
+GL_DECL void GL_CALL
 GL_Vertex3f(float x, float y, float z);
 
 GL_DECL void GL_CALL
 GL_Vertex3fv(const float* xyz);
+
+GL_DECL void GL_CALL
+GL_Vertex3i(int x, int y, int z);
+
+GL_DECL void GL_CALL
+GL_Vertex3iv(const int* v);
+
+GL_DECL void GL_CALL
+GL_Vertex3s(short x, short y, short z);
+
+GL_DECL void GL_CALL
+GL_Vertex3sv(const short* v);
+
+GL_DECL void GL_CALL
+GL_Vertex4d(double x, double y, double z, double w);
+
+GL_DECL void GL_CALL
+GL_Vertex4dv(const double* v);
 
 GL_DECL void GL_CALL
 GL_Vertex4f(float x, float y, float z, float w);
@@ -752,8 +1206,20 @@ GL_DECL void GL_CALL
 GL_Vertex4fv(const float* xyzw);
 
 GL_DECL void GL_CALL
+GL_Vertex4i(int x, int y, int z, int w);
+
+GL_DECL void GL_CALL
+GL_Vertex4iv(const int* v);
+
+GL_DECL void GL_CALL
+GL_Vertex4s(short x, short y, short z, short w);
+
+GL_DECL void GL_CALL
+GL_Vertex4sv(const short* v);
+
+GL_DECL void GL_CALL
 GL_VertexAttribPointer(unsigned int index, int size, unsigned int type,
-            unsigned char normalized, int stride, const void *pointer);
+            unsigned char normalized, int stride, const void* pointer);
 
 GL_DECL void GL_CALL
 GL_VertexPointer(int size, unsigned int type, int stride, const void* data);

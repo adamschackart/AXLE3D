@@ -42,6 +42,26 @@ AL_DECL const char* AL_CALL al_implementation(void);
 AL_DECL void AL_CALL al_init(void);
 AL_DECL void AL_CALL al_quit(void);
 
+/*
+================================================================================
+ * ~~ [ OpenAL wrapper ] ~~ *
+--------------------------------------------------------------------------------
+*/
+
+// TODO
+
+/* ===== [ alc ] ============================================================ */
+
+// TODO
+
+/* ===== [ alext ] ========================================================== */
+
+// TODO
+
+/* ===== [ efx ] ============================================================ */
+
+// TODO
+
 // NOTE avoiding linker issues when changing build configurations,
 // in case somebody accidentally types this into a header file...
 #undef AL_DECL

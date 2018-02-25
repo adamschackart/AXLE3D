@@ -140,6 +140,13 @@ AE_DECL void AE_CALL ae_log_str(const char* category, const char* fmt, ...)
                 AE_STRINGIFY(suffix_type), type ## _name[(int) (value)],    \
                                 (__FUNCTION__), (__FILE__), (__LINE__))
 
+/* Indicates that a function is barely implemented or suboptimal in some way.
+ * An example would be while porting memory allocation to a new platform,
+ * implementing stack allocation and freeing as simple malloc / free calls.
+ */
+#define AE_TEMP() ae_log(MISC, "temp function \"%s\" (file \"%s\" line %i)", \
+                                    (__FUNCTION__), (__FILE__), (__LINE__))
+
 /*
 ================================================================================
  * ~~ [ logging control ] ~~ *

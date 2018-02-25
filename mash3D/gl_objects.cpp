@@ -655,10 +655,35 @@ gl_texture_t* gl_texture_create(int width, int height, int comp)
             NULL, (size_t)width, (size_t)height, ae_format, ae_type, NULL,
         };
 
+        // TODO: generate the default image (in debug mode) in this call
         ae_image_alloc(&blank);
 
-        const float color[4] = { 1.0f, 0.0f, 1.0f, 1.0f }; // set to pink
-        ae_image_set_color(&blank, NULL, color, 1, 1, 1, 1);
+        #if 0
+            ae_image_set_color(&blank, NULL, ae_color_magenta, 1, 1, 1, 1);
+        #else
+            ae_image_randomize(&blank, NULL, 1, 1, 1, 1);
+        #endif
+
+        if (1) // draw outlines around textures to easily visualize bounds
+        {
+            const float color[4] =
+            {
+                ae_random_flt(), ae_random_flt(), ae_random_flt(), 1.0f,
+            };
+
+            ae_image_blit_rect_outline(&blank, NULL, (float*)color);
+        }
+
+        if (1) // "tag" images with unique colors in the top-left corner
+        {
+            const int tl_rect[4] = { 4, 4, 20, 20 };
+            const float color[4] =
+            {
+                ae_random_flt(), ae_random_flt(), ae_random_flt(), 1.0f,
+            };
+
+            ae_image_set_color(&blank, (int*)tl_rect, color, 1, 1, 1, 1);
+        }
 
         GL_TexImage2D(data->target, 0, gl_internal_format, width, height,
                                     0, gl_format, gl_type, blank.pixels);
@@ -2770,7 +2795,33 @@ void gl_buffer_set_vertex(gl_buffer_t* buffer, size_t which,
         if (t) vec_copy(vertex + tex_offset, t, tex_size);
         if (c) vec_copy(vertex + col_offset, c, col_size);
         if (n) vec_copy(vertex + nrm_offset, n, nrm_size);
-        if (p) vec_copy(vertex + pos_offset, p, pos_size);
+        if (p)
+        {
+            vec_copy(vertex + pos_offset, p, pos_size);
+
+            #define GL_BUFFER_RECOMPUTE_AABBOX_FROM_SINGLE_VERTEX(data) \
+                                                                        \
+                if (ae_likely((data)->compute_aabbox))                  \
+                {                                                       \
+                    if (ae_likely((data)->vertices.size != 0))          \
+                    {                                                   \
+                        vec3min_vec((data)->minv, (data)->minv, p);     \
+                        vec3max_vec((data)->maxv, (data)->maxv, p);     \
+                    }                                                   \
+                    else                                                \
+                    {                                                   \
+                        vec3copy((data)->minv, p);                      \
+                        vec3copy((data)->maxv, p);                      \
+                    }                                                   \
+                }                                                       \
+                else                                                    \
+                {                                                       \
+                    vec3zero((data)->minv);                             \
+                    vec3zero((data)->maxv);                             \
+                }                                                       \
+
+            GL_BUFFER_RECOMPUTE_AABBOX_FROM_SINGLE_VERTEX(buffer_data);
+        }
     }
 }
 
@@ -2783,34 +2834,24 @@ void gl_buffer_append_vertex(gl_buffer_t* buffer, float* t, float* c, float* n, 
 
     if (ae_likely(gl_buffer_get_open(buffer)))
     {
-        assert(!X(buffer)->locked);
+        assert(!X(buffer)->locked); // buffer isn't in "edit" mode
 
         ae_vertex_format_t f = X(buffer)->vertex_format;
         assert(ae_vertex_format_position_size[f] == 3);
 
-        assert(ae_vertex_format_has_texcoord(f) ? t != NULL : 1);
-        assert(ae_vertex_format_has_color(f) ? c != NULL : 1);
-        assert(ae_vertex_format_has_normal(f) ? n != NULL : 1);
-        assert(ae_vertex_format_has_position(f) ? p != NULL : 1);
+        ae_assert(ae_vertex_format_has_texcoord(f) ? t != NULL : 1,
+                                    "NULL vertex texcoord pointer");
 
-        if (ae_likely(X(buffer)->compute_aabbox))
-        {
-            if (ae_likely(X(buffer)->vertices.size != 0))
-            {
-                vec3min_vec(X(buffer)->minv, X(buffer)->minv, p);
-                vec3max_vec(X(buffer)->maxv, X(buffer)->maxv, p);
-            }
-            else
-            {
-                vec3copy(X(buffer)->minv, p);
-                vec3copy(X(buffer)->maxv, p);
-            }
-        }
-        else
-        {
-            vec3zero(X(buffer)->minv);
-            vec3zero(X(buffer)->maxv);
-        }
+        ae_assert(ae_vertex_format_has_color(f) ? c != NULL : 1,
+                                    "NULL vertex color pointer");
+
+        ae_assert(ae_vertex_format_has_normal(f) ? n != NULL : 1,
+                                    "NULL vertex normal pointer");
+
+        ae_assert(ae_vertex_format_has_position(f) ? p != NULL : 1,
+                                    "NULL vertex position pointer");
+
+        GL_BUFFER_RECOMPUTE_AABBOX_FROM_SINGLE_VERTEX(X(buffer));
 
         ae_array_reserve(&X(buffer)->vertices, sizeof(float) *
                                     ae_vertex_format_size[f]);
@@ -2838,10 +2879,13 @@ void gl_buffer_get_face(gl_buffer_t * buffer, size_t which,
     {
         assert(!X(buffer)->locked);
 
+        const // XXX: do we need this in release mode if we're just bounds checking?
         size_t index_count = static_cast<size_t>(gl_buffer_get_index_count(buffer));
-        const size_t tri_index = which * 3;
 
-        ae_index_type_t index_type = X(buffer)->index_type;
+        // TODO: (ae_)switch on the index type just once instead of three times here
+        const size_t tri_index = which * 3;
+        const ae_index_type_t index_type = X(buffer)->index_type;
+
         void* indices = X(buffer)->indices.data;
 
         if (v0) *v0 = idx_value_get(indices, index_type, index_count, tri_index + 0);
@@ -2859,10 +2903,13 @@ void gl_buffer_set_face(gl_buffer_t * buffer, size_t which,
     {
         assert(!X(buffer)->locked);
 
+        const // XXX: do we need this in release mode if we're just bounds checking?
         size_t index_count = static_cast<size_t>(gl_buffer_get_index_count(buffer));
-        const size_t tri_index = which * 3;
 
-        ae_index_type_t index_type = X(buffer)->index_type;
+        // TODO: (ae_)switch on the index type just once instead of three times here
+        const size_t tri_index = which * 3;
+        const ae_index_type_t index_type = X(buffer)->index_type;
+
         void* indices = X(buffer)->indices.data;
 
         idx_value_set(indices, index_type, index_count, tri_index + 0, v0);
@@ -3767,7 +3814,7 @@ static gl_buffer_t* gl_buffer_from_par_mesh(par_shapes_mesh* mesh)
     float* p = mesh->points;
 
     ae_array_reserve(&data->vertices, mesh->npoints * // avoid over-allocation
-                    ae_vertex_format_size[data->vertex_format] * sizeof(float));
+                ae_vertex_format_size[data->vertex_format] * sizeof(float));
 
     for (int i = 0; i < mesh->npoints; i++, t += 2, n += 3, p += 3)
     {
@@ -3891,9 +3938,10 @@ gl_buffer_t* gl_buffer_create_rock(int seed, int nsubdivisions)
     X(par_shapes_create_rock(seed, nsubdivisions));
 }
 
-gl_buffer_t* gl_buffer_create_lsystem(char const* program, int slices, int maxdepth)
+gl_buffer_t* gl_buffer_create_lsystem(char const* program,
+                                int slices, int max_depth)
 {
-    X(par_shapes_create_lsystem(program, slices, maxdepth));
+    X(par_shapes_create_lsystem(program, slices, max_depth));
 }
 
 #undef X
@@ -6131,6 +6179,14 @@ gl_particle_emitter_generate_particles(gl_internal_particle_emitter_t* data, dou
 {
     GL_PROFILE_SCOPE();
 
+    /* "cache" these as locals so we only have pay to to dereference the structure once
+     */
+    const float* const pos_sigma = const_cast<const float* const>(data->position_sigma);
+    const float* const pos = const_cast<const float* const>(data->position);
+
+    const float* const vel_sigma = const_cast<const float* const>(data->velocity_sigma);
+    const float* const vel = const_cast<const float* const>(data->velocity);
+
     while (data->time > data->period)
     {
         data->time -= data->period;
@@ -6140,18 +6196,18 @@ gl_particle_emitter_generate_particles(gl_internal_particle_emitter_t* data, dou
             if (data->num_particles != data->max_particles) data->num_particles += 1;
             if (data->current_index >= data->max_particles) data->current_index  = 0;
 
-            float* p = ((float*)data->particles.data) + data->current_index * 3;
-            float* v = ((float*)data->vel_array.data) + data->current_index * 3;
+            float* curr_p = ((float*)data->particles.data) + data->current_index * 3;
+            float* curr_v = ((float*)data->vel_array.data) + data->current_index * 3;
 
-            /* TODO: store const members in locals, selection of different gen algorithms
+            /* TODO: allow selection of different random particle generation algorithms
              */
-            p[0] = data->position[0] + ae_random_gauss_flt(0.0f, data->position_sigma[0]);
-            p[1] = data->position[1] + ae_random_gauss_flt(0.0f, data->position_sigma[1]);
-            p[2] = data->position[2] + ae_random_gauss_flt(0.0f, data->position_sigma[2]);
+            curr_p[0] = ae_random_gauss_flt(pos[0], pos_sigma[0]);
+            curr_p[1] = ae_random_gauss_flt(pos[1], pos_sigma[1]);
+            curr_p[2] = ae_random_gauss_flt(pos[2], pos_sigma[2]);
 
-            v[0] = data->velocity[0] + ae_random_gauss_flt(0.0f, data->velocity_sigma[0]);
-            v[1] = data->velocity[1] + ae_random_gauss_flt(0.0f, data->velocity_sigma[1]);
-            v[2] = data->velocity[2] + ae_random_gauss_flt(0.0f, data->velocity_sigma[2]);
+            curr_v[0] = ae_random_gauss_flt(vel[0], vel_sigma[0]);
+            curr_v[1] = ae_random_gauss_flt(vel[1], vel_sigma[1]);
+            curr_v[2] = ae_random_gauss_flt(vel[2], vel_sigma[2]);
 
             data->current_index++;
         }
